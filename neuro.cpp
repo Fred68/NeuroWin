@@ -9,14 +9,16 @@
 
 
 
-#if _DEBUG
-    #include <iostream>
-    #define _DEBUG_NEURO_DET true
-#endif
+
 
 #include <format>
 #include <memory>
 #include <vector>
+#include <cmath>
+
+#include <execution>
+#include <algorithm>
+
 
 #include "neuro.h"
 
@@ -26,7 +28,9 @@ using namespace std;
 namespace neuro
 {  
     /*******************************************/
+    //
     // network
+    //
     /*******************************************/
 
     network::network()
@@ -40,7 +44,7 @@ namespace neuro
     network::network(std::vector<int> nlay)
     {
         _nLays = nlay.size();
-        for(int i=0; i < _nLays; i++)       // create layers
+        for(unsigned int i=0; i < _nLays; i++)       // create layers
         {
             vector<neuron> *vn;
             if(i==0)
@@ -54,8 +58,10 @@ namespace neuro
             layers.push_back(*vn);
         }
         
+        #if TXT_INFO
         name_elements();
-
+        #endif
+        
         #if _DEBUG
         cout << "network(" << _nLays <<")\n";
         #endif
@@ -78,7 +84,7 @@ namespace neuro
         string txt;
         txt += std::format("Layers: {0}\n", _nLays);
 
-        for (int i=0; i < _nLays; i++)
+        for (unsigned int i=0; i < _nLays; i++)
         {
             txt += std::format("Layer: {0}\n", i);
             for(neuron n : layers[i])
@@ -87,6 +93,16 @@ namespace neuro
             }
         }
         return txt;
+    }
+    
+    neuron& network::get_neuron(unsigned int lay, unsigned int num)
+    {
+        if (lay >= _nLays)
+            throw new std::exception("Layer out of range");
+        else if (num >= layers[lay].size())
+            throw new std::exception("Node out of range");
+        else
+            return get_at(lay, num);
     }
 
     #if TXT_INFO
@@ -100,8 +116,14 @@ namespace neuro
     }
     #endif
 
+
+
+//-----------------------------------------------------------
+
     /*******************************************/
+    //
     // neuron
+    //
     /*******************************************/
 
     neuron::neuron()
@@ -117,8 +139,6 @@ namespace neuro
         x = y = 0;
         for(neuron &n : prev)
         {
-            //synapse s(n,0);
-            //syns.push_back(s);
             syns.push_back(synapse(n,0));
         }
         #if _DEBUG_NEURO_DET
@@ -136,26 +156,95 @@ namespace neuro
 
     std::string neuron::to_string()
     {
-        string txt = std::format("x={0}, y={1}",x,y);
+        string txt = std::format("x={0},y={1}",x,y);
         for(synapse s : syns)
         {
-            txt = txt + std::format("[{0},{1}]",s.pn->get_name(),s.w);
+            if(s.pn!=nullptr)
+            {
+                string nn = "";
+                #if TXT_INFO
+                nn = s.pn->get_name()+",";
+                #endif
+                txt = txt + std::format("[{0}{1}]", nn, s.w);
+            }
         }
         #if TXT_INFO
         txt = name + ": " + txt;
         #endif
         return txt;
     }
+    
+    void neuron::calc_x()
+    {
+        
+        // USARE std::for_each(std::execution::par, data.begin(), data.end(), [](int&) {std::cout << "Hello, World!" << std::endl;});
+        // std::for_each(std::execution::seq,syns.begin(),syns.end(),[](synapse&){}
 
 
+        // act tot = std::accumulate(std::execution::par,syns.begin(),syns.end(),0.0);
+    }
+    /*******************************************/
+    // Funzioni di attivazione
+    act neuron::sigmoid(neuron &n)
+    {
+        #ifdef ACT_DBL
+            return 1.0 / (1.0 + std::exp(-n.x));
+        #else
+            return 1.0f / (1.0f + std::expf(-n.x));
+        #endif
+    }
+    act neuron::sigmoid_der(neuron &n)
+    {
+        #ifdef ACT_DBL
+            return n.y * (1.0 - n.y);
+        #else
+            return n.y * (1.0f - n.y);
+        #endif    
+    }
+    act neuron::hyptangent(neuron &n)
+    {
+        #ifdef ACT_DBL
+            return std::tanh(n.x);
+        #else
+            return std::tanhf(n.x);
+        #endif
+    }
+    act neuron::hyptangent_der(neuron &n)
+    {
+        #ifdef ACT_DBL
+            return 1.0 - n.y * n.y;
+        #else
+            return 1.0f - n.y * n.y;
+        #endif    
+    }
+    act neuron::relu(neuron &n)
+    {
+        #ifdef ACT_DBL
+            return (n.x > 0) ? n.x : 0.0;
+        #else
+            return (n.x > 0) ? n.x : 0.0f;
+        #endif
+    }
+    act neuron::relu_der(neuron &n)
+    {
+        #ifdef ACT_DBL
+            return (n.x > 0) ? 1.0 : 0.0;
+        #else
+            return (n.x > 0) ? 1.0f : 0.0f;
+        #endif    
+    }
+
+//-----------------------------------------------------------
 
     /*******************************************/
+    //
     // synapse
+    //
     /*******************************************/
 
     synapse::synapse()
     {
-        pn = std::make_shared<neuron>();        // Alloca un neurone vuoto e ne crea il puntatore
+        pn = std::shared_ptr<neuron>(nullptr);  // Non usa pn=std::make_shared<neuron>() perché alloca un nuovo oggetto
         w = (act)0;
         #if _DEBUG_NEURO_DET
         cout << "synapse()\n";
@@ -164,10 +253,8 @@ namespace neuro
 
     synapse::synapse(neuron &p_n, act ws)
     {
-       // pn = std::make_shared<neuron>(p_n);     // No: make_shared crea una copia
-        pn = std::shared_ptr<neuron>(&p_n);
+        pn = std::shared_ptr<neuron>(&p_n);     // Non usa pn=std::make_shared<neuron>(p_n) perché crea una copia
         w = ws;
-        pn->set_name(pn->get_name()+"-");
         #if _DEBUG_NEURO_DET
         cout << "synapse(p_n)\n";
         #endif
