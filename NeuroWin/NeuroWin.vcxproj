@@ -25,6 +25,9 @@
   <ItemGroup>
     <ClInclude Include="..\neuro.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Note.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

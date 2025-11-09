@@ -46,6 +46,8 @@ namespace neuro
     typedef float act;
     #endif
     
+    enum class FACT { sigmoid = 0, tanh, relu, one, Count };
+
     // Forward declarations
     class neuron;
     class synapse;
@@ -61,6 +63,7 @@ namespace neuro
     /// </summary>
     class network
     {
+
         private:
             unsigned int _nLays = 0;
             std::vector<std::vector<neuron>> layers;
@@ -92,8 +95,6 @@ namespace neuro
     /// </summary>
     class neuron
     {
-        
-        enum class FACT {sigmoid = 0, tanh, relu, one, Count};
 
         friend class network;
         friend class synapse;
@@ -110,6 +111,7 @@ namespace neuro
         static act relu_der(neuron *n);
         static act one(neuron *n);                  // bias modellato come peso di un nodo di uscita unitaria
         static act zero(neuron *n);                 // zero (derivata di costante)
+        static FACT fact_default() {return FACT::tanh;}
 
         private:
             act x;                                  // Segnale in ingresso

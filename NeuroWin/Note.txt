@@ -1,0 +1,28 @@
+/*************************************************/
+/* neuro.cpp                                     */
+/* Implementation for neural network components  */
+/* Standard C++ 20.0                             */
+/* Version 0.1                                   */
+/* Copyright FcSoft                              */
+/*************************************************/
+
+
+NOTE:
+	v	La funzione neuron::calc_x(), per eseguire la somma con algoritmo parallelo, non usa:
+        x = std::reduce(std::execution::par,syns.begin(),syns.end(),s0,[&](act tot,synapse &s){return tot+s.pn->y*s.w;});
+        perché l'operatore binario (associativo e commutativo) accetta solo tipi compatibili, non classi.
+        Si potrebbe scrivere un iterator sui prodotti w*xi delle sinapsi, ma è poco pratico.
+
+    v   Invece neuron::calc_x() usa: std::for_each(std::execution::par, syns.begin(), syns.end(), func_atm);
+        con: auto func_atm = [&](const synapse &s) {sum.fetch_add(s.pn->y * s.w);}; con synapse passata per riferimento.
+        La somma è atomic<act> sum e calcolata con sum.fetch_add(), per evitare ogni race condition.
+
+    v   Aggiunte alcune funzioni di attivazione (e derivata), tra cui one() per rappresentare il bias con un peso extra.
+
+DA FARE
+    
+    .   Inizializzare la rete con un nodo extra di bias e con la sua funzione di attivazione.
+    .   Aggiungere bool neuron::active, per indicare se va ricalcolato. Es.: se one() o se disattivato (relu < 0).
+    .   Aggiungere composizione degli strati con un tipo di funzione per livello.
+    .   Aggiungere connessione ai dati di input per i nodi del primo livello.
+    .   ...

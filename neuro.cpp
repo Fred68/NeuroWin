@@ -167,10 +167,6 @@ namespace neuro
         
         // Calcola, su tutte le sinapsi del nodo, la somma delle uscite y dil nodi collegati, moltiplicate...
         // ...per il peso w della sinapsi. Il risultato è il segnale di ingresso x del nodo.        
-        // Non si può usare std::reduce, perché l'operatore binario (associativo e commutativo) accetta solo tipi compatibili...
-        // ...non classi. Si potrebbe scrivere un iterator sui prodotti w * xi delle sinapsi, ma è poco pratico.
-        // x = std::reduce(std::execution::par, syns.begin(), syns.end(), s0, [&](act tot, synapse &s){return tot + s.pn->y * s.w;});
-
         atomic<act> sum;
         auto func_atm = [&](const synapse &s) {sum.fetch_add(s.pn->y * s.w);};
         std::for_each(std::execution::par, syns.begin(), syns.end(), func_atm);
@@ -248,7 +244,9 @@ namespace neuro
         #endif
     }
 
-    neuron::FACT neuron::get_fact() {return fact;}    
+    FACT fact_default();
+
+    FACT neuron::get_fact() {return fact;}    
     std::string neuron::get_fact_name()
     {
         switch (fact)
@@ -260,7 +258,7 @@ namespace neuro
             default: return "undefined";
         }
     }
-    void neuron::set_fact(neuron::FACT f)
+    void neuron::set_fact(FACT f)
     {
         switch(f)
         {
