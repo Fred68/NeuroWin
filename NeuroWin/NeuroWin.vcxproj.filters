@@ -15,11 +15,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\neuro.cpp">
-      <Filter>File di intestazione</Filter>
-    </ClCompile>
     <ClCompile Include="..\test.cpp">
-      <Filter>File di intestazione</Filter>
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\neuro.cpp">
+      <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,7 @@
 
+
+
+
 #include <iostream>
 
 
@@ -9,16 +12,18 @@
 #include <execution>
 #include <algorithm>
 
-
+#include <atomic>
 
 using namespace std;
 using namespace neuro;
+
 
 // Function prototyping
 void print(vector<int> &v);
 
 int main()
 {
+    
     int j = 0;
     auto func_x2 = [&](int &x) {x = x * 2; };
    
@@ -34,32 +39,34 @@ int main()
     std::cout << "sum (accumulate)= " << sum << std::endl;
     std::cout << "ssm (...+lambda op)= " << ssm << std::endl;
 
-    int sss = 0;
-    auto func_s = [&](const int &x) {sss += x; };
-    std::for_each(std::execution::par, v.begin(), v.end(), func_s); // Possibile errore per race condition
-    std::cout << "sss " << sss << std::endl;
-
     int sumR = std::reduce(std::execution::par, v.begin(), v.end(), j);
-    // Usare questo: vd. https://en.cppreference.com/w/cpp/algorithm/reduce.html
+    // Usare questo: vd. https://en.cppreference.com/w/cpp/algorithm/reduce.html ???
+    // No, perché l'operatore binario è solo su tipi std, non su classi
     int ssmR = std::reduce(std::execution::par, v.begin(), v.end(), j, [&](int tot, int x) {return tot + x; });
     std::cout << "sum (reduce)= " << sumR << std::endl;
     std::cout << "ssm (...+lambda op)= " << ssmR << std::endl;
 
+    int sss = 0;
+    auto func_s = [&](const int &x) {sss += x; };
+    std::for_each(std::execution::par, v.begin(), v.end(), func_s); // Possibile errore per race condition
+    std::cout << "sss (for_each on int, race condition?)" << sss << std::endl;
+
+    atomic<int> sum_atm(0);
+    auto func_atm = [&](const int &x) {sum_atm.fetch_add(x); };
+    std::for_each(std::execution::par, v.begin(), v.end(), func_atm);
+    std::cout << "sum_atm (for_each on atomic<int>)" << sum_atm << std::endl;
+    
+    
+    
     std::cout << "neuro test" << std::endl;
     
     std::vector<int> lays = {3,2,2};
 
-    network net(lays);
+    network net(lays);          // Crea la rete
     
     std::cout << net.to_string();
     
-    //  std::cout << net.f_sigmoid(x) << std::endl;
-    //std::cout << f_sigmoid(x) << std::endl;
-    // std::cout << f_tanh(x) << std::endl;
-    /*int x;
-    std::cin >> x;*/
-
-    getchar();
+    int x = getchar();
 
     return 0;
     
