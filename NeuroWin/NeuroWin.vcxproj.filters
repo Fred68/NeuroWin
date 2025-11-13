@@ -15,15 +15,33 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\start.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
     <ClCompile Include="..\test.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="..\neuro.cpp">
+    <ClCompile Include="..\init_data.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\network.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\neuron.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\synapse.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modtest.ixx">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\neuro.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="..\test.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

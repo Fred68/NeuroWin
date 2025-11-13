@@ -19,11 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\neuro.cpp" />
+    <ClCompile Include="..\init_data.cpp" />
+    <ClCompile Include="..\modtest.ixx" />
+    <ClCompile Include="..\network.cpp" />
+    <ClCompile Include="..\neuron.cpp" />
+    <ClCompile Include="..\start.cpp" />
+    <ClCompile Include="..\synapse.cpp" />
     <ClCompile Include="..\test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\neuro.h" />
+    <ClInclude Include="..\test.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Note.txt" />
