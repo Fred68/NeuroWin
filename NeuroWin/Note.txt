@@ -34,6 +34,7 @@ DA FARE
     v   Correggere network per avere recettori al primo strato (cioè neuroni di input, senza sinapsi e con funzione id).
 	v   Aggiungere impostazione dei valori di ingresso per i nodi del primo livello.
 
+	.	Inizializzare i bias (peso w del collegamento al nodo bias) ad una valore nullo o molto basso.
 	.	Rendere private tutte le funzioni possibili in neuron e synapse. Vedere quali funzioni lasciare pubbliche.
 	.	Dividere l'header in vari file .h e compilare senza errori.
 	.	Prove di velocità cambiando std::execution::par/seq in std::for_each

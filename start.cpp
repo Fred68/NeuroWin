@@ -69,13 +69,13 @@ int main()
     std::cout << "-----------------------------------------------\n";
 
     std::vector<int> lays = {3,2,2};
-    std::vector<FACT> facts ={FACT::tanh, FACT::relu, FACT::sigmoid};
+    std::vector<FACT> facts ={FACT::sigmoid, FACT::sigmoid, FACT::sigmoid};
     init_data ini(lays,facts);
     std::cout << ini.to_string() << std::endl;
 
     network net(ini);          // Crea la rete
 	vector<act> vinp = {0.1,0.2,0.9};
-	if(!net.set_input_layer(vinp))	cout << "wrong input layer" << endl;
+	if(!net.fw_prop(vinp))	cout << "Error in fw propagation" << endl;
 
 
     std::cout << net.to_string();

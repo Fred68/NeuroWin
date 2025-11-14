@@ -35,16 +35,19 @@
 #include <atomic>           // atomic<float>
 #include <ranges>			// iota
 
+
 namespace neuro
 {
 
-    // Tipo di dato per l'attività neurale: act
-    #ifdef ACT_DBL
+    
+    #ifdef ACT_DBL					// Tipo di dato per l'attività neurale: act
     typedef double act;
     #else
     typedef float act;
     #endif
     
+	typedef unsigned int uint;
+
     enum class FACT { sigmoid = 0, tanh, relu, one, id, Count };
 
     // Forward declarations
@@ -82,25 +85,28 @@ namespace neuro
     class network
     {
         private:
-            unsigned int _nLays = 0;
+            uint _nLays = 0;
             std::vector<std::vector<neuron>> _layers;
 
 		public:
 			static std::string fact2string(FACT f);
 
         private:
-            neuron& get_at(unsigned int lay, unsigned int num) {return (_layers[lay])[num];}
+            neuron& get_at(uint lay, uint num) {return (_layers[lay])[num];}	// No index range check
             #if TXT_INFO
             void name_elements();
             #endif
+			bool set_input_layer(std::vector<act> &inp_lay);		// Count check
+			bool calc_lay(uint nlay);						// No index range check
 
         public:
             network();
             network(init_data &ini_data);
             ~network();
             std::string to_string();
-            neuron& get_neuron(unsigned int lay, unsigned int num);
-            bool set_input_layer(std::vector<act> &inp_lay);
+            neuron& get_neuron(uint lay, uint num);
+            
+			bool fw_prop(std::vector<act> &inp_lay);
 
     };  // class network
 
@@ -153,7 +159,7 @@ namespace neuro
         public:
             neuron();
 			neuron(bool isInput);
-            neuron(std::vector<neuron> &prev); 
+            neuron(std::vector<neuron> &prev, act std_w = (act)0.5, act bias_w = (act)0.0); 
             ~neuron();
 
             std::string to_string();
@@ -199,7 +205,7 @@ namespace neuro
             synapse();
             synapse(neuron &p_n, act ws);
             ~synapse();        
-            std::string to_string();
+            //std::string to_string();
             act x() {return w * pn->y;}
     };
 

@@ -28,13 +28,14 @@ namespace neuro
 			input = true;			// ...poi imposta input a true, che disabilita set_fact()
 		}
 	}
-    neuron::neuron(std::vector<neuron> &prev) : neuron()
+	neuron::neuron(std::vector<neuron> &prev, act std_w, act bias_w)
     {
-		
-		for(neuron &n : prev)		// Imposta il vettore delle sinapsi (non è un neurone di input)
+		for(uint i=0; i<prev.size(); i++)						// Imposta il vettore delle sinapsi (non è un neurone di input)
 		{
-			syns.push_back(synapse(n,1));
+			neuron &n = prev[i];
+			syns.push_back(synapse(n, (i == prev.size() - 1) ? bias_w : std_w));
 		}
+
         #if _DEBUG_NEURO_DET
         cout << "neuron(neuron &prev)\n";
         #endif
@@ -50,11 +51,12 @@ namespace neuro
     
     std::string neuron::to_string()
     {
+		// TODO mettere il numero di cifre in una costante
         std::string statStr = "";
         if(!active) statStr = "X";
 		if(input)  statStr += "I";
 		if(!statStr.empty())	statStr = "["+statStr+"]";
-        std::string txt = format("x={0},y={1}(f={2}){3}",x,y,get_fact_name(),statStr);
+        std::string txt = format("x={0:.3f},y={1:.3f}(f={2}){3}",x,y,get_fact_name(),statStr);
         if(active)
         {
             for(synapse s : syns)
@@ -65,7 +67,7 @@ namespace neuro
                     #if TXT_INFO
                     nn = s.pn->get_name()+",";
                     #endif
-                    txt = txt + std::format("[{0}{1}]", nn, s.w);
+                    txt = txt + std::format("[{0}{1:.3f}]", nn, s.w);
                 }
             }
         }
@@ -141,6 +143,7 @@ namespace neuro
             std::atomic<act> sum;
             auto func_add = [&](const synapse &s) {sum.fetch_add(s.pn->y * s.w);};
             std::for_each(std::execution::par, syns.begin(), syns.end(), func_add);
+			x = sum;
         }
     }
     void neuron::calc_y()

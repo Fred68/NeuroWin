@@ -2,6 +2,7 @@
 
 #include "neuro.h"
 
+#define _PARALLEL	false
 
 namespace neuro
 {
@@ -21,9 +22,9 @@ namespace neuro
 
     network::network(init_data &ini_data)
     {
-        _nLays = std::min( (unsigned int) ini_data._layers.size(), (unsigned int)ini_data._types.size() );
+        _nLays = std::min( (uint) ini_data._layers.size(), (uint)ini_data._types.size() );
 
-        for(unsigned int i=0; i < _nLays; i++)		// Crea i livelli, ognuno con un nodo in più (uscita 1, per i bias)
+        for(uint i=0; i < _nLays; i++)		// Crea i livelli, ognuno con un nodo in più (uscita 1, per i bias)
         {
             std::vector<neuron> *vn;				// Alloca il vettore con vector<T>(numero, parametri per il ctor di T).
             if(i==0)								// Per il primo livello, crea neuroni di input, usando come ctor:
@@ -36,7 +37,7 @@ namespace neuro
             }
             _layers.push_back(*vn);
 
-            int jmax = (unsigned int) _layers.back().size();
+            int jmax = (uint) _layers.back().size();
             for(int j=0; j<jmax; j++)
             {
                 if(j == jmax-1)
@@ -103,7 +104,7 @@ namespace neuro
         std::string txt;
         txt += std::format("Layers: {0}\n", _nLays);
 
-        for (unsigned int i=0; i < _nLays; i++)
+        for (uint i=0; i < _nLays; i++)
         {
             txt += std::format("Layer: {0}\n", i);
             for(neuron n : _layers[i])
@@ -113,7 +114,7 @@ namespace neuro
         }
         return txt;
     }
-    neuron& network::get_neuron(unsigned int lay, unsigned int num)
+    neuron& network::get_neuron(uint lay, uint num)
     {
         if (lay >= _nLays)
             throw new std::exception("Layer out of range");
@@ -139,9 +140,9 @@ namespace neuro
 		bool ret = false;
 		if(inp_lay.size() == _layers[0].size()-1)
 		{
-			#if false
+			#if !_PARALLEL
 			bool ok = true;
-			for(int i=0; i<inp_lay.size(); i++)
+			for(uint i=0; i<inp_lay.size(); i++)
 			{
 				ok = ok && get_at(0,i).set_x(inp_lay[i]);
 			}
@@ -149,14 +150,38 @@ namespace neuro
 			#else
 			// E' possibile che la versione parallela con iota sia complessivamente più lenta.
 			// TODO Fare prove di velocità
-			auto v = std::ranges::iota_view(0, (int)inp_lay.size());
+			auto v = std::ranges::iota_view((uint)0, (uint)inp_lay.size());
 			std::atomic<bool> ok = true;
-			auto func_set = [&](int i) {ok = ok && get_at(0, i).set_x(inp_lay[i]); };
+			auto func_set = [&](uint i) {ok = ok && get_at(0, i).set_x(inp_lay[i]); };
 			std::for_each(std::execution::par,v.begin(),v.end(),func_set);
 			ret = ok;
 			#endif
 		}
 		return ret;
+	}
+
+	bool network::calc_lay(uint nlay)
+	{
+		bool ret = false;
+		std::vector<neuron> &layer = _layers[nlay];							// Riferimento al livello da calcolare
+		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());		// 0, 1, 2... per calc. parallelo
+		//std::atomic<bool> ok = true;
+		auto func_calc = [&](uint i) {layer[i].calc_x(); layer[i].calc_y();};
+		std::for_each(std::execution::par, v.begin(), v.end(), func_calc);
+		return ret;
+	}
+
+	bool network::fw_prop(std::vector<act> &inp_lay)
+	{
+		bool ok = set_input_layer(inp_lay);
+		if(ok)
+		{
+			for(uint i = 0; i<_nLays; i++)				// Ciclo (qui non usa il calcolo parallelo)
+			{
+				calc_lay(i);	
+			}
+		}
+		return ok;
 	}
 
 
