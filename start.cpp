@@ -74,7 +74,10 @@ int main()
     std::cout << ini.to_string() << std::endl;
 
     network net(ini);          // Crea la rete
-    
+	vector<act> vinp = {0.1,0.2,0.9};
+	if(!net.set_input_layer(vinp))	cout << "wrong input layer" << endl;
+
+
     std::cout << net.to_string();
     
     int x = getchar();

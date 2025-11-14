@@ -134,6 +134,30 @@ namespace neuro
     }
     #endif
 
+	bool network::set_input_layer(std::vector<act> &inp_lay)
+	{
+		bool ret = false;
+		if(inp_lay.size() == _layers[0].size()-1)
+		{
+			#if false
+			bool ok = true;
+			for(int i=0; i<inp_lay.size(); i++)
+			{
+				ok = ok && get_at(0,i).set_x(inp_lay[i]);
+			}
+			ret = ok;
+			#else
+			// E' possibile che la versione parallela con iota sia complessivamente più lenta.
+			// TODO Fare prove di velocità
+			auto v = std::ranges::iota_view(0, (int)inp_lay.size());
+			std::atomic<bool> ok = true;
+			auto func_set = [&](int i) {ok = ok && get_at(0, i).set_x(inp_lay[i]); };
+			std::for_each(std::execution::par,v.begin(),v.end(),func_set);
+			ret = ok;
+			#endif
+		}
+		return ret;
+	}
 
 
 

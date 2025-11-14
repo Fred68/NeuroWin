@@ -54,7 +54,7 @@ namespace neuro
         if(!active) statStr = "X";
 		if(input)  statStr += "I";
 		if(!statStr.empty())	statStr = "["+statStr+"]";
-        std::string txt = format("x={0},y={1}f={2}{3}",x,y,get_fact_name(),statStr);
+        std::string txt = format("x={0},y={1}(f={2}){3}",x,y,get_fact_name(),statStr);
         if(active)
         {
             for(synapse s : syns)
@@ -139,9 +139,8 @@ namespace neuro
             // Calcola, su tutte le sinapsi del nodo, la somma delle uscite y dei nodi collegati, moltiplicate...
             // ...per il peso w della sinapsi. Il risultato è il segnale di ingresso x del nodo.        
             std::atomic<act> sum;
-            auto func_atm = [&](const synapse &s) {sum.fetch_add(s.pn->y * s.w);};
-			//auto func_atm = [&](const synapse &s) {sum.fetch_add(s.get_n().y * s.w); };
-            std::for_each(std::execution::par, syns.begin(), syns.end(), func_atm);
+            auto func_add = [&](const synapse &s) {sum.fetch_add(s.pn->y * s.w);};
+            std::for_each(std::execution::par, syns.begin(), syns.end(), func_add);
         }
     }
     void neuron::calc_y()

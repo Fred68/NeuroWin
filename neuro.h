@@ -5,7 +5,8 @@
 /* Implementation for neural network components  */
 /* Standard C++ 20.0                             */
 /* Version 0.1                                   */
-/* Copyright FcSoft                              */
+/* Copyright FcSoft november 2025                */
+/* Work in progress...                           */
 /*************************************************/
 
 
@@ -26,13 +27,13 @@
 #include <string>
 #include <vector>
 #include <memory>
-
 #include <format>
 #include <cmath>
 #include <tuple>
 #include <execution>        // std::execution::par
 #include <algorithm>        // for_each
 #include <atomic>           // atomic<float>
+#include <ranges>			// iota
 
 namespace neuro
 {
@@ -80,10 +81,12 @@ namespace neuro
     /// </summary>
     class network
     {
-
         private:
             unsigned int _nLays = 0;
             std::vector<std::vector<neuron>> _layers;
+
+		public:
+			static std::string fact2string(FACT f);
 
         private:
             neuron& get_at(unsigned int lay, unsigned int num) {return (_layers[lay])[num];}
@@ -91,14 +94,14 @@ namespace neuro
             void name_elements();
             #endif
 
-
         public:
             network();
             network(init_data &ini_data);
             ~network();
             std::string to_string();
             neuron& get_neuron(unsigned int lay, unsigned int num);
-            static std::string fact2string(FACT f);
+            bool set_input_layer(std::vector<act> &inp_lay);
+
     };  // class network
 
 

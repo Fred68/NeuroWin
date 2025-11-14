@@ -32,9 +32,12 @@ DA FARE
 	v	Un neurone va dichiarato di input nel costruttore (la funzione di attivazione è id). Poi non può più essere cambiato. 
     x   Impostare 'input' a false, se vector<synapse> syns.size()==0, automaticamente nel costruttore ? No.
     v   Correggere network per avere recettori al primo strato (cioè neuroni di input, senza sinapsi e con funzione id).
+	v   Aggiungere impostazione dei valori di ingresso per i nodi del primo livello.
 
 	.	Rendere private tutte le funzioni possibili in neuron e synapse. Vedere quali funzioni lasciare pubbliche.
+	.	Dividere l'header in vari file .h e compilare senza errori.
+	.	Prove di velocità cambiando std::execution::par/seq in std::for_each
 
-	.   Aggiungere connessione ai dati di input per i nodi del primo livello.
+	
 
     .   ...
