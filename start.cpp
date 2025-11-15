@@ -75,8 +75,9 @@ int main()
 
     network net(ini);          // Crea la rete
 	vector<act> vinp = {0.1,0.2,0.9};
-	if(!net.fw_prop(vinp))	cout << "Error in fw propagation" << endl;
-
+	vector<act> vout = {1,0};
+	if(!net.prop_fw(vinp))	cout << "Error in fw propagation" << endl;
+	if (!net.prop_bw(vout))	cout << "Error in bw propagation" << endl;
 
     std::cout << net.to_string();
     

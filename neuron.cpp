@@ -12,7 +12,8 @@ namespace neuro
 
     neuron::neuron()
     {
-        x = y = 1;
+        x = y = 0;
+		b = 0;
         set_fact(fact_default());
         active = true;
         input = false;
@@ -28,14 +29,13 @@ namespace neuro
 			input = true;			// ...poi imposta input a true, che disabilita set_fact()
 		}
 	}
-	neuron::neuron(std::vector<neuron> &prev, act std_w, act bias_w)
+	neuron::neuron(std::vector<neuron> &prev, act std_w, act bias_w) : neuron()
     {
 		for(uint i=0; i<prev.size(); i++)						// Imposta il vettore delle sinapsi (non è un neurone di input)
 		{
 			neuron &n = prev[i];
 			syns.push_back(synapse(n, (i == prev.size() - 1) ? bias_w : std_w));
 		}
-
         #if _DEBUG_NEURO_DET
         cout << "neuron(neuron &prev)\n";
         #endif
@@ -56,7 +56,7 @@ namespace neuro
         if(!active) statStr = "X";
 		if(input)  statStr += "I";
 		if(!statStr.empty())	statStr = "["+statStr+"]";
-        std::string txt = format("x={0:.3f},y={1:.3f}(f={2}){3}",x,y,get_fact_name(),statStr);
+        std::string txt = format("x={0:.3f},y={1:.3f},b={4:.3f}(f={2}){3}",x,y,get_fact_name(),statStr,b);
         if(active)
         {
             for(synapse s : syns)
@@ -128,6 +128,8 @@ namespace neuro
         }
         return false;            
     }
+	void neuron::set_b(act b_in) { b = b_in;}
+
     void neuron::calc_x()
     {
         if(active && !input)
@@ -154,7 +156,6 @@ namespace neuro
 
     /*******************************************/
     // Funzioni di attivazione
-	// le istanzia come oggetti statici
     act neuron::sigmoid(neuron *n)
     {
         #ifdef ACT_DBL

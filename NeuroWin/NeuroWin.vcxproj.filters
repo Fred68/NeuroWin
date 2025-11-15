@@ -50,4 +50,7 @@
       <Filter>File di intestazione</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Doc\Neuro01.pdf" />
+  </ItemGroup>
 </Project>

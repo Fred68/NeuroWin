@@ -2,7 +2,7 @@
 
 #include "neuro.h"
 
-#define _PARALLEL	false
+#define _PARALLEL	true
 
 namespace neuro
 {
@@ -52,11 +52,9 @@ namespace neuro
                 }
             }
         }
-        
         #if TXT_INFO
         name_elements();
         #endif
-        
         #if _DEBUG
         std::cout << "network(" << _nLays <<")\n";
         #endif
@@ -138,7 +136,7 @@ namespace neuro
 	bool network::set_input_layer(std::vector<act> &inp_lay)
 	{
 		bool ret = false;
-		if(inp_lay.size() == _layers[0].size()-1)
+		if(inp_lay.size() == _layers[0].size()-1)		// 1° livello
 		{
 			#if !_PARALLEL
 			bool ok = true;
@@ -160,30 +158,76 @@ namespace neuro
 		return ret;
 	}
 
-	bool network::calc_lay(uint nlay)
+	bool network::set_output_layer(std::vector<act> &out_lay)
 	{
 		bool ret = false;
-		std::vector<neuron> &layer = _layers[nlay];							// Riferimento al livello da calcolare
-		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());		// 0, 1, 2... per calc. parallelo
-		//std::atomic<bool> ok = true;
-		auto func_calc = [&](uint i) {layer[i].calc_x(); layer[i].calc_y();};
-		std::for_each(std::execution::par, v.begin(), v.end(), func_calc);
+		if (out_lay.size() == _layers[_nLays-1].size() - 1)		// Ultimo livello
+		{
+			#if !_PARALLEL
+			for(uint i=0; i<out_lay.size(); i++)
+			{
+				get_at(_nLays - 1,i).set_b(out_lay[i]);
+			}
+			#else
+			// E' possibile che la versione parallela con iota sia complessivamente più lenta.
+			// TODO Fare prove di velocità
+			auto v = std::ranges::iota_view((uint)0, (uint)out_lay.size());
+			std::atomic<bool> ok = true;
+			auto func_set = [&](uint i) {get_at(_nLays - 1, i).set_b(  get_at(_nLays - 1, i).get_y()-out_lay[i]);}; 
+			std::for_each(std::execution::par,v.begin(),v.end(),func_set);			// Formula [6]		
+			ret = ok;
+			#endif
+			ret = true;
+		}
 		return ret;
 	}
 
-	bool network::fw_prop(std::vector<act> &inp_lay)
+
+	bool network::calc_y_lay(uint nlay)
+	{
+		bool ret = false;
+		std::vector<neuron> &layer = _layers[nlay];							// Riferimento
+		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());		// 0, 1, 2... per calc. parallelo
+		auto func_calc_y = [&](uint i) {layer[i].calc_x(); layer[i].calc_y(); layer[i].set_b((act)0.0);};
+		std::for_each(std::execution::par, v.begin(), v.end(), func_calc_y);			// Formula [2]		
+		return ret;
+	}
+
+	bool network::calc_b_lay(uint nlay)
+	{
+		bool ret = false;
+		std::vector<neuron> &layer = _layers[nlay];							// Riferimento
+		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());		// 0, 1, 2... per calc. parallelo
+		
+		auto func_calc_b = [&](uint i)
+			{
+			// Fare dopo, usando calc_b di neuron
+			};
+		
+		std::for_each(std::execution::par, v.begin(), v.end(), func_calc_b);
+		return ret;
+	}
+
+	bool network::prop_fw(std::vector<act> &inp_lay)
 	{
 		bool ok = set_input_layer(inp_lay);
 		if(ok)
 		{
 			for(uint i = 0; i<_nLays; i++)				// Ciclo (qui non usa il calcolo parallelo)
 			{
-				calc_lay(i);	
+				calc_y_lay(i);	
 			}
 		}
 		return ok;
 	}
 
+	bool network::prop_bw(std::vector<act> &out_lay)
+	{
+		bool ok = set_output_layer(out_lay);
+
+
+		return ok;
+	}
 
 
 }

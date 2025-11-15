@@ -84,6 +84,9 @@ namespace neuro
     /// </summary>
     class network
     {
+
+		typedef void (*lay_func) (std::vector<neuron> &layer, uint i);          // Puntatore a funzione di calcolo livello
+
         private:
             uint _nLays = 0;
             std::vector<std::vector<neuron>> _layers;
@@ -92,12 +95,14 @@ namespace neuro
 			static std::string fact2string(FACT f);
 
         private:
-            neuron& get_at(uint lay, uint num) {return (_layers[lay])[num];}	// No index range check
+            neuron& get_at(uint lay, uint num) {return (_layers[lay])[num];}	// No check indici
             #if TXT_INFO
             void name_elements();
             #endif
-			bool set_input_layer(std::vector<act> &inp_lay);		// Count check
-			bool calc_lay(uint nlay);						// No index range check
+			bool set_input_layer(std::vector<act> &inp_lay);		// Verifica con numero di neuroni
+			bool set_output_layer(std::vector<act> &out_lay);
+			bool calc_y_lay(uint nlay);							// Calcola le attività e azzera beta (no check indici)
+			bool calc_b_lay(uint nlay);							// Calcola le derivate dell'errore (no check indici)
 
         public:
             network();
@@ -106,7 +111,8 @@ namespace neuro
             std::string to_string();
             neuron& get_neuron(uint lay, uint num);
             
-			bool fw_prop(std::vector<act> &inp_lay);
+			bool prop_fw(std::vector<act> &inp_lay);
+			bool prop_bw(std::vector<act> &out_lay);
 
     };  // class network
 
@@ -143,6 +149,7 @@ namespace neuro
         private:
             act x;                                  // Segnale in ingresso
             act y;                                  // Attività in uscita
+			act b;									// Derivata dell'errore
             std::vector<synapse> syns;              // Sinapsi
             FACT fact;                              // Indice della funzione di attivazione
             act_func f_act;                         // Puntatori alla funzione di attivazione e...
@@ -176,6 +183,9 @@ namespace neuro
 
 			act get_x() { return x; }				// Ingresso complessivo
 			bool set_x(act x_in);                   // Modifica l'ingresso x, solo se è un nodo di input. Se no restituisce false.
+			act get_y() { return y; }				// Uscita
+			act get_b() { return b; }				// beta, derivata dell'errore
+			void set_b(act b_in);
 			void calc_x();                          // Calcola x, solo se è active e se non è un nodo di input
 			void calc_y();                          // Calcola y, solo se active
 
