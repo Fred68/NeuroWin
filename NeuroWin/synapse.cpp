@@ -1,10 +1,12 @@
 
-#include "neuro.h"
+
+
+#include "neuron.h"
+
 
 
 namespace neuro
 {
-
     /*******************************************/
     /*                                         */
     /* synapse                                 */

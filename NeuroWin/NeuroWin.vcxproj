@@ -19,23 +19,31 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\init_data.cpp" />
-    <ClCompile Include="..\modtest.ixx" />
-    <ClCompile Include="..\network.cpp" />
-    <ClCompile Include="..\neuron.cpp" />
-    <ClCompile Include="..\start.cpp" />
-    <ClCompile Include="..\synapse.cpp" />
-    <ClCompile Include="..\test.cpp" />
+    <ClCompile Include="init_data.cpp" />
+    <ClCompile Include="modtest.ixx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="network.cpp" />
+    <ClCompile Include="neuron.cpp" />
+    <ClCompile Include="start.cpp" />
+    <ClCompile Include="synapse.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\neuro.h" />
-    <ClInclude Include="..\test.h" />
+    <ClInclude Include="init_data.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="neuron.h" />
+    <ClInclude Include="network.h" />
+    <ClInclude Include="neuro_def.h" />
+    <ClInclude Include="test.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Note.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Doc\Neuro01.pdf" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

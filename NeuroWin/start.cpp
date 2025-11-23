@@ -1,22 +1,24 @@
 
-
+#define INI_TEST false
 
 
 #include <iostream>
 
-#include "neuro.h"
+#include "network.h"
 
-
+#if INI_TEST
 #include <vector>
 #include <execution>
 #include <algorithm>
-
 #include <atomic>
+#endif
+
 
 //import modtest;
 
 using namespace std;
 using namespace neuro;
+
 //using namespace pippospace;
 
 // Function prototyping
@@ -24,7 +26,7 @@ void print(vector<int> &v);
 
 int main()
 {
-    
+	#if INI_TEST
     int j = 0;
     auto func_x2 = [&](int &x) {x = x * 2; };
    
@@ -56,6 +58,7 @@ int main()
     auto func_atm = [&](const int &x) {sum_atm.fetch_add(x); };
     std::for_each(std::execution::par, v.begin(), v.end(), func_atm);
     std::cout << "sum_atm (for_each on atomic<int>)" << sum_atm << std::endl;
+	#endif
 
     //std::cout << "-----------------------------------------------\n";
     //std::cout << "module test" << std::endl;
@@ -68,18 +71,32 @@ int main()
     std::cout << "neuro test" << std::endl;
     std::cout << "-----------------------------------------------\n";
 
+	// Ini
     std::vector<int> lays = {3,2,2};
     std::vector<FACT> facts ={FACT::sigmoid, FACT::sigmoid, FACT::sigmoid};
     init_data ini(lays,facts);
     std::cout << ini.to_string() << std::endl;
-
-    network net(ini);          // Crea la rete
+	
+	// net
+	std::unique_ptr<network> net;
+	try
+	{
+		net = make_unique<network>(ini);          // Crea la rete
+	}
+	catch(std::exception e)
+	{
+		cout << e.what() << std::endl;
+	}
+	
+	// data
 	vector<act> vinp = {0.1,0.2,0.9};
 	vector<act> vout = {1,0};
-	if(!net.prop_fw(vinp))	cout << "Error in fw propagation" << endl;
-	if (!net.prop_bw(vout))	cout << "Error in bw propagation" << endl;
 
-    std::cout << net.to_string();
+	// fw & bw prop
+	if(!net->prop_fw(vinp))		cout << "Error in fw propagation" << endl;
+	if (!net->prop_bw(vout))	cout << "Error in bw propagation" << endl;
+
+    std::cout << net->to_string();
     
     int x = getchar();
 
@@ -93,3 +110,6 @@ void print(vector<int> &v)
     for (int i = 0; i < v.size(); i++) { std::cout << v[i] << " "; }
     std::cout << "]\n";
 }
+
+
+#undef INI_TEST

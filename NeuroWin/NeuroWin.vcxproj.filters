@@ -15,33 +15,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\start.cpp">
+    <ClCompile Include="init_data.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="..\test.cpp">
+    <ClCompile Include="network.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="..\init_data.cpp">
+    <ClCompile Include="neuron.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="..\network.cpp">
+    <ClCompile Include="start.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="..\neuron.cpp">
+    <ClCompile Include="synapse.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="..\synapse.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\modtest.ixx">
+    <ClCompile Include="modtest.ixx">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\neuro.h">
+    <ClInclude Include="network.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="..\test.h">
+    <ClInclude Include="test.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="init_data.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="neuro_def.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="neuron.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
@@ -52,5 +58,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Doc\Neuro01.pdf" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

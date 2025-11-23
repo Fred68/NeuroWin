@@ -1,6 +1,5 @@
 
-
-#include "neuro.h"
+#include "init_data.h"
 
 
 namespace neuro
@@ -39,7 +38,7 @@ namespace neuro
             else
                 sep = '\0';
 
-            str += std::format("{0}{1}", network::fact2string(_types[i]), sep);
+            str += std::format("{0}{1}", fact2string(_types[i]), sep);
         }
         return str;
     }
