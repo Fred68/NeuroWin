@@ -38,6 +38,14 @@ namespace neuro
         static act id(neuron *n);                   // identità
         static FACT fact_default() {return FACT::tanh;}
 
+		public:
+			static constexpr act w_ini_const = 0.05;
+			static constexpr act b_ini_const = 0.001;
+			static constexpr act w_ini_mean = 0.5;
+			static constexpr act b_ini_mean = 0.001;
+
+
+
         private:
             act x;                                  // Segnale in ingresso
             act y;                                  // Attività in uscita
@@ -56,7 +64,7 @@ namespace neuro
         public:
             neuron();
 			neuron(bool isInput);
-            neuron(std::vector<neuron> &prev, act std_w = (act)0.5, act bias_w = (act)0.01); 
+            neuron(std::vector<neuron> &prev, act std_w = w_ini_const, act bias_w = b_ini_const); 
             ~neuron();
 
             std::string to_string();
@@ -95,16 +103,17 @@ namespace neuro
 	class synapse
 	{
 		friend class neuron;
+	
 
-	private:
-		std::shared_ptr<neuron> pn;
-		act    w;
+		private:
+			std::shared_ptr<neuron> pn;
+			act    w;
 
-	public:
-		synapse();
-		synapse(neuron &p_n, act ws);
-		~synapse();
-		act x() { return w * pn.get()->y; }
+		public:
+			synapse();
+			synapse(neuron &p_n, act ws);
+			~synapse();
+			act x() { return w * pn.get()->y; }
 	};
 
 

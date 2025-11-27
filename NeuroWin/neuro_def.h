@@ -2,7 +2,7 @@
 #define NEURO_DEF_H
 
 #define ACT_DBL                     // Definizione del tipo di dato per l'attività: double 
-// #undef ACT_DBL                      // Se non definito: float
+//#undef ACT_DBL                      // Se non definito: float
 
 #define TXT_INFO false              // Informazioni aggiuntive in nodi e sinapsi
 
@@ -52,6 +52,7 @@ namespace neuro
 		}
 		return str;
 	}
+
 }
 
 #endif

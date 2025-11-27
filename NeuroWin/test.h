@@ -1,6 +1,7 @@
 #pragma once
 
-#include "neuro.h"
+#include "neuro_def.h"
+#include "network.h"
 
 namespace neuro
 {

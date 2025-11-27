@@ -157,20 +157,41 @@ namespace neuro
 		return ret;
 	}
 
-	void network::set_weights()
+	void network::set_weights(weight_func wf)
 	{
 		for(uint il = 1; il < _nLays; il++)
 		{
 			for(uint in = 0; in < _layers[il].size(); in++)
 			{
-				neuron n = get_at(il,in);			// Reference al neurone
+				neuron n = get_at(il,in);						// Reference al neurone
 				for(uint is = 0; is < n.get_n_syn(); is++)
 				{
-					// mettere qui il puntatore a funzione che calcola il peso per il network 'this'
+					bool is_bias = (is == (n.get_n_syn() - 1));	// Ultima sinapsi connessa a nodo One disattivo: il peso è il bias.
+					n.set_w(wf(il, in, is, is_bias), is);		// Usa il puntatore a funzione
 				}
 			}
 		}
 	}
+
+	act network::set_w_const(uint iLay, uint iNeu, uint iSyn, bool is_bias)
+	{
+		return is_bias ? (act)neuron::b_ini_const : (act)neuron::w_ini_const;
+	};
+	
+	act network::set_w_mean(uint iLay, uint iNeu, uint iSyn, bool is_bias)
+	{
+		if(is_bias)
+		{
+			return (act)neuron::b_ini_mean;
+		}
+		else
+		{
+			uint nn = get_at(iLay,iNeu).get_n_syn();
+			return (act) (neuron::w_ini_mean/nn);
+		}
+
+	}
+
 
 	bool network::calc_y_lay(uint nlay)
 	{

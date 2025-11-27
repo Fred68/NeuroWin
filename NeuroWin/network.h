@@ -44,8 +44,10 @@ namespace neuro
     /// </summary>
     class network
     {
-		// Puntatori a funzione
-		typedef void (*lay_func) (std::vector<neuron> &layer, uint i);				// Calcolo di un livello
+		private:
+			// Puntatori a funzione
+			typedef void (*lay_func) (std::vector<neuron> &layer, uint i);					// Calcolo di un livello
+			typedef act (*weight_func) (uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Inizializzazione di un peso
 
         private:
             uint _nLays = 0;
@@ -54,17 +56,21 @@ namespace neuro
 
         private:
             neuron &get_at(uint lay, uint num) {return (_layers[lay])[num];}	// No check indici
-
             #if TXT_INFO
             void name_elements();
             #endif
 			bool set_inputs(std::vector<act> &inp_lay);			// Imposta gli ingressi (check indici)
 			bool set_outputs(std::vector<act> &out_lay);
-			void set_weights();									// Imposta i pesi iniziali
+			void set_weights(weight_func wf);					// Imposta i pesi iniziali
+			// Funzioni per i pesi iniziali
+			act set_w_const(uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Pesi e bias costanti
+			act set_w_mean(uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Pesi e bias medi (no check indici)
+
 
 			bool calc_y_lay(uint nlay);							// Calcola le attività e azzera EI (no check indici)
 
 			bool calc_b_lay(uint nlay);							// Calcola le derivate dell'errore (no check indici) [DA COMPLETARE]
+
 
         public:
             network(init_data &ini_data);
