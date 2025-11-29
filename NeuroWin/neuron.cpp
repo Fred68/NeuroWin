@@ -1,5 +1,5 @@
 
-#include "neuron.h"
+#include "neuron_synapse.h"
 
 
 namespace neuro
@@ -14,7 +14,7 @@ namespace neuro
     neuron::neuron()
     {
         x = y = 0;
-		b_ei = 0;
+		ei = 0;
         set_fact(fact_default());
         active = true;
         input = false;
@@ -57,7 +57,7 @@ namespace neuro
         if(!active) statStr = "X";
 		if(input)  statStr += "I";
 		if(!statStr.empty())	statStr = "["+statStr+"]";
-        std::string txt = format("x={0:.3f},y={1:.3f},b_ei={4:.3f}(f={2}){3}",x,y,get_fact_name(),statStr,b_ei);
+        std::string txt = format("x={0:.3f},y={1:.3f},ei={4:.3f}(f={2}){3}",x,y,get_fact_name(),statStr,ei);
         if(active)
         {
             for(synapse s : syns)
@@ -120,6 +120,7 @@ namespace neuro
 	{
 		return fact2string(fact);
 	}
+
     bool neuron::set_x(act x_in)
     {
         if(input)
@@ -129,13 +130,13 @@ namespace neuro
         }
         return false;            
     }
-	void neuron::set_ei(act b_in) { b_ei = b_in;}
+
+	void neuron::set_ei(act ei_in) { ei = ei_in;}
 
 	act neuron::get_w(uint i)
 	{
 		return (i < syns.size()) ? syns[i].w : 0;
 	}
-
 	void neuron::set_w(act w, uint i)
 	{
 		if(i < syns.size())

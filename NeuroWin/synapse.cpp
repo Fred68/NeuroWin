@@ -1,7 +1,7 @@
 
 
 
-#include "neuron.h"
+#include "neuron_synapse.h"
 
 
 

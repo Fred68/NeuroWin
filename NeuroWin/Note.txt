@@ -42,6 +42,6 @@ DA FARE
 
 	.	Forward-propagation: semplice. Il calcolo delle y dei neuroni azzera (preventivamente) i coefficienti beta.
 
-	.	La back-propagation richiede dei calcoli pià complessi.
+	.	La back-propagation richiede dei calcoli più complessi.
 		-	Con network::set_output_layer(std::vector<act> &out_lay) vengono calcolate le beta dell'ultimo livello.
     .   ...

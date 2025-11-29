@@ -38,16 +38,13 @@
     <ClInclude Include="network.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="test.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="init_data.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="neuro_def.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="neuron.h">
+    <ClInclude Include="neuron_synapse.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

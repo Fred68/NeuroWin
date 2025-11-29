@@ -213,7 +213,6 @@ namespace neuro
 			{
 			// Fare dopo, usando calc_b di neuron
 			};
-		
 		std::for_each(std::execution::par, v.begin(), v.end(), func_calc_b);
 		return ret;
 	}

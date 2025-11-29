@@ -47,15 +47,19 @@ namespace neuro
 
 
         private:
-            act x;                                  // Segnale in ingresso
-            act y;                                  // Attività in uscita
-			act b_ei;								// Valori beta oppure EI (in base al ciclo dell'algoritmo)
-            std::vector<synapse> syns;              // Sinapsi
-            FACT fact;                              // Tipo di funzione di attivazione
-            act_func f_act;                         // Puntatori alla funzione di attivazione e...
-            act_func f_act_der;                     // ...alla sua derivata.
-            bool active = true;                     // Se false, non calcola né x dai pesi né y.
-            bool input = false;                     // Se true: nodo di input, non calcola la x, solo la y, e abilita set_input
+            act x;                                  /// Segnale in ingresso
+            act y;                                  /// Attività in uscita
+			union
+			{	
+				act beta;							// beta (primo calcolo), poi...
+				act ei;								// ...EI = beta * F' (secondo calcolo) 			
+			};
+            std::vector<synapse> syns;              /// Sinapsi
+            FACT fact;                              /// Tipo di funzione di attivazione
+            act_func f_act;                         /// Puntatore alla funzione di attivazione
+            act_func f_act_der;                     /// Puntatore alla derivata della funzione di attivazione
+            bool active = true;                     /// Se false, non calcola né x dai pesi né y.
+            bool input = false;                     /// Se true: nodo di input, non calcola la x, solo la y, e abilita set_input
             
 			#if TXT_INFO
             std::string name = "";
@@ -85,17 +89,55 @@ namespace neuro
             void set_name(std::string s) { name = s; }
             #endif
 
-			act get_x() { return x; }				// Ingresso complessivo
-			bool set_x(act x_in);                   // Modifica l'ingresso x, solo se è un nodo di input. Se no restituisce false.
-			void calc_x();                          // Calcola x, solo se è active e se non è un nodo di input
+			
+			/// <summary>
+			/// Valore dell'ingresso complessivo x
+			/// </summary>
+			/// <returns></returns>
+			act get_x() { return x; }				// Ingresso complessivo				
+			/// <summary>
+			/// Modifica l'ingresso x, solo se è un nodo di input
+			/// </summary>
+			/// <param name="x_in"></param>
+			/// <returns></returns>
+			bool set_x(act x_in);
+			/// <summary>
+			/// Calcola l'ingresso x, solo se è attivo e non è di input
+			/// </summary>
+			void calc_x();
 
+			/// <summary>
+			/// Valore dell'uscita y
+			/// </summary>
+			/// <returns></returns>
 			act get_y() { return y; }				// Uscita
-			void calc_y();                          // Calcola y, solo se active
+			/// <summary>
+			/// Calcola l'uscita y, solo se è attivo
+			/// </summary>
+			void calc_y();
 
-			act get_ei() { return b_ei; }			// EI, derivata dell'errore
-			void set_ei(act b_in);
+			/// <summary>
+			/// Valore della derivata dell'errore (ei, in unione con beta)
+			/// </summary>
+			/// <returns></returns>
+			act get_ei() { return ei; }				// Derivata dell'errore 
+			/// <summary>
+			/// Imposta la derivata dell'errore (ei, in unione con beta)
+			/// </summary>
+			/// <param name="ei_in"></param>
+			void set_ei(act ei_in);
 
-			act get_w(uint i);						// Sinapsi i.
+			/// <summary>
+			/// Valore del peso della sinapsi i
+			/// </summary>
+			/// <param name="i"></param>
+			/// <returns></returns>
+			act get_w(uint i);						// Peso della sinapsi i.
+			/// <summary>
+			/// Imposta il peso della sinapsi i
+			/// </summary>
+			/// <param name="w"></param>
+			/// <param name="i"></param>
 			void set_w(act w, uint i);
     };
 	

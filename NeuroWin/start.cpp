@@ -92,12 +92,18 @@ int main()
 	vector<act> vinp = {0.1,0.2,0.9};
 	vector<act> vout = {1,0};
 
+	cout << "\n\nIni:\n";
+	std::cout << net->to_string();
 	// fw & bw prop
+	
+	cout << "\n\nprop_fw():\n";
 	if(!net->prop_fw(vinp))		cout << "Error in fw propagation" << endl;
+	std::cout << net->to_string();
+	
+	cout << "\n\nprop_bw():\n";
 	if (!net->prop_bw(vout))	cout << "Error in bw propagation" << endl;
+	std::cout << net->to_string();
 
-    std::cout << net->to_string();
-    
     int x = getchar();
 
     return 0;

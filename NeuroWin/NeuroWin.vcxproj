@@ -33,10 +33,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="neuron.h" />
+    <ClInclude Include="neuron_synapse.h" />
     <ClInclude Include="network.h" />
     <ClInclude Include="neuro_def.h" />
-    <ClInclude Include="test.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Note.txt" />
