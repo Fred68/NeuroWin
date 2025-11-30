@@ -44,16 +44,17 @@ namespace neuro
 			static constexpr act w_ini_mean = 0.5;
 			static constexpr act b_ini_mean = 0.001;
 
-
-
         private:
             act x;                                  /// Segnale in ingresso
             act y;                                  /// Attività in uscita
 			union
-			{	
+			{										// Union inutile, messa solo per chiarezza
 				act beta;							// beta (primo calcolo), poi...
 				act ei;								// ...EI = beta * F' (secondo calcolo) 			
 			};
+			#if _DEBUG
+			bool isBeta = true;						// beta or EI
+			#endif
             std::vector<synapse> syns;              /// Sinapsi
             FACT fact;                              /// Tipo di funzione di attivazione
             act_func f_act;                         /// Puntatore alla funzione di attivazione
@@ -89,6 +90,9 @@ namespace neuro
             void set_name(std::string s) { name = s; }
             #endif
 
+			#if _DEBUG
+			bool xxx;
+			#endif
 			
 			/// <summary>
 			/// Valore dell'ingresso complessivo x
@@ -120,12 +124,27 @@ namespace neuro
 			/// Valore della derivata dell'errore (ei, in unione con beta)
 			/// </summary>
 			/// <returns></returns>
-			act get_ei() { return ei; }				// Derivata dell'errore 
+			act get_beta();							// Derivata parziale beta dell'errore dE/dy
+			/// <summary>
+			/// Imposta la derivata dell'errore (beta, in unione con ei)
+			/// </summary>
+			/// <param name="beta_in"></param>
+			void set_beta(act beta_in);
+			/// <summary>
+			/// Valore della derivata dell'errore (ei, in unione con beta)
+			/// </summary>
+			/// <returns></returns>
+			act get_ei();							// Derivata parziale EI dell'errore dE/dx
 			/// <summary>
 			/// Imposta la derivata dell'errore (ei, in unione con beta)
 			/// </summary>
 			/// <param name="ei_in"></param>
 			void set_ei(act ei_in);
+			/// <summary>
+			/// Calcola la derivata EI dell'errore.
+			/// Deve essere stata calcolata beta
+			/// </summary>
+			void calc_ei();
 
 			/// <summary>
 			/// Valore del peso della sinapsi i
@@ -139,6 +158,8 @@ namespace neuro
 			/// <param name="w"></param>
 			/// <param name="i"></param>
 			void set_w(act w, uint i);
+
+			void calc_parz_eai();					// Contributi parziali alle EA = beta dei nodi del livello precedente
     };
 	
 	

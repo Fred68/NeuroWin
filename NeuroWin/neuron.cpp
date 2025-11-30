@@ -54,10 +54,20 @@ namespace neuro
     {
 		// TODO mettere il numero di cifre in una costante
         std::string statStr = "";
+		std::string type_err_der = "b_ei";
         if(!active) statStr = "X";
 		if(input)  statStr += "I";
+		#if _DEBUG
+		if(isBeta)
+			type_err_der = "beta";
+		else
+			type_err_der = "ei";
+		#else
+
+		#endif
 		if(!statStr.empty())	statStr = "["+statStr+"]";
-        std::string txt = format("x={0:.3f},y={1:.3f},ei={4:.3f}(f={2}){3}",x,y,get_fact_name(),statStr,ei);
+
+        std::string txt = format("x={0:.3f},y={1:.3f},{5}={4:.3f}(f={2}){3}",x,y,get_fact_name(),statStr,ei,type_err_der);
         if(active)
         {
             for(synapse s : syns)
@@ -131,7 +141,38 @@ namespace neuro
         return false;            
     }
 
-	void neuron::set_ei(act ei_in) { ei = ei_in;}
+	void neuron::set_ei(act ei_in)
+	{
+		ei = ei_in;
+		#if _DEBUG
+		isBeta = false;
+		#endif
+	}
+	void neuron::set_beta(act beta_in)
+	{
+		beta = beta_in;
+		#if _DEBUG
+		isBeta = true;
+		#endif
+	}
+	act neuron::get_ei()
+	{	
+		#if _DEBUG
+		if(isBeta)
+			throw new std::exception("Get EI when beta is set.");
+		#endif
+		return ei;
+		
+	}
+	act neuron::get_beta()
+	{
+		#if _DEBUG
+		if(!isBeta)
+			throw new std::exception("Get beta when EI is set.");
+		#endif
+		return beta;
+	}
+
 
 	act neuron::get_w(uint i)
 	{
@@ -155,7 +196,7 @@ namespace neuro
         
             // Calcola, su tutte le sinapsi del nodo, la somma delle uscite y dei nodi collegati, moltiplicate...
             // ...per il peso w della sinapsi. Il risultato è il segnale di ingresso x del nodo.        
-            std::atomic<act> sum;
+            std::atomic<act> sum = s0;
             auto func_add = [&](const synapse &s) {sum.fetch_add(s.pn->y * s.w);};
             std::for_each(std::execution::par, syns.begin(), syns.end(), func_add);
 			x = sum;
@@ -166,8 +207,31 @@ namespace neuro
         if(active)
             y = f_act(this);
     }
+	void neuron::calc_ei()
+	{
+		if(active)
+		{
+			#if _DEBUG
+			if(!isBeta)
+				throw new std::exception("Cannot calc. EI when beta is not set");
+			#endif
+			set_ei(get_beta() * f_act_der(this));
+		}
+		else
+		{
+			set_ei((act)0.0);
+		}
+	}
+	void neuron::calc_parz_eai()
+	{
+		if (active && !input)
+		{
+			auto func_ea = [&](const synapse &s) {s.pn->set_beta(s.w * get_ei());};
+			std::for_each(std::execution::par, syns.begin(), syns.end(), func_ea);
+		}
+	}
 
-    /*******************************************/
+	/*******************************************/
     // Funzioni di attivazione
     act neuron::sigmoid(neuron *n)
     {

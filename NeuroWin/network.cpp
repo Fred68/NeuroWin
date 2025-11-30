@@ -148,12 +148,14 @@ namespace neuro
 			// TODO Fare prove di velocità
 			auto v = std::ranges::iota_view((uint)0, (uint)out_lay.size());
 			std::atomic<bool> ok = true;
-			auto func_set = [&](uint i) {get_at(_nLays - 1, i).set_ei( get_at(_nLays - 1, i).get_y()-out_lay[i]);}; 
+			auto func_set = [&](uint i) {get_at(_nLays - 1, i).set_beta( get_at(_nLays - 1, i).get_y()-out_lay[i]);}; 
 			std::for_each(std::execution::par,v.begin(),v.end(),func_set);			// Formula [6]		
 			ret = ok;
 			#endif
 			ret = true;
 		}
+		else
+			throw new std::exception("Output vector and last leyier size don't match");
 		return ret;
 	}
 
@@ -196,24 +198,20 @@ namespace neuro
 	bool network::calc_y_lay(uint nlay)
 	{
 		bool ret = false;
-		std::vector<neuron> &layer = _layers[nlay];							// Riferimento
-		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());		// 0, 1, 2... per calc. parallelo
-		auto func_calc_y = [&](uint i) {layer[i].calc_x(); layer[i].calc_y(); layer[i].set_ei((act)0.0);};
-		std::for_each(std::execution::par, v.begin(), v.end(), func_calc_y);			// Formula [2]		
+		std::vector<neuron> &layer = _layers[nlay];								// Riferimento
+		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());			// 0, 1, 2... per calc. parallelo
+		auto func_calc_y = [&](uint i) {layer[i].calc_x(); layer[i].calc_y(); layer[i].set_beta((act)0.0);};
+		std::for_each(std::execution::par, v.begin(), v.end(), func_calc_y);	// Formula [2]		
 		return ret;
 	}
 
-	bool network::calc_b_lay(uint nlay)
+	bool network::calc_ei_eaprec_lay(uint nlay)
 	{
 		bool ret = false;
 		std::vector<neuron> &layer = _layers[nlay];							// Riferimento
-		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());		// 0, 1, 2... per calc. parallelo
-		
-		auto func_calc_b = [&](uint i)
-			{
-			// Fare dopo, usando calc_b di neuron
-			};
-		std::for_each(std::execution::par, v.begin(), v.end(), func_calc_b);
+		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());		// 0, 1, 2... per calc. parallelo	
+		auto func_calc_ei = [&](uint j) {layer[j].calc_ei(); layer[j].calc_parz_eai(); };
+		std::for_each(std::execution::par, v.begin(), v.end(), func_calc_ei);
 		return ret;
 	}
 
@@ -233,7 +231,7 @@ namespace neuro
 	bool network::prop_bw(std::vector<act> &out_lay)
 	{
 		bool ok = set_outputs(out_lay);
-
+		
 
 		return ok;
 	}

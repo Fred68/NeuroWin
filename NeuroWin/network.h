@@ -105,13 +105,19 @@ namespace neuro
 			act set_w_mean(uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Pesi e bias medi (no check indici)
 
 			/// <summary>
-			/// Calcola la attività y di un livello ed azzera i valori di EI
+			/// Calcola la attività y di un livello ed azzera i valori di beta
+			/// Non controlla gli indici
 			/// </summary>
 			/// <param name="nlay"></param>
 			/// <returns></returns>
-			bool calc_y_lay(uint nlay);							// Calcola le attività e azzera EI (no check indici)
-
-			bool calc_b_lay(uint nlay);							// Calcola le derivate dell'errore (no check indici) [DA COMPLETARE]
+			bool calc_y_lay(uint nlay);					// Calc. le attività y del livello nlay e azzera le beta
+			/// <summary>
+			/// Calcola le derivate EI dell'errore del livello nLay e le beta del livello precedente
+			/// Non controlla gli indici
+			/// </summary>
+			/// <param name="nlay"></param>
+			/// <returns></returns>
+			bool calc_ei_eaprec_lay(uint nlay);			// Calcola le derivate EI dell'errore del livello nLay e le beta del prec.
 
 
         public:
