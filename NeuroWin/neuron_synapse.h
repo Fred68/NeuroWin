@@ -13,6 +13,8 @@
 #include <atomic>           // atomic<float>
 #include <ranges>			// iota
 
+#define TO_STR_FORMAT_N(n,b) ("x={0:." #n "f},y={1:." #n "f},{5}={4:." #b "f}(f={2}){3}")
+#define TO_STR_FORMAT_W(n) ("[{0}{1:." #n "f}]")
 
 namespace neuro
 {
@@ -25,7 +27,7 @@ namespace neuro
         
         typedef act (*act_func) (neuron*);          // Puntatore a funzione di attivazione
 
-        // Funzioni di attivazione (non usano dati d'istanza)
+        /// Funzioni di attivazione (non usano dati d'istanza)
         // Scelto argomento neuron*, per usare f(this), invece che neuron& e f(*this) (copia l'oggetto ?)
         static act sigmoid(neuron *n);
         static act sigmoid_der(neuron *n);
@@ -37,6 +39,10 @@ namespace neuro
         static act zero(neuron *n);                 // zero (derivata di costante)
         static act id(neuron *n);                   // identità
         static FACT fact_default() {return FACT::tanh;}
+		
+		public:
+			static constexpr const char *to_string_frm_n = TO_STR_FORMAT_N(3,5);
+			static constexpr const char *to_string_frm_w = TO_STR_FORMAT_W(3);
 
 		public:
 			static constexpr act w_ini_const = 0.05;
@@ -49,11 +55,11 @@ namespace neuro
             act y;                                  /// Attività in uscita
 			union
 			{										// Union inutile, messa solo per chiarezza
-				act beta;							// beta (primo calcolo), poi...
-				act ei;								// ...EI = beta * F' (secondo calcolo) 			
+				act beta;							/// beta (primo calcolo), poi...
+				act ei;								/// ...EI = beta * F' (secondo calcolo) 			
 			};
 			#if _DEBUG
-			bool isBeta = true;						// beta or EI
+			bool isBeta = true;						/// beta or EI
 			#endif
             std::vector<synapse> syns;              /// Sinapsi
             FACT fact;                              /// Tipo di funzione di attivazione
@@ -141,10 +147,10 @@ namespace neuro
 			/// <param name="ei_in"></param>
 			void set_ei(act ei_in);
 			/// <summary>
-			/// Calcola la derivata EI dell'errore.
-			/// Deve essere stata calcolata beta
+			/// Calcola la derivata EI dell'errore con la formula [7].
+			/// Deve essere stata calcolata beta.
 			/// </summary>
-			void calc_ei();
+			void calc_ei();							// Calcola EI con la formula [7]
 
 			/// <summary>
 			/// Valore del peso della sinapsi i
@@ -158,8 +164,11 @@ namespace neuro
 			/// <param name="w"></param>
 			/// <param name="i"></param>
 			void set_w(act w, uint i);
-
-			void calc_parz_eai();					// Contributi parziali alle EA = beta dei nodi del livello precedente
+			/// <summary>
+			/// Calcolo parziale delle EA = beta dei nodi del livello precedente
+			/// Formula [9], ma contributi del nodo j attuale alle beta dei nodi i precedenti
+			/// </summary>
+			void calc_parz_eai();					// Calcolo parziale delle EA = beta dei nodi del livello precedente
     };
 	
 	

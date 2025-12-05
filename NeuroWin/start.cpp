@@ -72,8 +72,8 @@ int main()
     std::cout << "-----------------------------------------------\n";
 
 	// Ini
-    std::vector<int> lays = {3,2,2};
-    std::vector<FACT> facts ={FACT::sigmoid, FACT::sigmoid, FACT::sigmoid};
+    std::vector<int> lays = {3,2, 3,2};
+    std::vector<FACT> facts ={FACT::sigmoid, FACT::sigmoid, FACT::sigmoid, FACT::sigmoid};
     init_data ini(lays,facts);
     std::cout << ini.to_string() << std::endl;
 	
@@ -83,9 +83,9 @@ int main()
 	{
 		net = make_unique<network>(ini);          // Crea la rete
 	}
-	catch(std::exception e)
+	catch(std::exception const &ex)
 	{
-		cout << e.what() << std::endl;
+		cout << ex.what() << std::endl;
 	}
 	
 	// data
@@ -95,15 +95,20 @@ int main()
 	cout << "\n\nIni:\n";
 	std::cout << net->to_string();
 	// fw & bw prop
+	try
+	{
+		cout << "\n\nprop_fw():\n";
+		if(!net->prop_fw(vinp))		cout << "Error in fw propagation" << endl;
+		std::cout << net->to_string();
 	
-	cout << "\n\nprop_fw():\n";
-	if(!net->prop_fw(vinp))		cout << "Error in fw propagation" << endl;
-	std::cout << net->to_string();
-	
-	cout << "\n\nprop_bw():\n";
-	if (!net->prop_bw(vout))	cout << "Error in bw propagation" << endl;
-	std::cout << net->to_string();
-
+		cout << "\n\nprop_bw():\n";
+		if (!net->prop_bw(vout))	cout << "Error in bw propagation" << endl;
+		std::cout << net->to_string();
+	}
+	catch(std::exception const &ex)
+	{
+		cout << "\nException:" << ex.what() << endl;
+	}
     int x = getchar();
 
     return 0;

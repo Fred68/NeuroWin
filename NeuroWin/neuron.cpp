@@ -52,7 +52,6 @@ namespace neuro
     
     std::string neuron::to_string()
     {
-		// TODO mettere il numero di cifre in una costante
         std::string statStr = "";
 		std::string type_err_der = "b_ei";
         if(!active) statStr = "X";
@@ -67,7 +66,7 @@ namespace neuro
 		#endif
 		if(!statStr.empty())	statStr = "["+statStr+"]";
 
-        std::string txt = format("x={0:.3f},y={1:.3f},{5}={4:.3f}(f={2}){3}",x,y,get_fact_name(),statStr,ei,type_err_der);
+		std::string txt = format(to_string_frm_n, x, y, get_fact_name(), statStr, ei, type_err_der);
         if(active)
         {
             for(synapse s : syns)
@@ -78,7 +77,7 @@ namespace neuro
                     #if TXT_INFO
                     nn = s.pn->get_name()+",";
                     #endif
-                    txt = txt + std::format("[{0}{1:.3f}]", nn, s.w);
+                    txt = txt + std::format(to_string_frm_w, nn, s.w);
                 }
             }
         }
@@ -159,7 +158,7 @@ namespace neuro
 	{	
 		#if _DEBUG
 		if(isBeta)
-			throw new std::exception("Get EI when beta is set.");
+			throw std::exception("Get EI when beta is set.");
 		#endif
 		return ei;
 		
@@ -168,7 +167,7 @@ namespace neuro
 	{
 		#if _DEBUG
 		if(!isBeta)
-			throw new std::exception("Get beta when EI is set.");
+			throw std::exception("Get beta when EI is set.");
 		#endif
 		return beta;
 	}
@@ -213,7 +212,7 @@ namespace neuro
 		{
 			#if _DEBUG
 			if(!isBeta)
-				throw new std::exception("Cannot calc. EI when beta is not set");
+				throw std::exception("Cannot calc. EI when beta is not set");
 			#endif
 			set_ei(get_beta() * f_act_der(this));
 		}

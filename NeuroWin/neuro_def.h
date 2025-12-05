@@ -4,8 +4,8 @@
 #define ACT_DBL                     // Definizione del tipo di dato per l'attività: double 
 //#undef ACT_DBL                      // Se non definito: float
 
-#define TXT_INFO false              // Informazioni aggiuntive in nodi e sinapsi
-
+#define TXT_INFO		false		// Informazioni aggiuntive in nodi e sinapsi
+#define TXT_FLOAT_FRM	".3f"
 #if _DEBUG
 #include <iostream>
 #define _DEBUG_NEURO_DET false

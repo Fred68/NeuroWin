@@ -50,7 +50,7 @@ namespace neuro
 		}
 		else
 		{
-			throw new std::exception("Minimum 2 layer required.");
+			throw std::exception("Minimum 2 layer required.");
 		}
 
         #if TXT_INFO
@@ -91,9 +91,9 @@ namespace neuro
     neuron& network::get_neuron(uint lay, uint num)
     {
         if (lay >= _nLays)
-            throw new std::exception("Layer out of range");
+            throw std::exception("Layer out of range");
         else if (num >= _layers[lay].size())
-            throw new std::exception("Node out of range");
+            throw std::exception("Node out of range");
         else
             return get_at(lay, num);
     }
@@ -141,7 +141,7 @@ namespace neuro
 			#if !_PARALLEL
 			for(uint i=0; i<out_lay.size(); i++)
 			{
-				get_at(_nLays - 1,i).set_b(out_lay[i]);
+				get_at(_nLays - 1, i).set_beta(get_at(_nLays - 1, i).get_y() - out_lay[i]);
 			}
 			#else
 			// E' possibile che la versione parallela con iota sia complessivamente più lenta.
@@ -155,7 +155,7 @@ namespace neuro
 			ret = true;
 		}
 		else
-			throw new std::exception("Output vector and last leyier size don't match");
+			throw std::exception("Output vector and last layer sizes don't match");
 		return ret;
 	}
 
@@ -198,8 +198,8 @@ namespace neuro
 	bool network::calc_y_lay(uint nlay)
 	{
 		bool ret = false;
-		std::vector<neuron> &layer = _layers[nlay];								// Riferimento
-		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());			// 0, 1, 2... per calc. parallelo
+		std::vector<neuron> &layer = _layers[nlay];
+		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());
 		auto func_calc_y = [&](uint i) {layer[i].calc_x(); layer[i].calc_y(); layer[i].set_beta((act)0.0);};
 		std::for_each(std::execution::par, v.begin(), v.end(), func_calc_y);	// Formula [2]		
 		return ret;
@@ -208,8 +208,8 @@ namespace neuro
 	bool network::calc_ei_eaprec_lay(uint nlay)
 	{
 		bool ret = false;
-		std::vector<neuron> &layer = _layers[nlay];							// Riferimento
-		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());		// 0, 1, 2... per calc. parallelo	
+		std::vector<neuron> &layer = _layers[nlay];
+		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());
 		auto func_calc_ei = [&](uint j) {layer[j].calc_ei(); layer[j].calc_parz_eai(); };
 		std::for_each(std::execution::par, v.begin(), v.end(), func_calc_ei);
 		return ret;
@@ -229,10 +229,20 @@ namespace neuro
 	}
 
 	bool network::prop_bw(std::vector<act> &out_lay)
-	{
-		bool ok = set_outputs(out_lay);
-		
-
+	{	
+		bool ok = false;
+		try
+		{
+			ok = set_outputs(out_lay);
+			for(int lay = _nLays-1; lay > 0; lay--)
+			{
+				calc_ei_eaprec_lay(lay);
+			}
+		}
+		catch(std::exception const &ex)
+		{
+			std::cout << ex.what() << std::endl;
+		}
 		return ok;
 	}
 
