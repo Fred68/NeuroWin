@@ -88,28 +88,54 @@ int main()
 		cout << ex.what() << std::endl;
 	}
 	
+	int cicli = 1;
+	cout << "Cicli: ";
+	cin >> cicli;
+
 	// data
 	vector<act> vinp = {0.1,0.2,0.9};
 	vector<act> vout = {1,0};
 
 	cout << "\n\nIni:\n";
-	std::cout << net->to_string();
+	std::cout << net->to_string() << endl;
+
+	bool ok = true;
+
 	// fw & bw prop
 	try
 	{
-		cout << "\n\nprop_fw():\n";
-		if(!net->prop_fw(vinp))		cout << "Error in fw propagation" << endl;
-		std::cout << net->to_string();
+
+		for(int i=0; i<cicli; i++)
+		{
+			if (!net->prop_fw(vinp))
+			{
+				ok = false;
+				cout << "Error in fw propagation" << endl;
+			}
+			if (!net->prop_bw(vout))
+			{
+				ok = false;
+				cout << "Error in bw propagation" << endl;
+			}
+			cout << "E tot = " << net->get_err_tot() << endl;
+		}
+		//cout << "\n\nprop_fw():\n";
+		//if(!net->prop_fw(vinp))		cout << "Error in fw propagation" << endl;
+		//std::cout << net->to_string();
 	
-		cout << "\n\nprop_bw():\n";
-		if (!net->prop_bw(vout))	cout << "Error in bw propagation" << endl;
-		std::cout << net->to_string();
+		//cout << "\n\nprop_bw():\n";
+		//if (!net->prop_bw(vout))	cout << "Error in bw propagation" << endl;
+		//std::cout << net->to_string();
 	}
 	catch(std::exception const &ex)
 	{
+		ok = false;
 		cout << "\nException:" << ex.what() << endl;
 	}
-    int x = getchar();
+	
+	std::cout << net->to_string();
+    
+	int x = getchar();
 
     return 0;
     

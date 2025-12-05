@@ -53,6 +53,7 @@ namespace neuro
             uint _nLays = 0;
             std::vector<std::vector<neuron>> _layers;
 			std::vector<act> _beta_out;
+			act _err_tot;
 
         private:
             /// <summary>
@@ -124,6 +125,7 @@ namespace neuro
             network(init_data &ini_data);
             ~network();
             std::string to_string();
+			act get_err_tot() {return _err_tot;}
             /// <summary>
             /// Riferimento al neurone del livello 'lay' e con indice 'num'
 			/// Se indici errati: eccezione.
@@ -139,8 +141,9 @@ namespace neuro
 			/// </summary>
 			/// <param name="inp_lay"></param>
 			/// <returns></returns>
-			bool prop_fw(std::vector<act> &inp_lay);			// Calcola forward propagation
-			bool prop_bw(std::vector<act> &out_lay);			// Calcola back propagation [DA SCRIVERE]
+			bool prop_fw(std::vector<act> &inp_lay);			// Calcola singola forward propagation
+			bool prop_bw(std::vector<act> &out_lay);			// Calcola singola back propagation
+			bool update_w();									// Aggiorna i pesi
 
     };  // class network
 

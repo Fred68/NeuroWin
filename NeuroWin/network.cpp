@@ -16,6 +16,12 @@ namespace neuro
     network::network(init_data &ini_data)
     {
         _nLays = std::min( (uint) ini_data._layers.size(), (uint)ini_data._types.size() );
+		
+		#ifdef ACT_DBL
+			_err_tot = 0.0;
+		#else
+			_err_tot = 0.0f;
+        #endif
 
 		if(_nLays > 1)
 		{
@@ -76,6 +82,7 @@ namespace neuro
     {
         std::string txt;
         txt += std::format("Layers: {0}\n", _nLays);
+		txt += std::format("E: {0}\n", _err_tot);
 
         for (uint i=0; i < _nLays; i++)
         {
@@ -144,13 +151,26 @@ namespace neuro
 				get_at(_nLays - 1, i).set_beta(get_at(_nLays - 1, i).get_y() - out_lay[i]);
 			}
 			#else
-			// E' possibile che la versione parallela con iota sia complessivamente più lenta.
-			// TODO Fare prove di velocità
+			// TODO Fare prove di velocità. E' possibile che la versione parallela con iota sia complessivamente più lenta.
 			auto v = std::ranges::iota_view((uint)0, (uint)out_lay.size());
 			std::atomic<bool> ok = true;
-			auto func_set = [&](uint i) {get_at(_nLays - 1, i).set_beta( get_at(_nLays - 1, i).get_y()-out_lay[i]);}; 
+			#ifdef ACT_DBL
+                act s0 = 0.0;
+            #else
+                act s0 = 0.0f;
+            #endif
+			std::atomic<act> errtot = s0;
+			auto func_set =	[&](uint i)
+				{
+					//get_at(_nLays - 1, i).set_beta( get_at(_nLays - 1, i).get_y()-out_lay[i]);
+					auto betatmp = get_at(_nLays - 1, i).get_y() - out_lay[i];
+					get_at(_nLays - 1, i).set_beta(betatmp);
+					errtot.fetch_add(betatmp*betatmp);
+				}; 
 			std::for_each(std::execution::par,v.begin(),v.end(),func_set);			// Formula [6]		
 			ret = ok;
+			_err_tot = errtot;
+
 			#endif
 			ret = true;
 		}
