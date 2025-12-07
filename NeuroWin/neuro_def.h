@@ -13,16 +13,20 @@
 
 #include <string> 
 
+
 namespace neuro
 {
 
     #ifdef ACT_DBL					// Tipo di dato per l'attività neurale: act
-    typedef double act;
+		typedef double act;
+		//#define DEFAULT_LEARN_CONST 0.001;
     #else
-    typedef float act;
+		typedef float act;
+		//#define DEFAULT_LEARN_CONST 0.001f;
     #endif
     
 	typedef unsigned int uint;
+	class learn_const_data;
 
     enum class FACT { sigmoid = 0, tanh, relu, one, id, Count };
 

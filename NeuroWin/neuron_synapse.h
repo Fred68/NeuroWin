@@ -18,14 +18,15 @@
 
 namespace neuro
 {
-	class synapse;
+	class network;
+	class synapse;	
 
 	class neuron
     {
 
         friend class synapse;
         
-        typedef act (*act_func) (neuron*);          // Puntatore a funzione di attivazione
+        typedef act (*act_func) (neuron*);							// Puntatore a funzione di attivazione
 
         /// Funzioni di attivazione (non usano dati d'istanza)
         // Scelto argomento neuron*, per usare f(this), invece che neuron& e f(*this) (copia l'oggetto ?)
@@ -39,7 +40,7 @@ namespace neuro
         static act zero(neuron *n);                 // zero (derivata di costante)
         static act id(neuron *n);                   // identità
         static FACT fact_default() {return FACT::tanh;}
-		
+
 		public:
 			static constexpr const char *to_string_frm_n = TO_STR_FORMAT_N(3,5);
 			static constexpr const char *to_string_frm_w = TO_STR_FORMAT_W(3);
@@ -51,6 +52,7 @@ namespace neuro
 			static constexpr act b_ini_mean = 0.001;
 
         private:
+			const network &net;						/// Riferimento alla rete di appartenenza
             act x;                                  /// Segnale in ingresso
             act y;                                  /// Attività in uscita
 			union
@@ -63,8 +65,10 @@ namespace neuro
 			#endif
             std::vector<synapse> syns;              /// Sinapsi
             FACT fact;                              /// Tipo di funzione di attivazione
-            act_func f_act;                         /// Puntatore alla funzione di attivazione
-            act_func f_act_der;                     /// Puntatore alla derivata della funzione di attivazione
+            act_func f_act;                         /// Funzione di attivazione (puntatore)
+            act_func f_act_der;                     /// Derivata della funzione di attivazione (puntatore)
+			
+
             bool active = true;                     /// Se false, non calcola né x dai pesi né y.
             bool input = false;                     /// Se true: nodo di input, non calcola la x, solo la y, e abilita set_input
             
@@ -73,9 +77,9 @@ namespace neuro
             #endif
 
         public:
-            neuron();
-			neuron(bool isInput);
-            neuron(std::vector<neuron> &prev, act std_w = w_ini_const, act bias_w = b_ini_const); 
+			neuron(const network &netwrk);
+			neuron(const network &netwrk, bool isInput);
+			neuron(const network &netwrk, std::vector<neuron> &prev, act std_w = w_ini_const, act bias_w = b_ini_const);
             ~neuron();
 
             std::string to_string();
@@ -90,6 +94,8 @@ namespace neuro
 			FACT get_fact() {return fact;}			// Funzione di attivazione
 			std::string get_fact_name();			// Nome della funzione di attivazione
 			void set_fact(FACT f);					// Cambia la funzione di attivazione, solo se non è un nodo di input
+			
+			//void set_learn(learn_const_func fl);	// Imposta la funzione di apprendimento
 
 			#if TXT_INFO
             std::string get_name() { return name; }
@@ -169,6 +175,8 @@ namespace neuro
 			/// Formula [9], ma contributi del nodo j attuale alle beta dei nodi i precedenti
 			/// </summary>
 			void calc_parz_eai();					// Calcolo parziale delle EA = beta dei nodi del livello precedente
+
+			void calc_w();							// Ricalcolo dei pesi (chiama network per avere la costante di apprendimento)
     };
 	
 	

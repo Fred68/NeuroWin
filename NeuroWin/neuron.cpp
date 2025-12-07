@@ -1,17 +1,16 @@
 
 #include "neuron_synapse.h"
-
+#include "network.h"		// Nesessario, se no tipo incompleto "neuro::network" non consentito
 
 namespace neuro
 {
-
     /*******************************************/
     /*                                         */
     /* neuron                                  */
     /*                                         */
     /*******************************************/
 
-    neuron::neuron()
+    neuron::neuron(const network &netwrk) : net(netwrk)								//neuron::neuron(std::shared_ptr<network> netwrk) : pnet(netwrk)
     {
         x = y = 0;
 		ei = 0;
@@ -22,7 +21,7 @@ namespace neuro
         cout << "neuron()\n";
         #endif
     }
-	neuron::neuron(bool isInput) : neuron()
+	neuron::neuron(const network &netwrk, bool isInput) : neuron(netwrk)			//neuron::neuron(std::shared_ptr<network> netwrk, bool isInput) : neuron(netwrk)
 	{
 		if(isInput)					// Se è un neurone di input, imposta la funzione di attivazion identità  (ed il flag)
 		{
@@ -30,7 +29,7 @@ namespace neuro
 			input = true;			// ...poi imposta input a true, che disabilita set_fact()
 		}
 	}
-	neuron::neuron(std::vector<neuron> &prev, act neu_w, act bias_w) : neuron()
+	neuron::neuron(const network &netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)		//neuron::neuron(std::shared_ptr<network> netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)
     {
 		for(uint i=0; i<prev.size(); i++)						// Imposta il vettore delle sinapsi (non è un neurone di input)
 		{														// con pesi e bias indicati
@@ -84,6 +83,7 @@ namespace neuro
         #if TXT_INFO
         txt = name + ": " + txt;
         #endif
+		//net.get_layers_count();
         return txt;
     }    
  
@@ -95,7 +95,7 @@ namespace neuro
 
 	void neuron::set_fact(FACT f)
 	{
-		if(!input)			// SE è un neurone di input, la funzione di attivazione è quella definita nel costrutture
+		if(!input)			// Se è un neurone di input, la funzione di attivazione è quella definita nel costrutture
 		{
 			switch (f)
 			{
@@ -129,7 +129,7 @@ namespace neuro
 	{
 		return fact2string(fact);
 	}
-
+	
     bool neuron::set_x(act x_in)
     {
         if(input)
@@ -228,6 +228,10 @@ namespace neuro
 			auto func_ea = [&](const synapse &s) {s.pn->set_beta(s.w * get_ei());};
 			std::for_each(std::execution::par, syns.begin(), syns.end(), func_ea);
 		}
+	}
+	void neuron::calc_w()
+	{
+		uint y = net.test();
 	}
 
 	/*******************************************/

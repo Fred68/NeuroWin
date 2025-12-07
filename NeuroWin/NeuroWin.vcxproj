@@ -20,9 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="init_data.cpp" />
-    <ClCompile Include="modtest.ixx">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="network.cpp" />
     <ClCompile Include="neuron.cpp" />
     <ClCompile Include="start.cpp" />

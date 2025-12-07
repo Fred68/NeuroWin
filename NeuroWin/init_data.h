@@ -5,7 +5,6 @@
 #include <format>
 
 
-#if true
 namespace neuro
 {
 	class init_data
@@ -13,10 +12,9 @@ namespace neuro
 	public:
 		std::vector<int> _layers;
 		std::vector<FACT> _types;
-		init_data(std::vector<int> layers, std::vector<FACT> types);
+		init_data(std::vector<int> layers, std::vector<FACT> types, act learn_const_data);
 		std::string to_string();
-
+		act _learn_const;
 	};
 
 }
-#endif

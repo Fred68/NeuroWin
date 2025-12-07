@@ -13,15 +13,19 @@ namespace neuro
     /*                                         */
     /*******************************************/
 
-    network::network(init_data &ini_data)
+    network::network(init_data &ini_data) : lcd(this)
     {
+		//this_network = shared_from_this();
         _nLays = std::min( (uint) ini_data._layers.size(), (uint)ini_data._types.size() );
-		
+
 		#ifdef ACT_DBL
 			_err_tot = 0.0;
 		#else
 			_err_tot = 0.0f;
         #endif
+
+		_learn_const = ini_data._learn_const;
+		set_f_learn(lcf_costant_value);
 
 		if(_nLays > 1)
 		{
@@ -30,11 +34,11 @@ namespace neuro
 				std::vector<neuron> *vn;				// Alloca il vettore con vector<T>(numero, parametri per il ctor di T).
 				if(i==0)								// Per il primo livello, crea neuroni di input, usando come ctor:
 				{										// ...neuron(bool true) 
-					vn = new std::vector<neuron>(ini_data._layers[i] + 1,true);    
+					vn = new std::vector<neuron>(ini_data._layers[i] + 1,{*this,true});
 				}
 				else
 				{										// Per gli altri livelli, usa neuron()   
-					vn = new std::vector<neuron>(ini_data._layers[i] + 1,_layers[i-1]);   
+					vn = new std::vector<neuron>(ini_data._layers[i] + 1, {*this,_layers[i-1]});
 				}
 				_layers.push_back(*vn);
 
@@ -51,6 +55,8 @@ namespace neuro
 					{
 						_layers.back()[j].set_fact(ini_data._types[i]);
 					}
+					//_layers.back()[j].set_learn(static_learn_default);
+					//_layers.back()[j].set_learn(_f_learn);
 				}
 			}
 		}
@@ -64,8 +70,7 @@ namespace neuro
         #endif
         #if _DEBUG
         std::cout << "network(" << _nLays <<")\n";
-        #endif
-       
+		#endif
     }
 
     network::~network()
@@ -265,6 +270,20 @@ namespace neuro
 		}
 		return ok;
 	}
+
+	bool network::update_w()
+	{
+		bool ok = true;
+		// TODO Ciclo sui livelli + network::calc_w:lay() + neuron::calc_w() da scrivere
+		return ok;
+	}
+
+
+	uint network::test() const
+	{
+		uint x = 1;
+		return x;
+	};
 
 
 }

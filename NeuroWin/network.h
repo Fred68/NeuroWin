@@ -17,6 +17,8 @@
 
 #include "neuro_def.h"
 #include "neuron_synapse.h"
+#include "init_data.h"
+//#include "learn_const_data.h"
 
 #include <string>
 #include <vector>
@@ -29,12 +31,11 @@
 #include <atomic>           // atomic<float>
 #include <ranges>			// iota
 
-#include "init_data.h"
 
 
 namespace neuro
 {
-  
+	
     /*******************************************/
     // network
     /*******************************************/
@@ -42,18 +43,66 @@ namespace neuro
     /// <summary>
     /// Class network
     /// </summary>
-    class network
+    class network /*: public std::enable_shared_from_this<network>*/
     {
+		class learn_const_data
+		{
+			//std::unique_ptr<network> _net;
+			network *_net;
+
+			act _learn_const;
+
+		public:
+			learn_const_data(network *net) : _net(net)
+			{
+				//_net = std::make_unique<network>(net);
+				_learn_const = 0.01;/*DEFAULT_LEARN_CONST;*/
+			}
+
+			~learn_const_data()
+			{
+
+			}
+
+
+			act get_learn_const() { return _learn_const; };
+			void set_learn_const(act lc) { _learn_const = lc; };
+
+			void test()
+			{
+				_net->test();
+			}
+		};
+
+
+		public:
+			#ifdef ACT_DBL
+				const act Default_learn_const = 0.001;
+			#else
+				const act Default_learn_const = 0.001f;
+			#endif
+
+		public:		// Funzioni che restuiscono la costante di apprendimento.
+			static act lcf_costant_value(network &net, uint iLay, uint iNeu) { return net._learn_const; }
+
 		private:
-			// Puntatori a funzione
 			typedef void (*lay_func) (std::vector<neuron> &layer, uint i);					// Calcolo di un livello
 			typedef act (*weight_func) (uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Inizializzazione di un peso
+		
+		public:
+			typedef act (*learn_const_func) (network &net, uint iLay, uint iNeu);			// Cost. di apprendim. (puntatore a funzione)
 
         private:
+			//std::shared_ptr<network> this_network;
             uint _nLays = 0;
             std::vector<std::vector<neuron>> _layers;
 			std::vector<act> _beta_out;
 			act _err_tot;
+
+			act _learn_const = Default_learn_const;
+			learn_const_func _learn_const_pf;				// Puntatore alla funzione che restituisce la costante di apprendimento
+
+			learn_const_data lcd;
 
         private:
             /// <summary>
@@ -120,12 +169,22 @@ namespace neuro
 			/// <returns></returns>
 			bool calc_ei_eaprec_lay(uint nlay);			// Calcola le derivate EI dell'errore del livello nLay e le beta del prec.
 
-
         public:
             network(init_data &ini_data);
             ~network();
+
+			uint test() const;
+
+
             std::string to_string();
 			act get_err_tot() {return _err_tot;}
+
+			act get_learn_const() {return _learn_const;};
+			void set_learn_const(act lrn_c) {_learn_const = lrn_c;};
+
+			learn_const_func get_f_learn() {return _learn_const_pf;};
+			void set_f_learn(learn_const_func lrn_f) { _learn_const_pf = lrn_f; };
+
             /// <summary>
             /// Riferimento al neurone del livello 'lay' e con indice 'num'
 			/// Se indici errati: eccezione.
@@ -133,7 +192,7 @@ namespace neuro
             /// <param name="lay"></param>
             /// <param name="num"></param>
             /// <returns></returns>
-            neuron &get_neuron(uint lay, uint num);
+            neuron &get_neuron(uint lay, uint num);			// Riferimento al neurone del livello 'lay' e con indice 'num'
 			/// <summary>
 			/// Calcola la rete con forward propagation, partendo dai valori del vettore di input
 			/// Per ogni nodo (dal primo all'ultimo livello)...
@@ -141,9 +200,9 @@ namespace neuro
 			/// </summary>
 			/// <param name="inp_lay"></param>
 			/// <returns></returns>
-			bool prop_fw(std::vector<act> &inp_lay);			// Calcola singola forward propagation
-			bool prop_bw(std::vector<act> &out_lay);			// Calcola singola back propagation
-			bool update_w();									// Aggiorna i pesi
+			bool prop_fw(std::vector<act> &inp_lay);		// Calcola singola forward propagation
+			bool prop_bw(std::vector<act> &out_lay);		// Calcola singola back propagation
+			bool update_w();								// Aggiorna i pesi
 
     };  // class network
 

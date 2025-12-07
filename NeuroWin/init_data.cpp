@@ -10,10 +10,11 @@ namespace neuro
     /*                                         */
     /*******************************************/
 
-    init_data::init_data(std::vector<int> layers, std::vector<FACT> types)
+    init_data::init_data(std::vector<int> layers, std::vector<FACT> types, act learn_const_data)
     {
         this->_layers = layers;
         this->_types = types;
+		this->_learn_const = learn_const_data;
     };
 
     std::string init_data::to_string()

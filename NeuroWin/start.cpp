@@ -74,7 +74,7 @@ int main()
 	// Ini
     std::vector<int> lays = {3,2, 3,2};
     std::vector<FACT> facts ={FACT::sigmoid, FACT::sigmoid, FACT::sigmoid, FACT::sigmoid};
-    init_data ini(lays,facts);
+    init_data ini(lays,facts,0.001);
     std::cout << ini.to_string() << std::endl;
 	
 	// net
@@ -88,6 +88,8 @@ int main()
 		cout << ex.what() << std::endl;
 	}
 	
+	//cout << "network::test()" << net->test() << endl;
+
 	int cicli = 1;
 	cout << "Cicli: ";
 	cin >> cicli;

@@ -40,8 +40,8 @@ DA FARE
 	.	Prove di velocità cambiando std::execution::par/seq in std::for_each
 	.	Togliere le eccezioni, dov'è possible.
 
-	.	Forward-propagation: semplice. Il calcolo delle y dei neuroni azzera (preventivamente) i coefficienti beta.
+	v	Forward-propagation: semplice. Il calcolo delle y dei neuroni azzera (preventivamente) i coefficienti beta.
 
-	.	La back-propagation richiede dei calcoli più complessi.
-		-	Con network::set_output_layer(std::vector<act> &out_lay) vengono calcolate le beta dell'ultimo livello.
+	.	La back-propagation richiede dei calcoli più complessi (vedere documento Neuro01.pdf)
+		
     .   ...
