@@ -176,7 +176,7 @@ namespace neuro
 			/// </summary>
 			void calc_parz_eai();					// Calcolo parziale delle EA = beta dei nodi del livello precedente
 
-			void calc_w();							// Ricalcolo dei pesi (chiama network per avere la costante di apprendimento)
+			void calc_w(act learn_const);			// Ricalcolo dei pesi (riceve da network la costante di apprendimento)
     };
 	
 	

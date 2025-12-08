@@ -188,14 +188,13 @@ namespace neuro
         if(active && !input)
         {
             #ifdef ACT_DBL
-                act s0 = 0.0;
+				std::atomic<act> sum = 0.0;
             #else
-                act s0 = 0.0f;
+				std::atomic<act> sum = 0.0f;
             #endif
         
             // Calcola, su tutte le sinapsi del nodo, la somma delle uscite y dei nodi collegati, moltiplicate...
             // ...per il peso w della sinapsi. Il risultato è il segnale di ingresso x del nodo.        
-            std::atomic<act> sum = s0;
             auto func_add = [&](const synapse &s) {sum.fetch_add(s.pn->y * s.w);};
             std::for_each(std::execution::par, syns.begin(), syns.end(), func_add);
 			x = sum;
@@ -229,8 +228,18 @@ namespace neuro
 			std::for_each(std::execution::par, syns.begin(), syns.end(), func_ea);
 		}
 	}
-	void neuron::calc_w()
+	void neuron::calc_w(act learn_const)
 	{
+		if (active && !input)
+		{
+			auto func_updw = [&](synapse &s)
+			{	
+				// Corregge il peso wi della sinapsi tra in nodo j attuale e il nodo i precedente
+				// con le formule [8] e [10], usando il prodotto tra ei (del nodo j) e y (del nodo i).
+				s.w += - learn_const * ei * s.pn->y;
+			};
+			std::for_each(std::execution::par, syns.begin(), syns.end(), func_updw);
+		}
 		uint y = net.test();
 	}
 

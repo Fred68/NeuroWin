@@ -18,7 +18,6 @@
 #include "neuro_def.h"
 #include "neuron_synapse.h"
 #include "init_data.h"
-//#include "learn_const_data.h"
 
 #include <string>
 #include <vector>
@@ -43,11 +42,11 @@ namespace neuro
     /// <summary>
     /// Class network
     /// </summary>
-    class network /*: public std::enable_shared_from_this<network>*/
+    class network
     {
+		/// TODO: ELIMINARE LA CLASSE, INSERIRE TUTTO nella classe network
 		class learn_const_data
 		{
-			//std::unique_ptr<network> _net;
 			network *_net;
 
 			act _learn_const;
@@ -55,14 +54,10 @@ namespace neuro
 		public:
 			learn_const_data(network *net) : _net(net)
 			{
-				//_net = std::make_unique<network>(net);
-				_learn_const = 0.01;/*DEFAULT_LEARN_CONST;*/
+				_learn_const = network::Default_learn_const;
 			}
 
-			~learn_const_data()
-			{
-
-			}
+			~learn_const_data()	{}
 
 
 			act get_learn_const() { return _learn_const; };
@@ -77,9 +72,9 @@ namespace neuro
 
 		public:
 			#ifdef ACT_DBL
-				const act Default_learn_const = 0.001;
+				static constexpr act Default_learn_const = 0.001;
 			#else
-				const act Default_learn_const = 0.001f;
+				static constexpr act Default_learn_const = 0.001f;
 			#endif
 
 		public:		// Funzioni che restuiscono la costante di apprendimento.
@@ -182,7 +177,7 @@ namespace neuro
 			act get_learn_const() {return _learn_const;};
 			void set_learn_const(act lrn_c) {_learn_const = lrn_c;};
 
-			learn_const_func get_f_learn() {return _learn_const_pf;};
+			learn_const_func get_f_learn() const {return _learn_const_pf;};
 			void set_f_learn(learn_const_func lrn_f) { _learn_const_pf = lrn_f; };
 
             /// <summary>
