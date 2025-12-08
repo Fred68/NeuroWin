@@ -222,7 +222,7 @@ namespace neuro
 
 	bool network::calc_y_lay(uint nlay)
 	{
-		bool ret = false;
+		bool ret = true;
 		std::vector<neuron> &layer = _layers[nlay];
 		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());
 		auto func_calc_y = [&](uint i) {layer[i].calc_x(); layer[i].calc_y(); layer[i].set_beta((act)0.0);};
@@ -239,6 +239,20 @@ namespace neuro
 		std::for_each(std::execution::par, v.begin(), v.end(), func_calc_ei);
 		return ret;
 	}
+
+	bool network::calc_w_lay(uint nlay)
+	{
+		// TODO: mettere std::execution::seq/par/... in una variabile o in un define, per condorntare le velocità
+		bool ret = true;
+		std::vector<neuron> &layer = _layers[nlay];
+		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());
+		auto func_calc_w = [&](uint i) {layer[i].calc_w(get_f_learn()(*this,nlay,i));};
+		// Nota: calc_w(...) usa std::execution::par sui pesi, possibile 'race condition' ?
+		// No, le sinapsi di un nodo (verso i precedenti) sono indipendenti da quelle di un altro nodo
+		std::for_each(std::execution::par, v.begin(), v.end(), func_calc_w);
+		return ret;
+	}
+
 
 	bool network::prop_fw(std::vector<act> &inp_lay)
 	{
@@ -274,6 +288,10 @@ namespace neuro
 	bool network::update_w()
 	{
 		bool ok = true;
+		// Usa le funzioni:
+		// neuron::calc_w(...) sui pesi delle sinapsi di un nodo: parallela (i pesi sono indipendenti)
+		// network::calc_w_lay(...) sui nodi di un livello: sequenziale ? No, parallela
+		// network::... sui livelli. Probabilmente parallela.
 		// TODO Ciclo sui livelli + network::calc_w:lay() + neuron::calc_w() da scrivere
 		return ok;
 	}

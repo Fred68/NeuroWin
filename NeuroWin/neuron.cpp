@@ -240,7 +240,7 @@ namespace neuro
 			};
 			std::for_each(std::execution::par, syns.begin(), syns.end(), func_updw);
 		}
-		uint y = net.test();
+		//uint y = net.test();
 	}
 
 	/*******************************************/

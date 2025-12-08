@@ -163,6 +163,12 @@ namespace neuro
 			/// <param name="nlay"></param>
 			/// <returns></returns>
 			bool calc_ei_eaprec_lay(uint nlay);			// Calcola le derivate EI dell'errore del livello nLay e le beta del prec.
+			/// <summary>
+			/// Ricalcola i pesi delle sinapsi dei nodi del livello nlay
+			/// </summary>
+			/// <param name="nlay"></param>
+			/// <returns></returns>
+			bool calc_w_lay(uint nlay);					// Ricalcola i pesi delle sinapsi dei nodi del livello nlay
 
         public:
             network(init_data &ini_data);
