@@ -1,3 +1,4 @@
+
 #ifndef NEURO_DEF_H
 #define NEURO_DEF_H
 
@@ -7,12 +8,12 @@
 #define TXT_INFO		false		// Informazioni aggiuntive in nodi e sinapsi
 #define TXT_FLOAT_FRM	".3f"
 #if _DEBUG
-#include <iostream>
-#define _DEBUG_NEURO_DET false
+	#include <iostream>
+	#define _DEBUG_NEURO_DET false
 #endif
 
 #include <string> 
-
+#include <execution>
 
 namespace neuro
 {
@@ -24,11 +25,13 @@ namespace neuro
 		typedef float act;
 		//#define DEFAULT_LEARN_CONST 0.001f;
     #endif
-    
+	
+
 	typedef unsigned int uint;
-	class learn_const_data;
 
     enum class FACT { sigmoid = 0, tanh, relu, one, id, Count };
+	
+	enum class EXE_POL { neuron = 0, layer, network };
 
 	static std::string fact2string(FACT f)
 	{

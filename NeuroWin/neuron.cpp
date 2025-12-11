@@ -196,7 +196,7 @@ namespace neuro
             // Calcola, su tutte le sinapsi del nodo, la somma delle uscite y dei nodi collegati, moltiplicate...
             // ...per il peso w della sinapsi. Il risultato è il segnale di ingresso x del nodo.        
             auto func_add = [&](const synapse &s) {sum.fetch_add(s.pn->y * s.w);};
-            std::for_each(std::execution::par, syns.begin(), syns.end(), func_add);
+            std::for_each(net.get_exe_pol(EXE_POL::neuron), syns.begin(), syns.end(), func_add);
 			x = sum;
         }
     }
@@ -225,7 +225,7 @@ namespace neuro
 		if (active && !input)
 		{
 			auto func_ea = [&](const synapse &s) {s.pn->set_beta(s.w * get_ei());};
-			std::for_each(std::execution::par, syns.begin(), syns.end(), func_ea);
+			std::for_each(net.get_exe_pol(EXE_POL::neuron), syns.begin(), syns.end(), func_ea);
 		}
 	}
 	void neuron::calc_w(act learn_const)
@@ -238,7 +238,7 @@ namespace neuro
 				// con le formule [8] e [10], usando il prodotto tra ei (del nodo j) e y (del nodo i).
 				s.w += - learn_const * ei * s.pn->y;
 			};
-			std::for_each(std::execution::par, syns.begin(), syns.end(), func_updw);
+			std::for_each(net.get_exe_pol(EXE_POL::neuron), syns.begin(), syns.end(), func_updw);
 		}
 		//uint y = net.test();
 	}

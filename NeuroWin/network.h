@@ -44,31 +44,6 @@ namespace neuro
     /// </summary>
     class network
     {
-		/// TODO: ELIMINARE LA CLASSE, INSERIRE TUTTO nella classe network
-		class learn_const_data
-		{
-			network *_net;
-
-			act _learn_const;
-
-		public:
-			learn_const_data(network *net) : _net(net)
-			{
-				_learn_const = network::Default_learn_const;
-			}
-
-			~learn_const_data()	{}
-
-
-			act get_learn_const() { return _learn_const; };
-			void set_learn_const(act lc) { _learn_const = lc; };
-
-			void test()
-			{
-				_net->test();
-			}
-		};
-
 
 		public:
 			#ifdef ACT_DBL
@@ -76,30 +51,31 @@ namespace neuro
 			#else
 				static constexpr act Default_learn_const = 0.001f;
 			#endif
+			
+			typedef act(*learn_const_func) (network &net, uint iLay, uint iNeu);	// Cost. di apprendim. (puntatore a funzione)
 
-		public:		// Funzioni che restuiscono la costante di apprendimento.
 			static act lcf_costant_value(network &net, uint iLay, uint iNeu) { return net._learn_const; }
-
+			
 		private:
 			typedef void (*lay_func) (std::vector<neuron> &layer, uint i);					// Calcolo di un livello
 			typedef act (*weight_func) (uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Inizializzazione di un peso
 		
-		public:
-			typedef act (*learn_const_func) (network &net, uint iLay, uint iNeu);			// Cost. di apprendim. (puntatore a funzione)
-
-        private:
-			//std::shared_ptr<network> this_network;
             uint _nLays = 0;
             std::vector<std::vector<neuron>> _layers;
 			std::vector<act> _beta_out;
 			act _err_tot;
 
 			act _learn_const = Default_learn_const;
-			learn_const_func _learn_const_pf;				// Puntatore alla funzione che restituisce la costante di apprendimento
+			learn_const_func _learn_const_pf;				// Puntatore alla funzione che restituisce la costante di apprendimento	
 
-			learn_const_data lcd;
+			// std::execution::seq = sequenziale, singolo thread. Nessun data race
+			// std::execution::par = parallelo su più thread. Evitare data race con mutex o atomic. 
+			// std::execution::unseq = vettorizzato su singolo thread. Usa istruzioni che lavorano su più dati insieme.
+			// std::execution::par_unseq = vettorizzato su più thread. 
+			// Con unseq lo stesso thread potrebbe scrivere simultaneamente (con unica istruzione che agisce su più dati).
+			// In ogni caso un mutex introduce un overhead. Se l'operazione è semplice, meglio usare dati atomici
+			std::execution::parallel_policy exe_pol[3] = {std::execution::par, std::execution::par, std::execution::par};
 
-        private:
             /// <summary>
             /// Neurone del livello 'lay' e con indice 'num'.
 			/// Indici non controllati
@@ -108,9 +84,11 @@ namespace neuro
             /// <param name="num"></param>
             /// <returns></returns>
             neuron &get_at(uint lay, uint num) {return (_layers[lay])[num];}	// No check indici
-            #if TXT_INFO
+            
+			#if TXT_INFO
             void name_elements();
             #endif
+
 			/// <summary>
 			/// Imposta gli ingressi. Lunghezza del vettore non controllata.
 			/// </summary>
@@ -180,8 +158,10 @@ namespace neuro
             std::string to_string();
 			act get_err_tot() {return _err_tot;}
 
-			act get_learn_const() {return _learn_const;};
-			void set_learn_const(act lrn_c) {_learn_const = lrn_c;};
+			act get_learn_const() {return _learn_const;}
+			void set_learn_const(act lrn_c) {_learn_const = lrn_c;}
+			std::execution::parallel_policy get_exe_pol(EXE_POL pol) const {return exe_pol[(int)pol];}
+			
 
 			learn_const_func get_f_learn() const {return _learn_const_pf;};
 			void set_f_learn(learn_const_func lrn_f) { _learn_const_pf = lrn_f; };
