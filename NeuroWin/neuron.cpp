@@ -236,7 +236,7 @@ namespace neuro
 			{	
 				// Corregge il peso wi della sinapsi tra in nodo j attuale e il nodo i precedente
 				// con le formule [8] e [10], usando il prodotto tra ei (del nodo j) e y (del nodo i).
-				s.w += - learn_const * ei * s.pn->y;
+				s.w +=  learn_const * ei * s.pn->y;
 			};
 			std::for_each(net.get_exe_pol(EXE_POL::neuron), syns.begin(), syns.end(), func_updw);
 		}

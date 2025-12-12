@@ -47,9 +47,9 @@ namespace neuro
 
 		public:
 			#ifdef ACT_DBL
-				static constexpr act Default_learn_const = 0.001;
+				static constexpr act Default_learn_const = 0.01;
 			#else
-				static constexpr act Default_learn_const = 0.001f;
+				static constexpr act Default_learn_const = 0.01f;
 			#endif
 			
 			typedef act(*learn_const_func) (network &net, uint iLay, uint iNeu);	// Cost. di apprendim. (puntatore a funzione)

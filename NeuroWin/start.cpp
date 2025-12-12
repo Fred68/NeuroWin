@@ -72,9 +72,9 @@ int main()
     std::cout << "-----------------------------------------------\n";
 
 	// Ini
-    std::vector<int> lays = {3,2, 3,2};
-    std::vector<FACT> facts ={FACT::sigmoid, FACT::sigmoid, FACT::sigmoid, FACT::sigmoid};
-    init_data ini(lays,facts,0.001);
+    std::vector<int> lays = {3, 5, 2};
+    std::vector<FACT> facts ={FACT::sigmoid, FACT::sigmoid, FACT::sigmoid};
+    init_data ini(lays,facts,0.05);
     std::cout << ini.to_string() << std::endl;
 	
 	// net
@@ -107,7 +107,7 @@ int main()
 	try
 	{
 
-		for(int i=0; i<cicli; i++)
+		for(int i=0; i < cicli; i++)
 		{
 			if (!net->prop_fw(vinp))
 			{
@@ -119,8 +119,14 @@ int main()
 				ok = false;
 				cout << "Error in bw propagation" << endl;
 			}
-			cout << "E tot = " << net->get_err_tot() << endl;
+			if(!net->update_w())
+			{
+				ok = false;
+				cout << "Error in update w" << endl;
+			}
+			if((i==0)||(i== cicli-1))	cout << "E tot = " << net->get_err_tot() << endl;
 		}
+		
 		//cout << "\n\nprop_fw():\n";
 		//if(!net->prop_fw(vinp))		cout << "Error in fw propagation" << endl;
 		//std::cout << net->to_string();
@@ -139,6 +145,11 @@ int main()
     
 	int x = getchar();
 
+	//auto v = std::ranges::iota_view((uint)0, (uint)5);
+	//cout << "iota sz: "<< v.size() << endl;
+	//for_each(v.begin(),v.end(),[&](uint i){cout << i << endl;});
+	//x = getchar();
+
     return 0;
     
 }
@@ -149,6 +160,7 @@ void print(vector<int> &v)
     for (int i = 0; i < v.size(); i++) { std::cout << v[i] << " "; }
     std::cout << "]\n";
 }
+
 
 
 #undef INI_TEST

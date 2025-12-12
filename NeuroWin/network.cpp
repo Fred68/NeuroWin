@@ -17,6 +17,13 @@ namespace neuro
     {
         _nLays = std::min( (uint) ini_data._layers.size(), (uint)ini_data._types.size() );
 
+		if(ini_data._layers.size() != ini_data._types.size())
+		{
+			_nLays = 0;
+			throw std::exception("layers and types size don't match.");
+			return;
+		}
+
 		#ifdef ACT_DBL
 			_err_tot = 0.0;
 		#else
@@ -68,6 +75,7 @@ namespace neuro
 		else
 		{
 			throw std::exception("Minimum 2 layer required.");
+			return;
 		}
 
         #if TXT_INFO
@@ -292,11 +300,9 @@ namespace neuro
 	bool network::update_w()
 	{
 		bool ok = true;
-		// Usa le funzioni:
-		// neuron::calc_w(...) sui pesi delle sinapsi di un nodo: parallela (i pesi sono indipendenti)
-		// network::calc_w_lay(...) sui nodi di un livello: sequenziale ? No, parallela
-		// network::... sui livelli. Probabilmente parallela.
-		// TODO Ciclo sui livelli + network::calc_w:lay() + neuron::calc_w() da scrivere
+		auto v = std::ranges::iota_view((uint)1, _nLays);	// Dal secondo livello (lay=1) all'ultimo (nLay-1).
+		auto func_calc_lay = [&](uint i) {calc_w_lay(i);};
+		std::for_each(get_exe_pol(EXE_POL::network),v.begin(),v.end(),func_calc_lay);
 		return ok;
 	}
 
