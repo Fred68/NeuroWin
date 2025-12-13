@@ -10,37 +10,62 @@ namespace neuro
     /*                                         */
     /*******************************************/
 
-    init_data::init_data(std::vector<int> layers, std::vector<FACT> types, act learn_const_data)
-    {
-        this->_layers = layers;
-        this->_types = types;
-		this->_learn_const = learn_const_data;
-    };
+    init_data::init_data(std::vector<int> layers, std::vector<FACT> types, act learn_const_data) : _layers(layers), _types(types), _learn_const(learn_const_data)
+    {	
+		_ok = check();
+    }		
+
+	bool init_data::check()
+	{
+		bool ok = true;
+
+		#ifdef ACT_DBL
+		if(std::abs(_learn_const) < EPSILON)
+		#else
+		if (std::fabs(_learn_const) < EPSILON)
+		#endif
+		{
+			err += "Learn const is null";
+			ok = false;
+		}
+		if (_layers.size() != _types.size())
+		{
+			err += "Layers and types sizes don't match";
+			ok = false;
+		}
+
+		if (_layers.size() < 2)
+		{
+			err += "Minimum 2 layers required";
+			ok = false;
+		}
+
+		return ok;
+	}
 
     std::string init_data::to_string()
     {
         std::string str = "";
         char sep = '\0';
+		
+		if(!_ok)
+		{
+			str += std::format("init_data is not valid");
+		}
+		
+		str += std::format("learning const = {0}",_learn_const);
 
-        for (int i = 0; i < _layers.size(); i++)
+		str += "\n";
+		for (int i = 0; i < _layers.size(); i++)
         {
             if (i < _layers.size() - 1)
-                sep = '\t';
+                sep = '\n';
             else
                 sep = '\0';
 
-            str += std::format("{0}{1}", _layers[i], sep);
+            str += std::format("layer[{3}]: N.{0} {1}{2}", _layers[i], fact2string(_types[i]), sep,i);
         }
-        str += "\n";
-        for (int i = 0; i < _types.size(); i++)
-        {
-            if (i < _types.size() - 1)
-                sep = '\t';
-            else
-                sep = '\0';
-
-            str += std::format("{0}{1}", fact2string(_types[i]), sep);
-        }
+        
         return str;
     }
 }

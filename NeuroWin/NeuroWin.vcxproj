@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="init_data.cpp" />
+    <ClCompile Include="layer.cpp" />
     <ClCompile Include="network.cpp" />
     <ClCompile Include="neuron.cpp" />
     <ClCompile Include="start.cpp" />
@@ -30,6 +31,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="layer.h" />
     <ClInclude Include="neuron_synapse.h" />
     <ClInclude Include="network.h" />
     <ClInclude Include="neuro_def.h" />

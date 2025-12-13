@@ -74,8 +74,9 @@ int main()
 	// Ini
     std::vector<int> lays = {3, 5, 2};
     std::vector<FACT> facts ={FACT::sigmoid, FACT::sigmoid, FACT::sigmoid};
-    init_data ini(lays,facts,0.05);
-    std::cout << ini.to_string() << std::endl;
+    
+	init_data ini(lays,facts,0.05);
+    std::cout << "init_data:\n" << ini.to_string() << std::endl;
 	
 	// net
 	std::unique_ptr<network> net;
@@ -88,8 +89,6 @@ int main()
 		cout << ex.what() << std::endl;
 	}
 	
-	//cout << "network::test()" << net->test() << endl;
-
 	int cicli = 1;
 	cout << "Cicli: ";
 	cin >> cicli;
@@ -99,11 +98,9 @@ int main()
 	vector<act> vout = {1,0};
 
 	cout << "\n\nIni:\n";
-	std::cout << net->to_string() << endl;
 
 	bool ok = true;
 
-	// fw & bw prop
 	try
 	{
 
@@ -124,9 +121,10 @@ int main()
 				ok = false;
 				cout << "Error in update w" << endl;
 			}
-			if((i==0)||(i== cicli-1))	cout << "E tot = " << net->get_err_tot() << endl;
 		}
 		
+		cout << "E tot = " << net->get_err_tot() << endl;
+
 		//cout << "\n\nprop_fw():\n";
 		//if(!net->prop_fw(vinp))		cout << "Error in fw propagation" << endl;
 		//std::cout << net->to_string();
@@ -143,7 +141,8 @@ int main()
 	
 	std::cout << net->to_string();
     
-	int x = getchar();
+	getchar();
+	getchar();
 
 	//auto v = std::ranges::iota_view((uint)0, (uint)5);
 	//cout << "iota sz: "<< v.size() << endl;

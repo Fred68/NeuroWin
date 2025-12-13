@@ -18,6 +18,7 @@
 #include "neuro_def.h"
 #include "neuron_synapse.h"
 #include "init_data.h"
+#include "layer.h"
 
 #include <string>
 #include <vector>
@@ -53,7 +54,6 @@ namespace neuro
 			#endif
 			
 			typedef act(*learn_const_func) (network &net, uint iLay, uint iNeu);	// Cost. di apprendim. (puntatore a funzione)
-
 			static act lcf_costant_value(network &net, uint iLay, uint iNeu) { return net._learn_const; }
 			
 		private:
@@ -61,15 +61,14 @@ namespace neuro
 			typedef act (*weight_func) (uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Inizializzazione di un peso
 		
             uint _nLays = 0;
-            std::vector<std::vector<neuron>> _layers;
-			std::vector<act> _beta_out;
+			std::vector<layer> _layers;
 			act _err_tot;
 
 			act _learn_const = Default_learn_const;
 			learn_const_func _learn_const_pf;				// Puntatore alla funzione che restituisce la costante di apprendimento	
 
-			// std::execution::seq = sequenziale, singolo thread. Nessun data race
-			// std::execution::par = parallelo su più thread. Evitare data race con mutex o atomic. 
+			// std::execution::seq = sequenziale, singolo thread. Nessun 'data race'
+			// std::execution::par = parallelo su più thread. Evitare 'data race' con mutex o atomic. 
 			// std::execution::unseq = vettorizzato su singolo thread. Usa istruzioni che lavorano su più dati insieme.
 			// std::execution::par_unseq = vettorizzato su più thread. 
 			// Con unseq lo stesso thread potrebbe scrivere simultaneamente (con unica istruzione che agisce su più dati).

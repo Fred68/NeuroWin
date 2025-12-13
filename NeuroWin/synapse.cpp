@@ -15,7 +15,7 @@ namespace neuro
 
     synapse::synapse()
     {
-        pn = std::shared_ptr<neuron>(nullptr);  // Non usa pn=std::make_shared<neuron>() perché alloca un nuovo oggetto
+        pn = std::shared_ptr<neuron>(nullptr);  // Non usa pn=std::make_shared<neuron>() perché allocherebbe un nuovo oggetto
         w = (act) 1;
         #if _DEBUG_NEURO_DET
         cout << "synapse()\n";
@@ -23,7 +23,7 @@ namespace neuro
     }
     synapse::synapse(neuron &p_n, act ws)
     {
-        pn = std::shared_ptr<neuron>(&p_n);     // Non usa pn=std::make_shared<neuron>(p_n) perché crea una copia
+        pn = std::shared_ptr<neuron>(&p_n);     // Non usa pn=std::make_shared<neuron>(p_n) perché creerebbe una copia
         w = ws;
         #if _DEBUG_NEURO_DET
         cout << "synapse(p_n)\n";

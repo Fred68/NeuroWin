@@ -6,26 +6,39 @@
 //#undef ACT_DBL                      // Se non definito: float
 
 #define TXT_INFO		false		// Informazioni aggiuntive in nodi e sinapsi
-#define TXT_FLOAT_FRM	".3f"
+#define TXT_FLOAT_FRM	".4f"
 #if _DEBUG
-	#include <iostream>
+	
 	#define _DEBUG_NEURO_DET false
 #endif
+#include <iostream>
+
 
 #include <string> 
 #include <execution>
+
+
+// TODO Valutare come gestire gli errori.
+// preferibilmente evitare try...catch.
+// Usare throw per errori irrecuperabili nei costruttori
+// Dovunque sia possibile, usare un altro metodo.
+// Classi:
+// synapse:		non genera eccezioni particolare (tranne out_of_memory...).
+// neuron:		genera due eccezioni in debug ed una in caso di enum non definito: da mantenere.
+// network:		generare eccezioni nel costruttore e nell'accesso (usare tipi di eccezioni standard, per esempio out_of_range.
+//				Prt tutti i calcoli, mettere una verifica con azzeramente e flag di errore (non un'eccezione)
+// init_data:	mettere controlli ed eccezioni per controllare il più possibile
 
 namespace neuro
 {
 
     #ifdef ACT_DBL					// Tipo di dato per l'attività neurale: act
 		typedef double act;
-		//#define DEFAULT_LEARN_CONST 0.001;
     #else
 		typedef float act;
-		//#define DEFAULT_LEARN_CONST 0.001f;
     #endif
 	
+	#define EPSILON 1E-12
 
 	typedef unsigned int uint;
 
@@ -59,7 +72,6 @@ namespace neuro
 		}
 		return str;
 	}
-
 }
 
 #endif

@@ -15,14 +15,13 @@ namespace neuro
 
     network::network(init_data &ini_data)
     {
-        _nLays = std::min( (uint) ini_data._layers.size(), (uint)ini_data._types.size() );
-
-		if(ini_data._layers.size() != ini_data._types.size())
+        if(!ini_data.is_ok())
 		{
-			_nLays = 0;
-			throw std::exception("layers and types size don't match.");
+			throw std::exception("Initialization data invalid.");
 			return;
 		}
+
+		_nLays = ini_data.get_layers_num();
 
 		#ifdef ACT_DBL
 			_err_tot = 0.0;
@@ -30,11 +29,11 @@ namespace neuro
 			_err_tot = 0.0f;
         #endif
 
-		_learn_const = ini_data._learn_const;
+		_learn_const = ini_data.get_learn_const();
 		set_f_learn(lcf_costant_value);
 
-		// TODO: impostare exe_pol in base al numero totale di nodi e al numero di nodi per livello
-		// TODO: fare delle prove di velocità
+		// TODO: Impostare exe_pol in base al numero totale di nodi e al numero di nodi per livello
+		// TODO: Fare delle prove di velocità
 		exe_pol[(int)EXE_POL::neuron] = std::execution::par;
 		exe_pol[(int)EXE_POL::layer] = std::execution::par;
 		exe_pol[(int)EXE_POL::network] = std::execution::par;
@@ -43,16 +42,17 @@ namespace neuro
 		{
 			for(uint i=0; i < _nLays; i++)		// Crea i livelli, ognuno con un nodo in più (uscita 1, disattivo, per i bias)
 			{
-				std::vector<neuron> *vn;				// Alloca il vettore con vector<T>(numero, parametri per il ctor di T).
+				layer *ln;
+
 				if(i==0)								// Per il primo livello, crea neuroni di input, usando come ctor:
 				{										// ...neuron(bool true) 
-					vn = new std::vector<neuron>(ini_data._layers[i] + 1,{*this,true});
+					ln = new layer(ini_data.get_layers()[i] + 1, *this,true );
 				}
 				else
 				{										// Per gli altri livelli, usa neuron()   
-					vn = new std::vector<neuron>(ini_data._layers[i] + 1, {*this,_layers[i-1]});
+					ln = new layer(ini_data.get_layers()[i] + 1, *this, _layers[i - 1]);
 				}
-				_layers.push_back(*vn);
+				_layers.push_back(*ln);
 
 				int jmax = (uint) _layers.back().size();
 				for(int j=0; j<jmax; j++)
@@ -65,10 +65,8 @@ namespace neuro
 					}
 					else
 					{
-						_layers.back()[j].set_fact(ini_data._types[i]);
+						_layers.back()[j].set_fact(ini_data.get_types()[i]);
 					}
-					//_layers.back()[j].set_learn(static_learn_default);
-					//_layers.back()[j].set_learn(_f_learn);
 				}
 			}
 		}
@@ -100,6 +98,7 @@ namespace neuro
     {
         std::string txt;
         txt += std::format("Layers: {0}\n", _nLays);
+		txt += std::format("Learn const: {0}\n", get_learn_const());
 		txt += std::format("E: {0}\n", _err_tot);
 
         for (uint i=0; i < _nLays; i++)
@@ -180,7 +179,6 @@ namespace neuro
 			std::atomic<act> errtot = s0;
 			auto func_set =	[&](uint i)
 				{
-					//get_at(_nLays - 1, i).set_beta( get_at(_nLays - 1, i).get_y()-out_lay[i]);
 					auto betatmp = get_at(_nLays - 1, i).get_y() - out_lay[i];
 					get_at(_nLays - 1, i).set_beta(betatmp);
 					errtot.fetch_add(betatmp*betatmp);
@@ -236,9 +234,10 @@ namespace neuro
 	bool network::calc_y_lay(uint nlay)
 	{
 		bool ret = true;
-		std::vector<neuron> &layer = _layers[nlay];
-		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());
-		auto func_calc_y = [&](uint i) {layer[i].calc_x(); layer[i].calc_y(); layer[i].set_beta((act)0.0);};
+		//std::vector<neuron> &lay = _layers[nlay];
+		layer &lay = _layers[nlay];
+		auto v = std::ranges::iota_view((uint)0, (uint)lay.size());
+		auto func_calc_y = [&](uint i) {lay[i].calc_x(); lay[i].calc_y(); lay[i].set_beta((act)0.0);};
 		std::for_each(get_exe_pol(EXE_POL::layer), v.begin(), v.end(), func_calc_y);	// Formula [2]		
 		return ret;
 	}
@@ -246,9 +245,10 @@ namespace neuro
 	bool network::calc_ei_eaprec_lay(uint nlay)
 	{
 		bool ret = false;
-		std::vector<neuron> &layer = _layers[nlay];
-		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());
-		auto func_calc_ei = [&](uint j) {layer[j].calc_ei(); layer[j].calc_parz_eai(); };
+		//std::vector<neuron> &lay = _layers[nlay];
+		layer &lay = _layers[nlay];
+		auto v = std::ranges::iota_view((uint)0, (uint)lay.size());
+		auto func_calc_ei = [&](uint j) {lay[j].calc_ei(); lay[j].calc_parz_eai(); };
 		std::for_each(get_exe_pol(EXE_POL::layer), v.begin(), v.end(), func_calc_ei);
 		return ret;
 	}
@@ -256,12 +256,19 @@ namespace neuro
 	bool network::calc_w_lay(uint nlay)
 	{
 		bool ret = true;
-		std::vector<neuron> &layer = _layers[nlay];
-		auto v = std::ranges::iota_view((uint)0, (uint)layer.size());
-		auto func_calc_w = [&](uint i) {layer[i].calc_w(get_f_learn()(*this,nlay,i));};
-		// Nota: calc_w(...) usa std::execution::par sui pesi, possibile 'race condition' ?
-		// No, le sinapsi di un nodo (verso i precedenti) sono indipendenti da quelle di un altro nodo
-		std::for_each(get_exe_pol(EXE_POL::layer), v.begin(), v.end(), func_calc_w);
+		layer &lay = _layers[nlay];
+		if(lay.get_recalc_w())
+		{
+			auto v = std::ranges::iota_view((uint)0, (uint)lay.size());
+			auto func_calc_w = [&](uint i) {lay[i].calc_w(get_f_learn()(*this,nlay,i));};
+			// Nota: calc_w(...) usa std::execution::par sui pesi, possibile 'race condition' ?
+			// No, le sinapsi di un nodo (verso i precedenti) sono indipendenti da quelle di un altro nodo
+			std::for_each(get_exe_pol(EXE_POL::layer), v.begin(), v.end(), func_calc_w);
+		}
+		else
+		{
+			ret = false;
+		}
 		return ret;
 	}
 

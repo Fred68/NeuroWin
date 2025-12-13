@@ -95,8 +95,6 @@ namespace neuro
 			std::string get_fact_name();			// Nome della funzione di attivazione
 			void set_fact(FACT f);					// Cambia la funzione di attivazione, solo se non è un nodo di input
 			
-			//void set_learn(learn_const_func fl);	// Imposta la funzione di apprendimento
-
 			#if TXT_INFO
             std::string get_name() { return name; }
             void set_name(std::string s) { name = s; }
@@ -183,7 +181,6 @@ namespace neuro
 	class synapse
 	{
 		friend class neuron;
-	
 
 		private:
 			std::shared_ptr<neuron> pn;

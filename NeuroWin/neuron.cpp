@@ -10,6 +10,9 @@ namespace neuro
     /*                                         */
     /*******************************************/
 
+	// TODO : Prevedere cancellazione e creazione di sinapsi (alcuni livelli potrebbero avere solo poche sinapsi al livello precedente).
+	// TODO : Vedere se e quando disabilitare dei nodi (se funzione relu < 0), ma probabilmente è meglio di no.
+
     neuron::neuron(const network &netwrk) : net(netwrk)								//neuron::neuron(std::shared_ptr<network> netwrk) : pnet(netwrk)
     {
         x = y = 0;
@@ -139,7 +142,6 @@ namespace neuro
         }
         return false;            
     }
-
 	void neuron::set_ei(act ei_in)
 	{
 		ei = ei_in;
@@ -171,8 +173,6 @@ namespace neuro
 		#endif
 		return beta;
 	}
-
-
 	act neuron::get_w(uint i)
 	{
 		return (i < syns.size()) ? syns[i].w : 0;
@@ -236,11 +236,10 @@ namespace neuro
 			{	
 				// Corregge il peso wi della sinapsi tra in nodo j attuale e il nodo i precedente
 				// con le formule [8] e [10], usando il prodotto tra ei (del nodo j) e y (del nodo i).
-				s.w +=  learn_const * ei * s.pn->y;
+				s.w -=  learn_const * ei * s.pn->y;
 			};
 			std::for_each(net.get_exe_pol(EXE_POL::neuron), syns.begin(), syns.end(), func_updw);
 		}
-		//uint y = net.test();
 	}
 
 	/*******************************************/
@@ -248,7 +247,7 @@ namespace neuro
     act neuron::sigmoid(neuron *n)
     {
         #ifdef ACT_DBL
-            return 1.0 / (1.0 + std::exp(n->x));
+            return 1.0 / (1.0 + std::exp(-n->x));
         #else
             return 1.0f / (1.0f + std::expf(-n->x));
         #endif
