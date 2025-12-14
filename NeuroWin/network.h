@@ -30,8 +30,9 @@
 #include <algorithm>        // for_each
 #include <atomic>           // atomic<float>
 #include <ranges>			// iota
+#include <chrono>			// high_resolution_clock
 
-
+#define TO_STR_FORMAT_FLOAT(n) ("{0:." #n "f}")
 
 namespace neuro
 {
@@ -55,7 +56,8 @@ namespace neuro
 			
 			typedef act(*learn_const_func) (network &net, uint iLay, uint iNeu);	// Cost. di apprendim. (puntatore a funzione)
 			static act lcf_costant_value(network &net, uint iLay, uint iNeu) { return net._learn_const; }
-			
+			static std::string display_vector(std::vector<act> &v);
+
 		private:
 			typedef void (*lay_func) (std::vector<neuron> &layer, uint i);					// Calcolo di un livello
 			typedef act (*weight_func) (uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Inizializzazione di un peso
@@ -93,7 +95,7 @@ namespace neuro
 			/// </summary>
 			/// <param name="inp_lay"></param>
 			/// <returns></returns>
-			bool set_inputs(std::vector<act> &inp_lay);
+			bool set_inputs(const std::vector<act> &inp_lay);
 			/// <summary>
 			/// Imposta le uscite. Lunghezza del vettore non controllata.
 			/// </summary>
@@ -145,13 +147,31 @@ namespace neuro
 			/// </summary>
 			/// <param name="nlay"></param>
 			/// <returns></returns>
-			bool calc_w_lay(uint nlay);					// Ricalcola i pesi delle sinapsi dei nodi del livello nlay
+			void calc_w_lay(uint nlay);					// Ricalcola i pesi delle sinapsi dei nodi del livello nlay (se recalc_w è vero)
+
+			/// <summary>
+			/// Calcola la rete con forward propagation, partendo dai valori del vettore di input.
+			/// Per ogni nodo (dal primo all'ultimo livello)...
+			/// ...calcola lingresso totale (x) e attività di uscita (y), azzera EI.</summary>
+			/// <param name="inp_lay"></param>
+			/// <returns></returns>
+			bool prop_fw(const std::vector<act> &inp_lay);		// Calcola singola forward propagation	
+			/// <summary>
+			/// Calcola singola back propagation.
+			/// Per ogni nodo(dall'ultimo al primo livello)...
+			/// ...calcola le EI.</summary> 
+			/// </summary>
+			/// <param name="out_lay"></param>
+			/// <returns></returns>
+			bool prop_bw(std::vector<act> &out_lay);		// Calcola singola back propagation
+			/// <summary>
+			/// Corregge i pesi
+			/// </summary>
+			void update_w();								// Aggiorna i pesi
 
         public:
             network(init_data &ini_data);
             ~network();
-
-			uint test() const;
 
 
             std::string to_string();
@@ -161,7 +181,6 @@ namespace neuro
 			void set_learn_const(act lrn_c) {_learn_const = lrn_c;}
 			std::execution::parallel_policy get_exe_pol(EXE_POL pol) const {return exe_pol[(int)pol];}
 			
-
 			learn_const_func get_f_learn() const {return _learn_const_pf;};
 			void set_f_learn(learn_const_func lrn_f) { _learn_const_pf = lrn_f; };
 
@@ -173,16 +192,9 @@ namespace neuro
             /// <param name="num"></param>
             /// <returns></returns>
             neuron &get_neuron(uint lay, uint num);			// Riferimento al neurone del livello 'lay' e con indice 'num'
-			/// <summary>
-			/// Calcola la rete con forward propagation, partendo dai valori del vettore di input
-			/// Per ogni nodo (dal primo all'ultimo livello)...
-			/// calcola lingresso totale (x) e attività di uscita (y), azzera EI.
-			/// </summary>
-			/// <param name="inp_lay"></param>
-			/// <returns></returns>
-			bool prop_fw(std::vector<act> &inp_lay);		// Calcola singola forward propagation
-			bool prop_bw(std::vector<act> &out_lay);		// Calcola singola back propagation
-			bool update_w();								// Aggiorna i pesi
+
+			bool forward_propagate(const std::vector<act> &inp_lay, std::vector<act> &out_lay);
+			bool backward_propagate(const std::vector<act> &inp_lay, std::vector<act> &out_lay, uint cycles, std::chrono::milliseconds &msec_elap);
 
     };  // class network
 

@@ -21,9 +21,6 @@ using namespace neuro;
 
 //using namespace pippospace;
 
-// Function prototyping
-void print(vector<int> &v);
-
 int main()
 {
 	#if INI_TEST
@@ -89,58 +86,34 @@ int main()
 		cout << ex.what() << std::endl;
 	}
 	
-	int cicli = 1;
+	uint cicli = 1;
 	cout << "Cicli: ";
 	cin >> cicli;
 
 	// data
 	vector<act> vinp = {0.1,0.2,0.9};
 	vector<act> vout = {1,0};
+	vector<act> vres(2);
 
-	cout << "\n\nIni:\n";
+	cout << "vinp (teach.): " << network::display_vector(vinp) << '\n';
+	cout << "vout (teach.): " << network::display_vector(vout) << endl;
 
-	bool ok = true;
+	cout << "\nIni:\n" << net->to_string() << endl;
 
-	try
-	{
+	std::chrono::milliseconds msec_elap(0);
 
-		for(int i=0; i < cicli; i++)
-		{
-			if (!net->prop_fw(vinp))
-			{
-				ok = false;
-				cout << "Error in fw propagation" << endl;
-			}
-			if (!net->prop_bw(vout))
-			{
-				ok = false;
-				cout << "Error in bw propagation" << endl;
-			}
-			if(!net->update_w())
-			{
-				ok = false;
-				cout << "Error in update w" << endl;
-			}
-		}
-		
-		cout << "E tot = " << net->get_err_tot() << endl;
+	cout << "Back-propagation learning..." << endl;
+	cout << ((net->backward_propagate(vinp, vout, cicli, msec_elap)) ? "ok" : "err") << '\n';
+	cout << "Tempo: " << msec_elap << endl;
+	cout << "\nFin:\n" << net->to_string() << endl;
 
-		//cout << "\n\nprop_fw():\n";
-		//if(!net->prop_fw(vinp))		cout << "Error in fw propagation" << endl;
-		//std::cout << net->to_string();
-	
-		//cout << "\n\nprop_bw():\n";
-		//if (!net->prop_bw(vout))	cout << "Error in bw propagation" << endl;
-		//std::cout << net->to_string();
-	}
-	catch(std::exception const &ex)
-	{
-		ok = false;
-		cout << "\nException:" << ex.what() << endl;
-	}
-	
-	std::cout << net->to_string();
-    
+	cout << "Forward-propagation (test):" << endl;
+	cout << ((net->forward_propagate(vinp, vres)) ? "ok" : "err") << endl;
+	cout << "vinp (using): " << network::display_vector(vinp) << '\n';
+	cout << "vout (obj.) : " << network::display_vector(vout) << '\n';
+	cout << "vres (using): " << network::display_vector(vres) << endl;
+
+
 	getchar();
 	getchar();
 
@@ -151,13 +124,6 @@ int main()
 
     return 0;
     
-}
-
-void print(vector<int> &v)
-{
-    std::cout << "[";
-    for (int i = 0; i < v.size(); i++) { std::cout << v[i] << " "; }
-    std::cout << "]\n";
 }
 
 

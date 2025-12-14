@@ -2,6 +2,7 @@
 
 #include "neuro_def.h"
 #include "network.h"
+#include <sstream>
 
 #define _PARALLEL	true
 
@@ -112,6 +113,21 @@ namespace neuro
         return txt;
     }
 
+	std::string network::display_vector(std::vector<act> &v)
+	{
+		std::ostringstream ss;
+		char sep = '\t';
+		ss << "[";
+		for(uint i=0; i < v.size(); i++)
+		{
+			sep = (i < v.size() - 1) ? '\t' : '\0';
+			ss << std::format(TO_STR_FORMAT_FLOAT(3),v[i]) << sep;
+		}
+		ss << "]";
+		return ss.str();
+	}
+
+
     neuron& network::get_neuron(uint lay, uint num)
     {
         if (lay >= _nLays)
@@ -133,7 +149,7 @@ namespace neuro
     }
     #endif
 
-	bool network::set_inputs(std::vector<act> &inp_lay)
+	bool network::set_inputs(const std::vector<act> &inp_lay)
 	{
 		bool ret = false;
 		if(inp_lay.size() == _layers[0].size()-1)		// 1° livello
@@ -253,9 +269,8 @@ namespace neuro
 		return ret;
 	}
 
-	bool network::calc_w_lay(uint nlay)
+	void network::calc_w_lay(uint nlay)
 	{
-		bool ret = true;
 		layer &lay = _layers[nlay];
 		if(lay.get_recalc_w())
 		{
@@ -265,20 +280,15 @@ namespace neuro
 			// No, le sinapsi di un nodo (verso i precedenti) sono indipendenti da quelle di un altro nodo
 			std::for_each(get_exe_pol(EXE_POL::layer), v.begin(), v.end(), func_calc_w);
 		}
-		else
-		{
-			ret = false;
-		}
-		return ret;
 	}
 
 
-	bool network::prop_fw(std::vector<act> &inp_lay)
+	bool network::prop_fw(const std::vector<act> &inp_lay)
 	{
 		bool ok = set_inputs(inp_lay);
 		if(ok)
 		{
-			for(uint i = 0; i<_nLays; i++)				// Ciclo (qui non usa il calcolo parallelo)
+			for(uint i = 0; i<_nLays; i++)		// Calcolo necessariamente sequenziale
 			{
 				calc_y_lay(i);	
 			}
@@ -292,9 +302,12 @@ namespace neuro
 		try
 		{
 			ok = set_outputs(out_lay);
-			for(int lay = _nLays-1; lay > 0; lay--)
+			if(ok)
 			{
-				calc_ei_eaprec_lay(lay);
+				for(int lay = _nLays-1; lay > 0; lay--)		// Calcolo necessariamente sequenziale
+				{
+					calc_ei_eaprec_lay(lay);
+				}
 			}
 		}
 		catch(std::exception const &ex)
@@ -304,21 +317,61 @@ namespace neuro
 		return ok;
 	}
 
-	bool network::update_w()
+	void network::update_w()
 	{
-		bool ok = true;
 		auto v = std::ranges::iota_view((uint)1, _nLays);	// Dal secondo livello (lay=1) all'ultimo (nLay-1).
 		auto func_calc_lay = [&](uint i) {calc_w_lay(i);};
 		std::for_each(get_exe_pol(EXE_POL::network),v.begin(),v.end(),func_calc_lay);
-		return ok;
 	}
 
 
-	uint network::test() const
+	bool network::forward_propagate(const std::vector<act> &inp_lay, std::vector<act> &out_lay)
 	{
-		uint x = 1;
-		return x;
-	};
+		bool ok;
+		if(out_lay.size() == _layers[_nLays - 1].size() - 1)
+		{
+			if(ok = prop_fw(inp_lay))
+			{
+				for(int i=0; i< out_lay.size(); i++)
+				{
+					out_lay[i] = get_neuron(_nLays - 1,i).get_y();
+				}
+			}
+		}
+		else
+		{
+			ok = false;
+		}
+		return ok;
+	}
+
+	bool network::backward_propagate(const std::vector<act> &inp_lay, std::vector<act> &out_lay, uint cycles, std::chrono::milliseconds &msec_elap)
+	{
+		bool ok = true;
+		auto inizio = std::chrono::high_resolution_clock::now();	// std::chrono::steady_clock::time_point
+
+		if ( (out_lay.size() == _layers[_nLays - 1].size() - 1) && (inp_lay.size() == _layers[0].size()-1))
+		{
+			for(uint i = 0; (i < cycles) && ok; i++)
+			{
+				ok = prop_fw(inp_lay);
+				if(ok)
+				{
+					ok = prop_bw(out_lay);
+					update_w();
+				}
+			}
+		}
+		else
+		{
+			ok = false;
+		}
+		auto fine = std::chrono::high_resolution_clock::now();
+
+		msec_elap = std::chrono::duration_cast<std::chrono::milliseconds> (fine - inizio);
+		
+		return ok;
+	}
 
 
 }
