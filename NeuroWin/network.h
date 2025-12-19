@@ -63,6 +63,9 @@ namespace neuro
 			typedef act (*weight_func) (uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Inizializzazione di un peso
 		
             uint _nLays = 0;
+			uint _nInputs = 0;
+			uint _nOutputs = 0;
+
 			std::vector<layer> _layers;
 			act _err_tot;
 
@@ -173,15 +176,18 @@ namespace neuro
             network(init_data &ini_data);
             ~network();
 
-
             std::string to_string();
-			act get_err_tot() {return _err_tot;}
+			act get_err_tot() { return _err_tot; }
 
-			act get_learn_const() {return _learn_const;}
+			uint get_n_layers() const {return _nLays;}
+			uint get_input_layer_sz() const { return _nInputs; }
+			uint get_output_layer_sz() const { return _nOutputs; }
+
+			act get_learn_const() const {return _learn_const;}
 			void set_learn_const(act lrn_c) {_learn_const = lrn_c;}
-			std::execution::parallel_policy get_exe_pol(EXE_POL pol) const {return exe_pol[(int)pol];}
+			std::execution::parallel_policy get_exe_pol(EXE_POL pol) const { return exe_pol[(int)pol]; }
 			
-			learn_const_func get_f_learn() const {return _learn_const_pf;};
+			learn_const_func get_f_learn() const { return _learn_const_pf; };
 			void set_f_learn(learn_const_func lrn_f) { _learn_const_pf = lrn_f; };
 
             /// <summary>

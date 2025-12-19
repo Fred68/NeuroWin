@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="init_data.cpp" />
     <ClCompile Include="layer.cpp" />
+    <ClCompile Include="learn_data.cpp" />
     <ClCompile Include="network.cpp" />
     <ClCompile Include="neuron.cpp" />
     <ClCompile Include="start.cpp" />
@@ -32,6 +33,7 @@
       </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="layer.h" />
+    <ClInclude Include="learn_data.h" />
     <ClInclude Include="neuron_synapse.h" />
     <ClInclude Include="network.h" />
     <ClInclude Include="neuro_def.h" />

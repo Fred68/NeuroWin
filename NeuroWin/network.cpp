@@ -70,6 +70,9 @@ namespace neuro
 					}
 				}
 			}
+
+			_nInputs = _layers[0].size()-1;
+			_nOutputs = _layers[_nLays-1].size()-1;
 		}
 		else
 		{

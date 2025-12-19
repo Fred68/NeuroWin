@@ -68,6 +68,8 @@ int main()
     std::cout << "neuro test" << std::endl;
     std::cout << "-----------------------------------------------\n";
 
+	//vector<int> pippo(0);
+
 	// Ini
     std::vector<int> lays = {3, 5, 2};
     std::vector<FACT> facts ={FACT::sigmoid, FACT::sigmoid, FACT::sigmoid};
@@ -86,6 +88,7 @@ int main()
 		cout << ex.what() << std::endl;
 	}
 	
+	cout << "In: " << net->get_input_layer_sz() << "\n" << "Out: " << net->get_output_layer_sz() << endl;
 	uint cicli = 1;
 	cout << "Cicli: ";
 	cin >> cicli;
