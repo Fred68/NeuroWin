@@ -315,7 +315,7 @@ namespace neuro
 		}
 		catch(std::exception const &ex)
 		{
-			std::cout << ex.what() << std::endl;
+			std::cerr << ex.what() << std::endl;
 		}
 		return ok;
 	}

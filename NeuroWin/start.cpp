@@ -3,6 +3,7 @@
 
 
 #include <iostream>
+//#include <tuple>			// learn_data iterator
 
 #include "network.h"
 
@@ -85,32 +86,45 @@ int main()
 	}
 	catch(std::exception const &ex)
 	{
-		cout << ex.what() << std::endl;
+		cerr << ex.what() << std::endl;
 	}
 	
 	cout << "In: " << net->get_input_layer_sz() << "\n" << "Out: " << net->get_output_layer_sz() << endl;
 
 	learn_data ld(net);
 
-	// data
-	vector<act> vinp = { 0.1,0.2,0.9 };
-	vector<act> vout = { 1,0 };
-	vector<act> vres(2);
+	uint iInp, iOut;
 
-	uint iInp = ld.add_input(vinp);
-	uint iOut = ld.add_output(vout);
-	if ((iInp != learn_data::UINT_ERROR) && (iOut != learn_data::UINT_ERROR))
+	iOut = ld.add_output(vector<act>({ 1, 0 }));
+	iInp = ld.add_input(vector<act>({ 0.1, 0.2, 0.9 }));
+	ld.add_data(iInp, iOut);
+	iInp = ld.add_input(vector<act>({ 0.1, 0.1, 0.95 }));
+	ld.add_data(iInp, iOut);
+	iInp = ld.add_input(vector<act>({ -0.1, 0.0, 0.8 }));
+	ld.add_data(iInp, iOut);
+
+	iOut = ld.add_output(vector<act>({ 0, 1 }));
+	iInp = ld.add_input(vector<act>({ 0.9, 0.2, 0.1 }));
+	ld.add_data(iInp, iOut);
+	iInp = ld.add_input(vector<act>({ 0.85, 0.1, 0.0 }));
+	ld.add_data(iInp, iOut);
+	iInp = ld.add_input(vector<act>({ 0.99, 0., 0.2 }));
+	ld.add_data(iInp, iOut);
+
+	cout << "learn_data iterator:\n";
+	for(auto it = ld.begin(); it != ld.end(); it++)		// for(auto it : ld){} non è implementato
 	{
-		ld.add_data(iInp, iOut);
+		cout << network::display_vector(it.get_input_v()) << "-> " << network::display_vector(it.get_output_v()) << endl;
 	}
-
-	cout << "learn_data:\n" << ld.to_string() << endl;
+	
 
 	uint cicli = 1;
 	cout << "Cicli: ";
 	cin >> cicli;
 
-
+	vector<act> vinp = std::get<0>(ld.get_data(0));
+	vector<act> vout = std::get<1>(ld.get_data(0));
+	
 	cout << "vinp (teach.): " << network::display_vector(vinp) << '\n';
 	cout << "vout (teach.): " << network::display_vector(vout) << endl;
 
@@ -123,6 +137,8 @@ int main()
 	cout << "Tempo: " << msec_elap << endl;
 	cout << "\nFin:\n" << net->to_string() << endl;
 
+
+	vector<act> vres(2);
 	cout << "Forward-propagation (test):" << endl;
 	cout << ((net->forward_propagate(vinp, vres)) ? "ok" : "err") << endl;
 	cout << "vinp (using): " << network::display_vector(vinp) << '\n';
@@ -130,13 +146,14 @@ int main()
 	cout << "vres (using): " << network::display_vector(vres) << endl;
 
 
-	getchar();
-	getchar();
+	std::cout << "\n-----------------------------------------------\n";
+	std::cout << "end of test" << std::endl;
+	std::cout << "-----------------------------------------------\n";
 
-	//auto v = std::ranges::iota_view((uint)0, (uint)5);
-	//cout << "iota sz: "<< v.size() << endl;
-	//for_each(v.begin(),v.end(),[&](uint i){cout << i << endl;});
-	//x = getchar();
+	//cout << learn_data::UINT_ERROR << endl;
+	//cout << (uint) -1 << endl;
+	getchar();
+	getchar();
 
     return 0;
     

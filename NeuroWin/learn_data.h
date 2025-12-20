@@ -14,7 +14,7 @@ namespace neuro
 	{
 		
 		public:
-			static const uint UINT_ERROR = UINT_MAX;
+			static const uint UINT_ERROR = UINT_MAX;		/// Errorw per uint, equivalente a (uint) -1;
 
 		private:
 			const std::shared_ptr<network> _pnet;			/// Puntatore alla rete
@@ -23,7 +23,37 @@ namespace neuro
 			std::vector<std::vector<act>> _vinp;			/// Vettori di input
 			std::vector<std::vector<act>> _vout;			/// Vettori di output
 			std::vector<std::tuple<uint,uint>> _ldata;		/// Vettori dei valori per l'apprendimento
+		
+		public:
+			/// <summary>
+			/// Iteratore semplice con soltanto begin, end e ++
+			/// Non implementato for(Iterator it : learn_data _ldata) perché restutuirebbe una tuple<> difficile da gestire
+			/// </summary>
+			class Iterator
+			{
+				using iterator_category = std::forward_iterator_tag;
+				using difference_type = std::ptrdiff_t;
+				using value_type = uint;
+				using pointer = uint*;
+			
+				public:
+					Iterator(uint i, learn_data &ld) : _indx(i), _ld(ld) {}
+					Iterator& operator++() { _indx++; return *this; }
+					Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+					friend bool operator== (const Iterator& a, const Iterator& b) { return a._indx == b._indx; };
+					friend bool operator!= (const Iterator& a, const Iterator& b) { return a._indx != b._indx; };
 
+					std::vector<act> &get_input_v();
+					std::vector<act> &get_output_v();
+
+				private:
+					learn_data &_ld;
+					uint _indx;
+				
+			};
+			
+			Iterator begin() {return Iterator(0,*this);}
+			Iterator end() { return Iterator(_ldata.size(),*this); }	// Indice oltre il limite 
 
 		public:
 

@@ -49,7 +49,14 @@ namespace neuro
 	}
 	void learn_data::add_data(uint index_input, uint index_output)
 	{
-		_ldata.emplace_back(index_input,index_output);
+		if ((index_input != learn_data::UINT_ERROR) && (index_output != learn_data::UINT_ERROR))
+		{
+			_ldata.emplace_back(index_input,index_output);
+		}
+		else
+		{
+			throw std::exception("learn_data index error");
+		}
 	}
 
 	std::vector<act> &learn_data::get_input(uint i)
@@ -65,8 +72,35 @@ namespace neuro
 	{
 		std::tuple<uint, uint> idat = _ldata.at(i);
 		std::vector<act> &vinp = get_input(std::get<0>(idat));
-		std::vector<act> &vout = get_input(std::get<1>(idat));
+		std::vector<act> &vout = get_output(std::get<1>(idat));
 		return std::tuple<std::vector<act>&, std::vector<act>&>(vinp,vout);
+	}
+
+	std::vector<act> &learn_data::Iterator::get_input_v()
+	{
+		std::tuple<uint, uint> idat;
+		try
+		{
+			idat = _ld._ldata.at(_indx);
+		}
+		catch (std::exception const &ex)
+		{
+			std::cerr << ex.what() << std::endl;
+		}
+		return _ld.get_input(std::get<0>(idat));
+	}
+	std::vector<act> &learn_data::Iterator::get_output_v()
+	{
+		std::tuple<uint, uint> idat;
+		try
+		{
+			idat = _ld._ldata.at(_indx);
+		}
+		catch (std::exception const &ex)
+		{
+			std::cerr << ex.what() << std::endl;
+		}
+		return _ld.get_output(std::get<1>(idat));
 	}
 
 
