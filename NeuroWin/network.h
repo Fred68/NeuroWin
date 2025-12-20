@@ -19,6 +19,7 @@
 #include "neuron_synapse.h"
 #include "init_data.h"
 #include "layer.h"
+#include "learn_data.h"
 
 #include <string>
 #include <vector>
@@ -62,11 +63,11 @@ namespace neuro
 			typedef void (*lay_func) (std::vector<neuron> &layer, uint i);					// Calcolo di un livello
 			typedef act (*weight_func) (uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Inizializzazione di un peso
 		
+			std::vector<layer> _layers;			// Modificato solo nel ctor
             uint _nLays = 0;
 			uint _nInputs = 0;
 			uint _nOutputs = 0;
-
-			std::vector<layer> _layers;
+			
 			act _err_tot;
 
 			act _learn_const = Default_learn_const;

@@ -78,7 +78,7 @@ int main()
     std::cout << "init_data:\n" << ini.to_string() << std::endl;
 	
 	// net
-	std::unique_ptr<network> net;
+	std::shared_ptr<network> net;
 	try
 	{
 		net = make_unique<network>(ini);          // Crea la rete
@@ -89,14 +89,27 @@ int main()
 	}
 	
 	cout << "In: " << net->get_input_layer_sz() << "\n" << "Out: " << net->get_output_layer_sz() << endl;
+
+	learn_data ld(net);
+
+	// data
+	vector<act> vinp = { 0.1,0.2,0.9 };
+	vector<act> vout = { 1,0 };
+	vector<act> vres(2);
+
+	uint iInp = ld.add_input(vinp);
+	uint iOut = ld.add_output(vout);
+	if ((iInp != learn_data::UINT_ERROR) && (iOut != learn_data::UINT_ERROR))
+	{
+		ld.add_data(iInp, iOut);
+	}
+
+	cout << "learn_data:\n" << ld.to_string() << endl;
+
 	uint cicli = 1;
 	cout << "Cicli: ";
 	cin >> cicli;
 
-	// data
-	vector<act> vinp = {0.1,0.2,0.9};
-	vector<act> vout = {1,0};
-	vector<act> vres(2);
 
 	cout << "vinp (teach.): " << network::display_vector(vinp) << '\n';
 	cout << "vout (teach.): " << network::display_vector(vout) << endl;

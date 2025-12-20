@@ -12,10 +12,9 @@
 	#define _DEBUG_NEURO_DET false
 #endif
 #include <iostream>
-
-
 #include <string> 
 #include <execution>
+#include <limits>
 
 
 // TODO Valutare come gestire gli errori.
