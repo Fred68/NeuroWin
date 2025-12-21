@@ -37,7 +37,8 @@
 
 namespace neuro
 {
-	
+	class learn_data;
+
     /*******************************************/
     // network
     /*******************************************/
@@ -68,7 +69,7 @@ namespace neuro
 			uint _nInputs = 0;
 			uint _nOutputs = 0;
 			
-			act _err_tot;
+			//act _err_tot;
 
 			act _learn_const = Default_learn_const;
 			learn_const_func _learn_const_pf;				// Puntatore alla funzione che restituisce la costante di apprendimento	
@@ -102,10 +103,11 @@ namespace neuro
 			bool set_inputs(const std::vector<act> &inp_lay);
 			/// <summary>
 			/// Imposta le uscite. Lunghezza del vettore non controllata.
+			/// Aggiorna _err_tot
 			/// </summary>
 			/// <param name="out_lay"></param>
 			/// <returns></returns>
-			bool set_outputs(std::vector<act> &out_lay);
+			bool set_outputs(const std::vector<act> &out_lay, act &error_tot);
 			/// <summary>
 			/// Calcola i pesi iniziali usando il puntatore a funzione 'wf'
 			/// </summary>
@@ -163,22 +165,25 @@ namespace neuro
 			/// <summary>
 			/// Calcola singola back propagation.
 			/// Per ogni nodo(dall'ultimo al primo livello)...
-			/// ...calcola le EI.</summary> 
+			/// ...calcola le EI.
 			/// </summary>
 			/// <param name="out_lay"></param>
+			/// <param name="error_tot"></param>
 			/// <returns></returns>
-			bool prop_bw(std::vector<act> &out_lay);		// Calcola singola back propagation
+			bool prop_bw(const std::vector<act> &out_lay, act &error_tot);		// Calcola singola back propagation
 			/// <summary>
 			/// Corregge i pesi
 			/// </summary>
 			void update_w();								// Aggiorna i pesi
+
+			bool backward_propagate_no_check(const std::vector<act> &inp_lay, const std::vector<act> &out_lay, uint cycles, act &error_tot);
 
         public:
             network(init_data &ini_data);
             ~network();
 
             std::string to_string();
-			act get_err_tot() { return _err_tot; }
+			//act get_err_tot() { return _err_tot; }
 
 			uint get_n_layers() const {return _nLays;}
 			uint get_input_layer_sz() const { return _nInputs; }
@@ -190,6 +195,7 @@ namespace neuro
 			
 			learn_const_func get_f_learn() const { return _learn_const_pf; };
 			void set_f_learn(learn_const_func lrn_f) { _learn_const_pf = lrn_f; };
+			
 
             /// <summary>
             /// Riferimento al neurone del livello 'lay' e con indice 'num'
@@ -201,7 +207,9 @@ namespace neuro
             neuron &get_neuron(uint lay, uint num);			// Riferimento al neurone del livello 'lay' e con indice 'num'
 
 			bool forward_propagate(const std::vector<act> &inp_lay, std::vector<act> &out_lay);
-			bool backward_propagate(const std::vector<act> &inp_lay, std::vector<act> &out_lay, uint cycles, std::chrono::milliseconds &msec_elap);
+			
+			bool backward_propagate(const std::vector<act> &inp_lay, const std::vector<act> &out_lay, uint cycles, act &error_tot, std::chrono::milliseconds &msec_elap);
+			bool backward_propagate(std::shared_ptr<learn_data> pldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap);
 
     };  // class network
 

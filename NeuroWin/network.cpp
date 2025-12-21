@@ -3,6 +3,7 @@
 #include "neuro_def.h"
 #include "network.h"
 #include <sstream>
+#include <numeric>		// std::accumulate
 
 #define _PARALLEL	true
 
@@ -24,11 +25,11 @@ namespace neuro
 
 		_nLays = ini_data.get_layers_num();
 
-		#ifdef ACT_DBL
+		/*#ifdef ACT_DBL
 			_err_tot = 0.0;
 		#else
 			_err_tot = 0.0f;
-        #endif
+        #endif*/
 
 		_learn_const = ini_data.get_learn_const();
 		set_f_learn(lcf_costant_value);
@@ -103,7 +104,7 @@ namespace neuro
         std::string txt;
         txt += std::format("Layers: {0}\n", _nLays);
 		txt += std::format("Learn const: {0}\n", get_learn_const());
-		txt += std::format("E: {0}\n", _err_tot);
+		//txt += std::format("E: {0}\n", _err_tot);
 
         for (uint i=0; i < _nLays; i++)
         {
@@ -157,36 +158,21 @@ namespace neuro
 		bool ret = false;
 		if(inp_lay.size() == _layers[0].size()-1)		// 1° livello
 		{
-			#if !_PARALLEL
-			bool ok = true;
-			for(uint i=0; i<inp_lay.size(); i++)
-			{
-				ok = ok && get_at(0,i).set_x(inp_lay[i]);
-			}
-			ret = ok;
-			#else
 			// TODO Fare prove di velocità. La versione parallela con iota potrebbe essere complessivamente più lenta. 
 			auto v = std::ranges::iota_view((uint)0, (uint)inp_lay.size());
 			std::atomic<bool> ok = true;
 			auto func_set = [&](uint i) {ok = ok && get_at(0, i).set_x(inp_lay[i]); };
 			std::for_each(get_exe_pol(EXE_POL::layer),v.begin(),v.end(),func_set);
 			ret = ok;
-			#endif
 		}
 		return ret;
 	}
 
-	bool network::set_outputs(std::vector<act> &out_lay)
+	bool network::set_outputs(const std::vector<act> &out_lay, act &error_tot)
 	{
 		bool ret = false;
 		if (out_lay.size() == _layers[_nLays-1].size() - 1)		// Ultimo livello
 		{
-			#if !_PARALLEL
-			for(uint i=0; i<out_lay.size(); i++)
-			{
-				get_at(_nLays - 1, i).set_beta(get_at(_nLays - 1, i).get_y() - out_lay[i]);
-			}
-			#else
 			// TODO Fare prove di velocità. E' possibile che la versione parallela con iota sia complessivamente più lenta.
 			auto v = std::ranges::iota_view((uint)0, (uint)out_lay.size());
 			std::atomic<bool> ok = true;
@@ -203,11 +189,8 @@ namespace neuro
 					errtot.fetch_add(betatmp*betatmp);
 				}; 
 			std::for_each(get_exe_pol(EXE_POL::layer),v.begin(),v.end(),func_set);			// Formula [6]		
+			error_tot = errtot;
 			ret = ok;
-			_err_tot = errtot;
-
-			#endif
-			ret = true;
 		}
 		else
 			throw std::exception("Output vector and last layer sizes don't match");
@@ -299,12 +282,12 @@ namespace neuro
 		return ok;
 	}
 
-	bool network::prop_bw(std::vector<act> &out_lay)
+	bool network::prop_bw(const std::vector<act> &out_lay, act &error_tot)
 	{	
 		bool ok = false;
 		try
-		{
-			ok = set_outputs(out_lay);
+		{	
+			ok = set_outputs(out_lay, error_tot);
 			if(ok)
 			{
 				for(int lay = _nLays-1; lay > 0; lay--)		// Calcolo necessariamente sequenziale
@@ -348,33 +331,72 @@ namespace neuro
 		return ok;
 	}
 
-	bool network::backward_propagate(const std::vector<act> &inp_lay, std::vector<act> &out_lay, uint cycles, std::chrono::milliseconds &msec_elap)
+
+	bool network::backward_propagate_no_check(const std::vector<act> &inp_lay, const std::vector<act> &out_lay, uint cycles, act &error_tot)
 	{
 		bool ok = true;
-		auto inizio = std::chrono::high_resolution_clock::now();	// std::chrono::steady_clock::time_point
-
-		if ( (out_lay.size() == _layers[_nLays - 1].size() - 1) && (inp_lay.size() == _layers[0].size()-1))
+		for(uint i = 0; (i < cycles) && ok; i++)
 		{
-			for(uint i = 0; (i < cycles) && ok; i++)
+			ok = prop_fw(inp_lay);
+			if(ok)
 			{
-				ok = prop_fw(inp_lay);
-				if(ok)
+				ok = prop_bw(out_lay,error_tot);
+				update_w();
+			}
+		}
+		return ok;
+	}
+
+	bool network::backward_propagate(const std::vector<act> &inp_lay, const std::vector<act> &out_lay, uint cycles, act &error_tot, std::chrono::milliseconds &msec_elap)
+	{
+		
+		auto inizio = std::chrono::high_resolution_clock::now();	// std::chrono::steady_clock::time_point
+		bool ok = true;
+		if ((out_lay.size() == _layers[_nLays - 1].size() - 1) && (inp_lay.size() == _layers[0].size() - 1))
+		{
+			ok = backward_propagate_no_check(inp_lay, out_lay, cycles, error_tot);
+		}
+		auto fine = std::chrono::high_resolution_clock::now();
+		msec_elap = std::chrono::duration_cast<std::chrono::milliseconds> (fine - inizio);
+
+		return ok;
+	}
+
+	bool network::backward_propagate(std::shared_ptr<learn_data> pldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap)
+	{
+		auto inizio = std::chrono::high_resolution_clock::now();
+		bool ok = true;
+		std::vector<act> errors(pldata->get_data_size());	// Vettore con gli errori totali per tutti i casi
+
+		if( (pldata->check_data_size()) && (errors.size() > 0))
+		{
+			for(uint ic=0; ic < cycles && ok; ic++)			// Ripete per il numero di cicli di apprendimento
+			{
+				uint idat = 0;
+				for (auto it = pldata->begin(); it != pldata->end(); it++)	// Percorre i dati di apprendimento
 				{
-					ok = prop_bw(out_lay);
-					update_w();
+					const std::vector<act> vi = it.get_input_v();			// Coppia di vettori con i dati di ingresso...		
+					const std::vector<act> vo = it.get_output_v();			// ...e di uscita desiderati
+					if(!backward_propagate_no_check(vi, vo, subcycles, errors[idat]))	// Ripete bkprop e calcola errore tot
+					{
+						ok = false;
+						std::cerr << "Error in back_propagate()" << std::endl;
+						break;
+					}
+					idat++;
 				}
+				error_med = std::accumulate(errors.begin(),errors.end(),(act)0.0) / errors.size();
 			}
 		}
 		else
 		{
 			ok = false;
+			std::cerr << "Error in learn data size" << std::endl;
 		}
 		auto fine = std::chrono::high_resolution_clock::now();
+		msec_elap = std::chrono::duration_cast<std::chrono::milliseconds>(fine - inizio);
 
-		msec_elap = std::chrono::duration_cast<std::chrono::milliseconds> (fine - inizio);
-		
 		return ok;
 	}
-
 
 }

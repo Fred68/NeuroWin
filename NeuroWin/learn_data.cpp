@@ -1,7 +1,6 @@
 
 #include "neuro_def.h"
 #include "learn_data.h"
-//#include "network.h"
 #include <tuple> 
 
 
@@ -103,5 +102,20 @@ namespace neuro
 		return _ld.get_output(std::get<1>(idat));
 	}
 
+	bool learn_data::check_data_size()
+	{
+		bool ok = true;
+		for (auto it = begin(); it != end(); it++)
+		{
+			uint visz = it.get_input_v().size();
+			uint vosz = it.get_output_v().size();
+			if ( (visz != _pnet->get_input_layer_sz())||(vosz != _pnet->get_output_layer_sz()) )
+			{
+				ok = false;
+				break;
+			}
+		}
+		return ok;
+	}
 
 }
