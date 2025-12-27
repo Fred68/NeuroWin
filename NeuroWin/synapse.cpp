@@ -1,7 +1,7 @@
 
 
 
-#include "neuron_synapse.h"
+#include "neuron.h"
 
 
 
@@ -13,7 +13,7 @@ namespace neuro
     /*                                         */
     /*******************************************/
 
-    synapse::synapse()
+    neuron::synapse::synapse()
     {
         pn = std::shared_ptr<neuron>(nullptr);  // Non usa pn=std::make_shared<neuron>() perché allocherebbe un nuovo oggetto
         w = (act) 1;
@@ -21,7 +21,7 @@ namespace neuro
         cout << "synapse()\n";
         #endif
     }
-    synapse::synapse(neuron &p_n, act ws)
+	neuron::synapse::synapse(neuron &p_n, act ws)
     {
         pn = std::shared_ptr<neuron>(&p_n);     // Non usa pn=std::make_shared<neuron>(p_n) perché creerebbe una copia
         w = ws;
@@ -29,7 +29,7 @@ namespace neuro
         cout << "synapse(p_n)\n";
         #endif
     }
-    synapse::~synapse()
+	neuron::synapse::~synapse()
     {
         #if _DEBUG_NEURO_DET
         cout << "~synapse()\n";

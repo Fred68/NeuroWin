@@ -16,10 +16,11 @@
 #define NETWORK_H
 
 #include "neuro_def.h"
-#include "neuron_synapse.h"
+#include "neuron.h"
 #include "init_data.h"
 #include "layer.h"
 #include "learn_data.h"
+
 
 #include <string>
 #include <vector>
@@ -38,6 +39,7 @@
 namespace neuro
 {
 	class learn_data;
+	class neuro_exception;
 
     /*******************************************/
     // network
@@ -69,8 +71,6 @@ namespace neuro
 			uint _nInputs = 0;
 			uint _nOutputs = 0;
 			
-			//act _err_tot;
-
 			act _learn_const = Default_learn_const;
 			learn_const_func _learn_const_pf;				// Puntatore alla funzione che restituisce la costante di apprendimento	
 
@@ -91,6 +91,8 @@ namespace neuro
             /// <returns></returns>
             neuron &get_at(uint lay, uint num) {return (_layers[lay])[num];}	// No check indici
             
+			std::vector<neuro_exception> _exceptions;
+
 			#if TXT_INFO
             void name_elements();
             #endif
@@ -183,7 +185,14 @@ namespace neuro
             ~network();
 
             std::string to_string();
-			//act get_err_tot() { return _err_tot; }
+
+			network &get_reference() {return *this;}
+			
+			void add_exception(neuro_exception &ex);
+			bool isOk() {return (_exceptions.size() == 0);}
+			
+			std::string get_exceptions_string();
+				
 
 			uint get_n_layers() const {return _nLays;}
 			uint get_input_layer_sz() const { return _nInputs; }
@@ -196,7 +205,6 @@ namespace neuro
 			learn_const_func get_f_learn() const { return _learn_const_pf; };
 			void set_f_learn(learn_const_func lrn_f) { _learn_const_pf = lrn_f; };
 			
-
             /// <summary>
             /// Riferimento al neurone del livello 'lay' e con indice 'num'
 			/// Se indici errati: eccezione.
@@ -212,6 +220,41 @@ namespace neuro
 			bool backward_propagate(std::shared_ptr<learn_data> pldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap);
 
     };  // class network
+
+	class neuro_exception
+	{
+		public:
+			enum type : size_t
+			{
+				pippo = 0,
+				pluto,
+				none		// Usa il nome 'none' (invece che magic_enum class)
+			};
+
+			inline static std::string _str[type::none] =
+			{
+				"PIPPO",
+				"PLUTO",
+			};
+
+
+		private:
+			network &_net;
+			type _type;
+
+
+		public:
+			neuro_exception(network &net) : neuro_exception(net, type::none) {}
+			neuro_exception(network &net, const type type) : _net(net), _type(type)
+			{
+				_net.add_exception(*this);
+			}
+
+			const char *what() const noexcept		// No override di: virtual const char* what() const noexcept;
+			{
+				return _str[_type].c_str();
+			}
+	};  // class neuro_exception
 
 }  // namespace neuro
 

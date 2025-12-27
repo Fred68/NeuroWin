@@ -5,7 +5,7 @@
 #include <sstream>
 #include <numeric>		// std::accumulate
 
-#define _PARALLEL	true
+//#define _PARALLEL	true
 
 namespace neuro
 {
@@ -56,8 +56,8 @@ namespace neuro
 				}
 				_layers.push_back(*ln);
 
-				int jmax = (uint) _layers.back().size();
-				for(int j=0; j<jmax; j++)
+				uint jmax = (uint) _layers.back().size();
+				for(uint j=0; j<jmax; j++)
 				{
 					if(j == jmax-1)
 					{
@@ -87,6 +87,7 @@ namespace neuro
         #if _DEBUG
         std::cout << "network(" << _nLays <<")\n";
 		#endif
+
     }
 
     network::~network()
@@ -115,7 +116,20 @@ namespace neuro
             }
         }
         return txt;
-    }
+	}
+
+	void network::add_exception(neuro_exception &ex)
+	{
+		_exceptions.push_back(ex);
+	}
+
+	std::string network::get_exceptions_string()
+	{
+		std::string txt;
+		std::for_each(_exceptions.begin(),_exceptions.end(),[&] (neuro_exception ex) {txt += ex.what();});
+		return txt;
+	}
+
 
 	std::string network::display_vector(std::vector<act> &v)
 	{
@@ -158,7 +172,6 @@ namespace neuro
 		bool ret = false;
 		if(inp_lay.size() == _layers[0].size()-1)		// 1° livello
 		{
-			// TODO Fare prove di velocità. La versione parallela con iota potrebbe essere complessivamente più lenta. 
 			auto v = std::ranges::iota_view((uint)0, (uint)inp_lay.size());
 			std::atomic<bool> ok = true;
 			auto func_set = [&](uint i) {ok = ok && get_at(0, i).set_x(inp_lay[i]); };
@@ -173,7 +186,6 @@ namespace neuro
 		bool ret = false;
 		if (out_lay.size() == _layers[_nLays-1].size() - 1)		// Ultimo livello
 		{
-			// TODO Fare prove di velocità. E' possibile che la versione parallela con iota sia complessivamente più lenta.
 			auto v = std::ranges::iota_view((uint)0, (uint)out_lay.size());
 			std::atomic<bool> ok = true;
 			#ifdef ACT_DBL
@@ -290,7 +302,7 @@ namespace neuro
 			ok = set_outputs(out_lay, error_tot);
 			if(ok)
 			{
-				for(int lay = _nLays-1; lay > 0; lay--)		// Calcolo necessariamente sequenziale
+				for(uint lay = _nLays-1; lay > 0; lay--)		// Calcolo necessariamente sequenziale
 				{
 					calc_ei_eaprec_lay(lay);
 				}
@@ -366,9 +378,9 @@ namespace neuro
 	{
 		auto inizio = std::chrono::high_resolution_clock::now();
 		bool ok = true;
-		std::vector<act> errors(pldata->get_data_size());	// Vettore con gli errori totali per tutti i casi
+		std::vector<act> get_string_exceptions(pldata->get_data_size());	// Vettore con gli errori totali per tutti i casi
 
-		if( (pldata->check_data_size()) && (errors.size() > 0))
+		if( (pldata->check_data_size()) && (get_string_exceptions.size() > 0))
 		{
 			for(uint ic=0; ic < cycles && ok; ic++)			// Ripete per il numero di cicli di apprendimento
 			{
@@ -377,7 +389,7 @@ namespace neuro
 				{
 					const std::vector<act> vi = it.get_input_v();			// Coppia di vettori con i dati di ingresso...		
 					const std::vector<act> vo = it.get_output_v();			// ...e di uscita desiderati
-					if(!backward_propagate_no_check(vi, vo, subcycles, errors[idat]))	// Ripete bkprop e calcola errore tot
+					if(!backward_propagate_no_check(vi, vo, subcycles, get_string_exceptions[idat]))	// Ripete bkprop e calcola errore tot
 					{
 						ok = false;
 						std::cerr << "Error in back_propagate()" << std::endl;
@@ -385,7 +397,7 @@ namespace neuro
 					}
 					idat++;
 				}
-				error_med = std::accumulate(errors.begin(),errors.end(),(act)0.0) / errors.size();
+				error_med = std::accumulate(get_string_exceptions.begin(),get_string_exceptions.end(),(act)0.0) / get_string_exceptions.size();
 			}
 		}
 		else

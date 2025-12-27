@@ -1,5 +1,5 @@
 
-#include "neuron_synapse.h"
+#include "neuron.h"
 #include "network.h"		// Nesessario, se no tipo incompleto "neuro::network" non consentito
 
 namespace neuro
@@ -90,11 +90,8 @@ namespace neuro
         return txt;
     }    
  
-	void neuron::set_active(bool stat) { active = stat; }
-	void neuron::set_input(bool inp)
-	{
-		input = inp;
-	}
+	void neuron::set_active(bool stat)	{ active = stat; }
+	void neuron::set_input(bool inp)	{ input = inp; }
 
 	void neuron::set_fact(FACT f)
 	{
@@ -244,6 +241,8 @@ namespace neuro
 
 	/*******************************************/
     // Funzioni di attivazione
+	/*******************************************/
+
     act neuron::sigmoid(neuron *n)
     {
         #ifdef ACT_DBL

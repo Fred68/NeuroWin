@@ -23,8 +23,21 @@ namespace neuro
 
 	class neuron
     {
+		
+		class synapse
+		{
+			friend class neuron;
 
-        friend class synapse;
+			private:
+				std::shared_ptr<neuron> pn;
+				act    w;
+
+			public:
+				synapse();
+				synapse(neuron &p_n, act ws);
+				~synapse();
+				act x() { return w * pn.get()->y; }
+		};
         
         typedef act (*act_func) (neuron*);							// Puntatore a funzione di attivazione
 
@@ -177,23 +190,6 @@ namespace neuro
 			void calc_w(act learn_const);			// Ricalcolo dei pesi (riceve da network la costante di apprendimento)
     };
 	
-	
-	class synapse
-	{
-		friend class neuron;
-
-		private:
-			std::shared_ptr<neuron> pn;
-			act    w;
-
-		public:
-			synapse();
-			synapse(neuron &p_n, act ws);
-			~synapse();
-			act x() { return w * pn.get()->y; }
-	};
-
-
 }
 
 #endif

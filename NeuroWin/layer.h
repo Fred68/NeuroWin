@@ -3,7 +3,7 @@
 #ifndef LAYER_H
 #define LAYER_H
 
-#include "neuron_synapse.h"
+#include "neuron.h"
 #include <vector>
 #include <memory>
 

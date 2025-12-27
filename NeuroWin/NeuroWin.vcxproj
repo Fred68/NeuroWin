@@ -34,7 +34,7 @@
     </ClInclude>
     <ClInclude Include="layer.h" />
     <ClInclude Include="learn_data.h" />
-    <ClInclude Include="neuron_synapse.h" />
+    <ClInclude Include="neuron.h" />
     <ClInclude Include="network.h" />
     <ClInclude Include="neuro_def.h" />
   </ItemGroup>

@@ -3,8 +3,8 @@
 
 
 #include <iostream>
-//#include <tuple>			// learn_data iterator
 
+#include "neuro_def.h"
 #include "network.h"
 
 #if INI_TEST
@@ -14,13 +14,10 @@
 #include <atomic>
 #endif
 
-
 //import modtest;
 
 using namespace std;
 using namespace neuro;
-
-//using namespace pippospace;
 
 int main()
 {
@@ -69,8 +66,6 @@ int main()
     std::cout << "neuro test" << std::endl;
     std::cout << "-----------------------------------------------\n";
 
-	//vector<int> pippo(0);
-
 	// Ini
     std::vector<int> lays = {3, 5, 2};
     std::vector<FACT> facts ={FACT::sigmoid, FACT::sigmoid, FACT::sigmoid};
@@ -84,16 +79,25 @@ int main()
 	try
 	{
 		net = make_unique<network>(ini);
-		ld = make_unique<learn_data>(net);		
+		ld = make_unique<learn_data>(net);
+		throw neuro_exception(net->get_reference(),neuro_exception::pluto);
 	}
 	catch(std::exception const &ex)
 	{
 		cerr << ex.what() << std::endl;
 	}
-	
+	catch(neuro::neuro_exception const &nex)
+	{
+		cerr << nex.what() << std::endl;
+	}
+	std::string ntok((net->isOk()) ? "ok" : "not ok");
+	cout << "net is "<< ntok << std::endl;
+	if(!net->isOk())
+	{
+		cout << "errors:\n";
+		cout << net->get_exceptions_string() << endl;
+	}
 	cout << "In: " << net->get_input_layer_sz() << '\n' << "Out: " << net->get_output_layer_sz() << endl;
-	
-	//learn_data ld(net);
 	
 	uint iInp, iOut;
 
@@ -129,17 +133,11 @@ int main()
 	cout << "Sottocicli: ";
 	cin >> subcicli;
 
-	//vector<act> vinp = std::get<0>(ld->get_data(0));
-	//vector<act> vout = std::get<1>(ld->get_data(0));
-	//cout << "vinp (teach.): " << network::display_vector(vinp) << '\n';
-	//cout << "vout (teach.): " << network::display_vector(vout) << endl;
-
 	cout << "\nnet before learning:\n" << net->to_string() << endl;
-
 
 	std::chrono::milliseconds msec_elap(0);
 	
-	act errtot,errmed;
+	act errmed;
 	
 	#if false
 	cout << "Back-propagation single datum learning..." << endl;
@@ -154,8 +152,7 @@ int main()
 	
 	net->backward_propagate(ld, cicli, subcicli, errmed, msec_elap);
 	cout << "Tempo: " << msec_elap << '\n';
-	cout << "Err med: " << errmed << '\n';
-	cout << "\nFin:\n" << net->to_string() << endl;
+	cout << "Err med (quadratico): " << errmed << '\n';
 
 	cout << "\nnet after learning:\n" << net->to_string() << endl;
 
@@ -171,12 +168,6 @@ int main()
 		cout << "vout (obj.) : " << network::display_vector(vout) << '\n';
 		cout << "vres (using): " << network::display_vector(vres) << endl;
 	}
-
-	//cout << ((net->forward_propagate(vinp, vres)) ? "ok" : "err") << endl;
-	//cout << "vinp (using): " << network::display_vector(vinp) << '\n';
-	//cout << "vout (obj.) : " << network::display_vector(vout) << '\n';
-	//cout << "vres (using): " << network::display_vector(vres) << endl;
-
 
 	std::cout << "\n-----------------------------------------------\n";
 	std::cout << "end of test" << std::endl;

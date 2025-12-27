@@ -3,7 +3,7 @@
 #define NEURO_DEF_H
 
 #define ACT_DBL                     // Definizione del tipo di dato per l'attività: double 
-//#undef ACT_DBL                      // Se non definito: float
+// #undef ACT_DBL					// Se non definito: float
 
 #define TXT_INFO		false		// Informazioni aggiuntive in nodi e sinapsi
 #define TXT_FLOAT_FRM	".4f"
@@ -19,14 +19,19 @@
 
 // TODO Valutare come gestire gli errori.
 // preferibilmente evitare try...catch.
-// Usare throw per errori irrecuperabili nei costruttori
+// Usare throw solo per errori irrecuperabili nei costruttori
 // Dovunque sia possibile, usare un altro metodo.
 // Classi:
-// synapse:		non genera eccezioni particolare (tranne out_of_memory...).
+// synapse:		non genera eccezioni particolari (tranne forse out_of_memory...).
 // neuron:		genera due eccezioni in debug ed una in caso di enum non definito: da mantenere.
 // network:		generare eccezioni nel costruttore e nell'accesso (usare tipi di eccezioni standard, per esempio out_of_range.
 //				Prt tutti i calcoli, mettere una verifica con azzeramente e flag di errore (non un'eccezione)
 // init_data:	mettere controlli ed eccezioni per controllare il più possibile
+// USARE UNA CLASSE SPECIFICA, CONTENUTA IN network, con funzioni pubbliche per aggiungere errori e controllare
+// Le classi neuron e init_data hanno un riferimento a network (dal costruttore): possono segnalare gli errori a network
+// throw richiede degli argomenti specifici. Metterli nella funzione Errori, in network, con tutte le informazioni.
+// Usare una funzione della classe per segnalare errori (msg, errori o errori gravi, con throw nel gestore)
+
 
 namespace neuro
 {
@@ -39,7 +44,7 @@ namespace neuro
 	
 	#define EPSILON 1E-12
 
-	typedef unsigned int uint;
+	typedef size_t uint;		// In alternativa: typedef unsigned int uint;
 
     enum class FACT { sigmoid = 0, tanh, relu, one, id, Count };
 	

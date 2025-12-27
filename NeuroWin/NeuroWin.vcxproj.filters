@@ -47,7 +47,7 @@
     <ClInclude Include="neuro_def.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="neuron_synapse.h">
+    <ClInclude Include="neuron.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="layer.h">
