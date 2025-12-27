@@ -123,10 +123,23 @@ namespace neuro
 		_exceptions.push_back(ex);
 	}
 
+	void network::clear_exceptions()
+	{
+		_exceptions.clear();
+	}
+
 	std::string network::get_exceptions_string()
 	{
 		std::string txt;
-		std::for_each(_exceptions.begin(),_exceptions.end(),[&] (neuro_exception ex) {txt += ex.what();});
+		if(isOk())
+		{
+			txt += "network is ok";
+		}
+		else
+		{
+			txt += "network errors:";
+			std::for_each(_exceptions.begin(),_exceptions.end(),[&] (neuro_exception ex){txt += "\n"; txt += ex.what();});
+		}
 		return txt;
 	}
 

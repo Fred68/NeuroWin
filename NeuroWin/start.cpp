@@ -84,19 +84,21 @@ int main()
 	}
 	catch(std::exception const &ex)
 	{
-		cerr << ex.what() << std::endl;
+		cerr << "Catturata std::exception: " << ex.what() << std::endl;
 	}
 	catch(neuro::neuro_exception const &nex)
 	{
-		cerr << nex.what() << std::endl;
+		cerr << "Catturata neuro::neuro_exception: " << nex.what() << std::endl;
 	}
 	std::string ntok((net->isOk()) ? "ok" : "not ok");
 	cout << "net is "<< ntok << std::endl;
 	if(!net->isOk())
 	{
-		cout << "errors:\n";
 		cout << net->get_exceptions_string() << endl;
 	}
+	net->clear_exceptions();
+	cout << net->get_exceptions_string() << endl;
+
 	cout << "In: " << net->get_input_layer_sz() << '\n' << "Out: " << net->get_output_layer_sz() << endl;
 	
 	uint iInp, iOut;

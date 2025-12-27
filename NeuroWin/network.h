@@ -189,8 +189,8 @@ namespace neuro
 			network &get_reference() {return *this;}
 			
 			void add_exception(neuro_exception &ex);
+			void clear_exceptions();
 			bool isOk() {return (_exceptions.size() == 0);}
-			
 			std::string get_exceptions_string();
 				
 
@@ -221,6 +221,10 @@ namespace neuro
 
     };  // class network
 
+	/*******************************************/
+    // neuro_exception
+    /*******************************************/
+
 	class neuro_exception
 	{
 		public:
@@ -244,12 +248,13 @@ namespace neuro
 
 
 		public:
-			neuro_exception(network &net) : neuro_exception(net, type::none) {}
-			neuro_exception(network &net, const type type) : _net(net), _type(type)
-			{
-				_net.add_exception(*this);
-			}
-
+			neuro_exception(network &net) noexcept : _net(net), _type(type::none) {}
+			neuro_exception(network &net, const type type) noexcept : _net(net), _type(type) { _net.add_exception(*this); }
+			// Costruttore di copia e operatore di assegnazione non implementati, perché neuro_exception...
+			// ...contiene un reference unico a network
+			// neuro_exception(neuro_exception const &other) noexcept : _net(other._net), _type(other._type) {}
+			// neuro_exception& operator=(neuro_exception const &other) noexcept {if (this != &other){_net = other._net;_type = other._type;}return *this;}
+			
 			const char *what() const noexcept		// No override di: virtual const char* what() const noexcept;
 			{
 				return _str[_type].c_str();
