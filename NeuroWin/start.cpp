@@ -80,7 +80,7 @@ int main()
 	{
 		net = make_unique<network>(ini);
 		ld = make_unique<learn_data>(net);
-		throw neuro_exception(net->get_reference(),neuro_exception::pluto);
+		throw neuro_exception(net, neuro_exception::pluto);
 	}
 	catch(std::exception const &ex)
 	{

@@ -16,11 +16,11 @@
 #define NETWORK_H
 
 #include "neuro_def.h"
+
 #include "neuron.h"
 #include "init_data.h"
 #include "layer.h"
 #include "learn_data.h"
-
 
 #include <string>
 #include <vector>
@@ -243,18 +243,16 @@ namespace neuro
 
 
 		private:
-			network &_net;
+			std::shared_ptr<network> _net;
 			type _type;
 
 
 		public:
-			neuro_exception(network &net) noexcept : _net(net), _type(type::none) {}
-			neuro_exception(network &net, const type type) noexcept : _net(net), _type(type) { _net.add_exception(*this); }
-			// Costruttore di copia e operatore di assegnazione non implementati, perché neuro_exception...
-			// ...contiene un reference unico a network
-			// neuro_exception(neuro_exception const &other) noexcept : _net(other._net), _type(other._type) {}
-			// neuro_exception& operator=(neuro_exception const &other) noexcept {if (this != &other){_net = other._net;_type = other._type;}return *this;}
-			
+			neuro_exception(std::shared_ptr<network> net) noexcept : _net(net), _type(type::none) {}
+			neuro_exception(std::shared_ptr<network> net, const type type) noexcept : _net(net), _type(type) { _net->add_exception(*this); }
+			neuro_exception(neuro_exception const &other) noexcept : _net(other._net), _type(other._type) {}
+			neuro_exception& operator=(neuro_exception const &other) noexcept {if (this != &other){_net = other._net;_type = other._type;}return *this;}
+
 			const char *what() const noexcept		// No override di: virtual const char* what() const noexcept;
 			{
 				return _str[_type].c_str();
