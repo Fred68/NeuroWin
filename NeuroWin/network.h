@@ -22,7 +22,7 @@
 #include "layer.h"
 #include "learn_data.h"
 
-#include <string>
+#include <string>			// std::format
 #include <vector>
 #include <memory>
 #include <format>
@@ -44,6 +44,8 @@ namespace neuro
     /*******************************************/
     // network
     /*******************************************/
+
+	// TODO Aggiungere salvataggio e caricamento di una rete (con i pesi), per eseguire l'addestramento in più fasi
 
     /// <summary>
     /// Class network
@@ -190,8 +192,8 @@ namespace neuro
 			
 			void add_exception(neuro_exception &ex);
 			void clear_exceptions();
-			bool isOk() {return (_exceptions.size() == 0);}
-			std::string get_exceptions_string();
+			bool isOk();
+			std::string get_exceptions_string(bool show_warnings = false);
 				
 
 			uint get_n_layers() const {return _nLays;}
@@ -225,6 +227,8 @@ namespace neuro
     // neuro_exception
     /*******************************************/
 
+	// TODO Aggiungere gli errori, prendendoli da tutti i throw e da altri casi gestiti
+
 	class neuro_exception
 	{
 		public:
@@ -245,18 +249,52 @@ namespace neuro
 		private:
 			std::shared_ptr<network> _net;
 			type _type;
-
+			bool _is_error;
+			std::string _desc;
+			std::chrono::system_clock::time_point _time;
 
 		public:
-			neuro_exception(std::shared_ptr<network> net) noexcept : _net(net), _type(type::none) {}
-			neuro_exception(std::shared_ptr<network> net, const type type) noexcept : _net(net), _type(type) { _net->add_exception(*this); }
-			neuro_exception(neuro_exception const &other) noexcept : _net(other._net), _type(other._type) {}
-			neuro_exception& operator=(neuro_exception const &other) noexcept {if (this != &other){_net = other._net;_type = other._type;}return *this;}
-
-			const char *what() const noexcept		// No override di: virtual const char* what() const noexcept;
+			/// <summary>
+			/// neuro_exception
+			/// </summary>
+			/// <param name="net">std::shared_ptr<network> net</param>
+			/// <param name="type">type type = type::none</param>
+			/// <param name="is_error">bool is_error = true</param>
+			/// <param name="desc">std::string desc = ""</param>
+			neuro_exception(std::shared_ptr<network> net, const type type = type::none, bool is_error = true, std::string desc = "") noexcept : _net(net), _type(type), _is_error(is_error), _desc(desc), _time(std::chrono::system_clock::now())
 			{
-				return _str[_type].c_str();
+				_net->add_exception(*this);
 			}
+			neuro_exception(neuro_exception const &other) noexcept : _net(other._net), _type(other._type), _is_error(other._is_error), _desc(other._desc), _time(other._time) {}
+			neuro_exception& operator=(neuro_exception const &other) noexcept
+			{
+				if (this != &other)
+				{	
+					_net = other._net;
+					_type = other._type;
+					_is_error = other._is_error;
+					_desc=other._desc;
+					_time = other._time;
+				}
+				return *this;
+			}
+
+			static bool is_ex_error(neuro_exception &nex) {return nex._is_error;}
+			bool is_error() {return _is_error;}
+
+			const std::string what() const noexcept		// Nessun override di virtual const char* what() const noexcept
+			{
+				std::string txt;
+				txt = "[";
+				std::string x = std::format("{0}", _time);
+				txt += x;
+				txt += "] ";
+				txt += _str[_type];
+				if(_desc.size() > 0)	txt += " : " + _desc;
+				return txt;
+			}
+
+
 	};  // class neuro_exception
 
 }  // namespace neuro

@@ -127,20 +127,59 @@ namespace neuro
 	{
 		_exceptions.clear();
 	}
-
-	std::string network::get_exceptions_string()
+	
+	bool network::isOk()
 	{
-		std::string txt;
-		if(isOk())
+		uint count = std::count_if(_exceptions.begin(), _exceptions.end(), neuro_exception::is_ex_error);
+		return (count == 0);
+	}
+	
+	std::string network::get_exceptions_string(bool show_warnings)
+	{
+		std::string ret, txt, txt_err, txt_warn;
+		uint count, count_warn, count_err;
+		bool err, warn;
+
+		auto func_sel = [&](neuro_exception &ex)
 		{
-			txt += "network is ok";
+			if( (ex.is_error() && err) || (!ex.is_error() && warn))
+			{
+				txt += "\n" + ex.what();
+				count++;
+			}
+		};
+
+		count_err = count_warn = 0;
+
+		txt = "", err = true, warn = false, count = 0;
+		std::for_each(std::execution::seq, _exceptions.begin(), _exceptions.end(), func_sel);
+		if(count > 0)		txt_err = txt;
+		count_err = count;
+
+		if(show_warnings)
+		{
+			txt = "", err = false, warn = true, count = 0;
+			std::for_each(std::execution::seq, _exceptions.begin(), _exceptions.end(), func_sel);
+			if (count > 0)	txt_warn = txt;
+			count_warn = count;
+		}
+
+		if(count_err == 0)
+		{
+			ret += "network is ok";
 		}
 		else
 		{
-			txt += "network errors:";
-			std::for_each(_exceptions.begin(),_exceptions.end(),[&] (neuro_exception ex){txt += "\n"; txt += ex.what();});
+			ret += std::format("network has {0} errors:",count_err);
+			ret += txt_err;
 		}
-		return txt;
+
+		if (count_warn > 0)
+		{
+			ret += std::format("\nnetwork has {0} warnings:", count_warn);
+			ret += txt_warn;
+		}
+		return ret;
 	}
 
 
