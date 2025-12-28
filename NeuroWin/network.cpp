@@ -2,6 +2,7 @@
 
 #include "neuro_def.h"
 #include "network.h"
+
 #include <sstream>
 #include <numeric>		// std::accumulate
 
@@ -15,13 +16,15 @@ namespace neuro
     /*                                         */
     /*******************************************/
 
-    network::network(init_data &ini_data)
+    network::network(init_data &ini_data) /*: _pp(this)*/
     {
         if(!ini_data.is_ok())
 		{
 			throw std::exception("Initialization data invalid.");
 			return;
 		}
+		
+
 
 		_nLays = ini_data.get_layers_num();
 

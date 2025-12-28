@@ -1,4 +1,5 @@
 
+
 #ifndef NEURO_DEF_H
 #define NEURO_DEF_H
 
@@ -6,16 +7,18 @@
 // #undef ACT_DBL					// Se non definito: float
 
 #define TXT_INFO		false		// Informazioni aggiuntive in nodi e sinapsi
+
 #define TXT_FLOAT_FRM	".4f"
-#if _DEBUG
-	
+#if _DEBUG	
 	#define _DEBUG_NEURO_DET false
 #endif
+
+//#include "network.h"
+
 #include <iostream>
 #include <string> 
 #include <execution>
 #include <limits>
-
 
 namespace neuro
 {
@@ -61,5 +64,8 @@ namespace neuro
 		return str;
 	}
 }
+
+#include "PIPPO.h"
+//#include "neuro_exception.h"
 
 #endif

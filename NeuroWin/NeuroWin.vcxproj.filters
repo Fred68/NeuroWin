@@ -56,6 +56,12 @@
     <ClInclude Include="learn_data.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="neuro_exc_static.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="PIPPO.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Note.txt">

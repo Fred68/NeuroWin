@@ -16,11 +16,14 @@
 #define NETWORK_H
 
 #include "neuro_def.h"
+#include "neuro_exc_static.h"
 
 #include "neuron.h"
 #include "init_data.h"
 #include "layer.h"
 #include "learn_data.h"
+
+
 
 #include <string>			// std::format
 #include <vector>
@@ -52,6 +55,7 @@ namespace neuro
     /// </summary>
     class network
     {
+		//PIPPO _pp;
 
 		public:
 			#ifdef ACT_DBL
@@ -227,24 +231,15 @@ namespace neuro
     // neuro_exception
     /*******************************************/
 
-	// TODO Aggiungere gli errori, prendendoli da tutti i throw e da altri casi gestiti
-
 	class neuro_exception
 	{
 		public:
-			enum type : size_t
-			{
-				pippo = 0,
-				pluto,
-				none		// Usa il nome 'none' (invece che magic_enum class)
-			};
+			
+			// Usa la costante con l'enumerazione degli errori
+			_NEURO_EXC_ENUM;
 
-			inline static std::string _str[type::none] =
-			{
-				"PIPPO",
-				"PLUTO",
-			};
-
+			// Usa la costante con le stringhe statiche
+			_NEURO_EXC_STR
 
 		private:
 			std::shared_ptr<network> _net;
