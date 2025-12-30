@@ -45,7 +45,9 @@ namespace neuro
 	class neuro_exception;
 
     /*******************************************/
-    // network
+	/*                                         */
+    /* network                                 */
+	/*                                         */
     /*******************************************/
 
 	// TODO Aggiungere salvataggio e caricamento di una rete (con i pesi), per eseguire l'addestramento in più fasi
@@ -53,8 +55,74 @@ namespace neuro
     /// <summary>
     /// Class network
     /// </summary>
-    class network
+    class network /*: public std::enable_shared_from_this<network>*/
     {
+		public:
+			
+			/*******************************************/
+			// neuro_exception
+			/*******************************************/
+			class neuro_exception
+			{
+				friend network;
+
+				public:
+					_NEURO_EXC_ENUM;		// Usa la costante con l'enumerazione degli errori
+					_NEURO_EXC_STR;			// Usa la costante con le stringhe statiche
+
+				private:
+					std::shared_ptr<network> _net;
+					type _type;
+					bool _is_error;
+					std::string _desc;
+					std::chrono::system_clock::time_point _time;
+
+				//public:
+					/// <summary>
+					/// neuro_exception
+					/// </summary>
+					/// <param name="net">std::shared_ptr<network> net</param>
+					/// <param name="type">type type = type::none</param>
+					/// <param name="is_error">bool is_error = true</param>
+					/// <param name="desc">std::string desc = ""</param>
+					neuro_exception(const std::shared_ptr<network> net, const type type = type::none, bool is_error = true, std::string desc = "") noexcept : _net(net), _type(type), _is_error(is_error), _desc(desc), _time(std::chrono::system_clock::now())
+					{
+						_net->add_exception(*this);
+					}
+				public:
+					neuro_exception(neuro_exception const &other) noexcept : _net(other._net), _type(other._type), _is_error(other._is_error), _desc(other._desc), _time(other._time) {}
+					neuro_exception& operator=(neuro_exception const &other) noexcept
+					{
+						if (this != &other)
+						{
+							_net = other._net;
+							_type = other._type;
+							_is_error = other._is_error;
+							_desc = other._desc;
+							_time = other._time;
+						}
+						return *this;
+					}
+
+					static bool is_ex_error(neuro_exception &nex) { return nex._is_error; }
+					bool is_error() { return _is_error; }
+				
+				public:
+					const std::string what() const noexcept		// Nessun override di virtual const char* what() const noexcept
+					{
+						std::string txt;
+						txt = "[";
+						std::string x = std::format("{0}", _time);
+						txt += x;
+						txt += "] ";
+						txt += _str[_type];
+						if (_desc.size() > 0)	txt += " : " + _desc;
+						return txt;
+					}
+
+
+			};  // class neuro_exception
+
 		//PIPPO _pp;
 
 		public:
@@ -88,6 +156,8 @@ namespace neuro
 			// In ogni caso un mutex introduce un overhead. Se l'operazione è semplice, meglio usare dati atomici
 			std::execution::parallel_policy exe_pol[3] = {std::execution::par, std::execution::par, std::execution::par};
 
+			std::vector<neuro_exception> _exceptions;
+
             /// <summary>
             /// Neurone del livello 'lay' e con indice 'num'.
 			/// Indici non controllati
@@ -97,7 +167,8 @@ namespace neuro
             /// <returns></returns>
             neuron &get_at(uint lay, uint num) {return (_layers[lay])[num];}	// No check indici
             
-			std::vector<neuro_exception> _exceptions;
+			void add_exception(neuro_exception &ex);
+
 
 			#if TXT_INFO
             void name_elements();
@@ -193,8 +264,8 @@ namespace neuro
             std::string to_string();
 
 			network &get_reference() {return *this;}
-			
-			void add_exception(neuro_exception &ex);
+
+			neuro_exception &create_exception();
 			void clear_exceptions();
 			bool isOk();
 			std::string get_exceptions_string(bool show_warnings = false);
@@ -227,70 +298,7 @@ namespace neuro
 
     };  // class network
 
-	/*******************************************/
-    // neuro_exception
-    /*******************************************/
 
-	class neuro_exception
-	{
-		public:
-			
-			// Usa la costante con l'enumerazione degli errori
-			_NEURO_EXC_ENUM;
-
-			// Usa la costante con le stringhe statiche
-			_NEURO_EXC_STR
-
-		private:
-			std::shared_ptr<network> _net;
-			type _type;
-			bool _is_error;
-			std::string _desc;
-			std::chrono::system_clock::time_point _time;
-
-		public:
-			/// <summary>
-			/// neuro_exception
-			/// </summary>
-			/// <param name="net">std::shared_ptr<network> net</param>
-			/// <param name="type">type type = type::none</param>
-			/// <param name="is_error">bool is_error = true</param>
-			/// <param name="desc">std::string desc = ""</param>
-			neuro_exception(std::shared_ptr<network> net, const type type = type::none, bool is_error = true, std::string desc = "") noexcept : _net(net), _type(type), _is_error(is_error), _desc(desc), _time(std::chrono::system_clock::now())
-			{
-				_net->add_exception(*this);
-			}
-			neuro_exception(neuro_exception const &other) noexcept : _net(other._net), _type(other._type), _is_error(other._is_error), _desc(other._desc), _time(other._time) {}
-			neuro_exception& operator=(neuro_exception const &other) noexcept
-			{
-				if (this != &other)
-				{	
-					_net = other._net;
-					_type = other._type;
-					_is_error = other._is_error;
-					_desc=other._desc;
-					_time = other._time;
-				}
-				return *this;
-			}
-
-			static bool is_ex_error(neuro_exception &nex) {return nex._is_error;}
-			bool is_error() {return _is_error;}
-
-			const std::string what() const noexcept		// Nessun override di virtual const char* what() const noexcept
-			{
-				std::string txt;
-				txt = "[";
-				std::string x = std::format("{0}", _time);
-				txt += x;
-				txt += "] ";
-				txt += _str[_type];
-				if(_desc.size() > 0)	txt += " : " + _desc;
-				return txt;
-			}
-
-
-	};  // class neuro_exception
 
 }  // namespace neuro
 

@@ -80,14 +80,14 @@ int main()
 	{
 		net = make_unique<network>(ini);
 		ld = make_unique<learn_data>(net);
-		neuro_exception tmp = neuro_exception(net,neuro_exception::pippo,false,"warning...");
-		throw neuro_exception(net, neuro_exception::pluto, true, "error...");
+		network::neuro_exception tmp = network::neuro_exception(net, network::neuro_exception::pippo,false,"warning...");
+		throw network::neuro_exception(net, network::neuro_exception::pluto, true, "error...");
 	}
 	catch(std::exception const &ex)
 	{
 		cerr << "Catturata std::exception:\n" << ex.what() << std::endl;
 	}
-	catch(neuro::neuro_exception const &nex)
+	catch(network::neuro_exception const &nex)
 	{
 		cerr << "Catturata neuro::neuro_exception:\n" << nex.what() << std::endl;
 	}
@@ -98,7 +98,7 @@ int main()
 		cout << net->get_exceptions_string(false) << endl;
 	}
 	net->clear_exceptions();
-	neuro_exception tmp = neuro_exception(net, neuro_exception::pippo, false, "new warning...");
+	network::neuro_exception tmp = network::neuro_exception(net, network::neuro_exception::pippo, false, "new warning...");
 	cout << net->get_exceptions_string(true) << endl;
 
 	cout << "In: " << net->get_input_layer_sz() << '\n' << "Out: " << net->get_output_layer_sz() << endl;

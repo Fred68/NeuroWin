@@ -16,15 +16,13 @@ namespace neuro
     /*                                         */
     /*******************************************/
 
-    network::network(init_data &ini_data) /*: _pp(this)*/
+    network::network(init_data &ini_data) /*: _this(shared_from_this())*/
     {
         if(!ini_data.is_ok())
 		{
 			throw std::exception("Initialization data invalid.");
 			return;
 		}
-		
-
 
 		_nLays = ini_data.get_layers_num();
 

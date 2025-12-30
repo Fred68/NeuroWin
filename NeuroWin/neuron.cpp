@@ -120,7 +120,11 @@ namespace neuro
 				f_act_der = &one;
 				break;
 			default:
+				{
+				//throw neuro::neuro_exception(net.get_ptr(), neuro_exception::type::pippo, true, "enum FACT non riconosciuto.");
 				throw std::exception("enum FACT non riconosciuto.");
+				}
+				
 			}
 			fact = f;
 		}
