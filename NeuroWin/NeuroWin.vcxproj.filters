@@ -30,9 +30,6 @@
     <ClCompile Include="synapse.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="layer.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
     <ClCompile Include="learn_data.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
@@ -57,9 +54,6 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="neuro_exc_static.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="PIPPO.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

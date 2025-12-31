@@ -20,7 +20,7 @@ namespace neuro
     {
         if(!ini_data.is_ok())
 		{
-			throw std::exception("Initialization data invalid.");
+			throw this->create_exception(neuro_exception::init_data,true,"in network ctor");
 			return;
 		}
 
@@ -78,7 +78,7 @@ namespace neuro
 		}
 		else
 		{
-			throw std::exception("Minimum 2 layer required.");
+			throw this->create_exception(neuro_exception::layer_number, true, "minimum two layers required in network ctor");
 			return;
 		}
 
@@ -117,11 +117,6 @@ namespace neuro
             }
         }
         return txt;
-	}
-
-	void network::add_exception(neuro_exception &ex)
-	{
-		_exceptions.push_back(ex);
 	}
 
 	void network::clear_exceptions()
@@ -202,9 +197,9 @@ namespace neuro
     neuron& network::get_neuron(uint lay, uint num)
     {
         if (lay >= _nLays)
-            throw std::exception("Layer out of range");
+			throw this->create_exception(neuro_exception::layer_out_of_range, true, "in get_neuron()");
         else if (num >= _layers[lay].size())
-            throw std::exception("Node out of range");
+			throw this->create_exception(neuro_exception::node_out_of_range, true, "in get_neuron()");
         else
             return get_at(lay, num);
     }
@@ -231,6 +226,8 @@ namespace neuro
 			std::for_each(get_exe_pol(EXE_POL::layer),v.begin(),v.end(),func_set);
 			ret = ok;
 		}
+		else
+			throw this->create_exception(neuro_exception::size_mismatch, true, "input vector and first layer sizes are different in set_inputs()");
 		return ret;
 	}
 
@@ -258,7 +255,7 @@ namespace neuro
 			ret = ok;
 		}
 		else
-			throw std::exception("Output vector and last layer sizes don't match");
+			throw this->create_exception(neuro_exception::size_mismatch, true, "output vector and last layer sizes are different in set_outputs()");
 		return ret;
 	}
 

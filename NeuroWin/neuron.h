@@ -65,7 +65,7 @@ namespace neuro
 			static constexpr act b_ini_mean = 0.001;
 
         private:
-			const network &net;						/// Riferimento alla rete di appartenenza
+			/*const*/ network &net;						/// Riferimento alla rete di appartenenza
             act x;                                  /// Segnale in ingresso
             act y;                                  /// Attività in uscita
 			union
@@ -90,9 +90,9 @@ namespace neuro
             #endif
 
         public:
-			neuron(const network &netwrk);
-			neuron(const network &netwrk, bool isInput);
-			neuron(const network &netwrk, std::vector<neuron> &prev, act std_w = w_ini_const, act bias_w = b_ini_const);
+			neuron(/*const*/ network &netwrk);
+			neuron(/*const*/ network &netwrk, bool isInput);
+			neuron(/*const*/ network &netwrk, std::vector<neuron> &prev, act std_w = w_ini_const, act bias_w = b_ini_const);
             ~neuron();
 
             std::string to_string();

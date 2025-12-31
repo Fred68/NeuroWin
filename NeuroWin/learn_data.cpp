@@ -54,7 +54,7 @@ namespace neuro
 		}
 		else
 		{
-			throw std::exception("learn_data index error");
+			throw _pnet->create_exception(network::neuro_exception::learn_data_index,true,"in learn_data::add_data()");
 		}
 	}
 

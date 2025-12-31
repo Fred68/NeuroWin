@@ -13,7 +13,7 @@ namespace neuro
 	// TODO : Prevedere cancellazione e creazione di sinapsi (alcuni livelli potrebbero avere solo poche sinapsi al livello precedente).
 	// TODO : Vedere se e quando disabilitare dei nodi (se funzione relu < 0), ma probabilmente è meglio di no.
 
-    neuron::neuron(const network &netwrk) : net(netwrk)								//neuron::neuron(std::shared_ptr<network> netwrk) : pnet(netwrk)
+    neuron::neuron(/*const*/ network &netwrk) : net(netwrk)								//neuron::neuron(std::shared_ptr<network> netwrk) : pnet(netwrk)
     {
         x = y = 0;
 		ei = 0;
@@ -24,7 +24,7 @@ namespace neuro
         cout << "neuron()\n";
         #endif
     }
-	neuron::neuron(const network &netwrk, bool isInput) : neuron(netwrk)			//neuron::neuron(std::shared_ptr<network> netwrk, bool isInput) : neuron(netwrk)
+	neuron::neuron(/*const*/ network &netwrk, bool isInput) : neuron(netwrk)			//neuron::neuron(std::shared_ptr<network> netwrk, bool isInput) : neuron(netwrk)
 	{
 		if(isInput)					// Se è un neurone di input, imposta la funzione di attivazion identità  (ed il flag)
 		{
@@ -32,7 +32,7 @@ namespace neuro
 			input = true;			// ...poi imposta input a true, che disabilita set_fact()
 		}
 	}
-	neuron::neuron(const network &netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)		//neuron::neuron(std::shared_ptr<network> netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)
+	neuron::neuron(/*const*/ network &netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)		//neuron::neuron(std::shared_ptr<network> netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)
     {
 		for(uint i=0; i<prev.size(); i++)						// Imposta il vettore delle sinapsi (non è un neurone di input)
 		{														// con pesi e bias indicati
@@ -86,7 +86,6 @@ namespace neuro
         #if TXT_INFO
         txt = name + ": " + txt;
         #endif
-		//net.get_layers_count();
         return txt;
     }    
  
@@ -120,10 +119,7 @@ namespace neuro
 				f_act_der = &one;
 				break;
 			default:
-				{
-				//throw neuro::neuro_exception(net.get_ptr(), neuro_exception::type::pippo, true, "enum FACT non riconosciuto.");
-				throw std::exception("enum FACT non riconosciuto.");
-				}
+				throw net.create_exception(network::neuro_exception::type::activation_function, true, "in neuron::set_fact()");
 				
 			}
 			fact = f;
@@ -161,7 +157,7 @@ namespace neuro
 	{	
 		#if _DEBUG
 		if(isBeta)
-			throw std::exception("Get EI when beta is set.");
+			throw net.create_exception(network::neuro_exception::type::EI_mismatch, true, "failed neuron::get_ei(), beta is set");
 		#endif
 		return ei;
 		
@@ -170,7 +166,7 @@ namespace neuro
 	{
 		#if _DEBUG
 		if(!isBeta)
-			throw std::exception("Get beta when EI is set.");
+			throw net.create_exception(network::neuro_exception::type::beta_mismatch, true, "failed neuron::get_beta(), EI is set");
 		#endif
 		return beta;
 	}
@@ -212,7 +208,7 @@ namespace neuro
 		{
 			#if _DEBUG
 			if(!isBeta)
-				throw std::exception("Cannot calc. EI when beta is not set");
+				throw net.create_exception(network::neuro_exception::type::beta_mismatch, true, "failed neuron::calc_ei(), beta is not set");
 			#endif
 			set_ei(get_beta() * f_act_der(this));
 		}

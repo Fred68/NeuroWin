@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="init_data.cpp" />
-    <ClCompile Include="layer.cpp" />
     <ClCompile Include="learn_data.cpp" />
     <ClCompile Include="network.cpp" />
     <ClCompile Include="neuron.cpp" />
@@ -39,9 +38,6 @@
     <ClInclude Include="neuro_def.h" />
     <ClInclude Include="neuro_exc_static.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="PIPPO.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

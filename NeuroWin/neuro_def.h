@@ -33,7 +33,7 @@ namespace neuro
 
 	typedef size_t uint;		// In alternativa: typedef unsigned int uint;
 
-    enum class FACT { sigmoid = 0, tanh, relu, one, id, Count };
+    enum class FACT { sigmoid = 0, tanh, relu, one, id, test_error, Count };
 	
 	enum class EXE_POL { neuron = 0, layer, network };
 
@@ -64,8 +64,5 @@ namespace neuro
 		return str;
 	}
 }
-
-#include "PIPPO.h"
-//#include "neuro_exception.h"
 
 #endif
