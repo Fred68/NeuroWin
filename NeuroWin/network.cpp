@@ -10,6 +10,38 @@
 
 namespace neuro
 {
+
+	/*******************************************/
+    /* neuro_exception                         */
+    /*******************************************/
+
+	const std::string network::neuro_exception::what() const noexcept		// Nessun override di virtual const char* what() const noexcept
+	{
+		std::string txt;
+		txt = "[";
+		std::string x = std::format("{0}", _time);
+		txt += x;
+		txt += "] ";
+		txt += _str[_type];
+		if (_desc.size() > 0)	txt += " : " + _desc;
+		return txt;
+	}
+
+
+	network::neuro_exception& network::neuro_exception::operator=(neuro_exception const &other) noexcept
+	{
+		if (this != &other)
+		{
+			_type = other._type;
+			_is_error = other._is_error;
+			_desc = other._desc;
+			_time = other._time;
+		}
+		return *this;
+
+	}
+
+	
     /*******************************************/
     /*                                         */
     /* network                                 */
@@ -117,6 +149,12 @@ namespace neuro
             }
         }
         return txt;
+	}
+
+	constexpr network::neuro_exception &network::create_exception(const network::neuro_exception::type type, bool is_error, std::string desc)
+	{
+		_exceptions.push_back(network::neuro_exception(type, is_error, desc));
+		return _exceptions.back();
 	}
 
 	void network::clear_exceptions()

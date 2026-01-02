@@ -113,7 +113,7 @@ int main()
 	net->create_exception(network::neuro_exception::pippo, false, "new warning...");
 	cout << net->get_exceptions_string(true) << endl;
 
-	cout << "In: " << net->get_input_layer_sz() << '\n' << "Out: " << net->get_output_layer_sz() << endl;
+	cout << "In: " << net->get_input_layer_size() << '\n' << "Out: " << net->get_output_layer_size() << endl;
 	
 	uint iInp, iOut;
 

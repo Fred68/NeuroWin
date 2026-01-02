@@ -26,7 +26,7 @@ namespace neuro
 		
 		public:
 			/// <summary>
-			/// Iteratore semplice con soltanto begin, end e ++
+			/// Iteratore semplice con soltanto begin(), end() e operator++
 			/// Non implementato for(Iterator it : learn_data _ldata) perché restutuirebbe una tuple<> difficile da gestire
 			/// </summary>
 			class Iterator
@@ -37,11 +37,11 @@ namespace neuro
 				using pointer = uint*;
 			
 				public:
-					Iterator(uint i, learn_data &ld) : _indx(i), _ld(ld) {}
-					Iterator& operator++() { _indx++; return *this; }
-					Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
-					friend bool operator== (const Iterator& a, const Iterator& b) { return a._indx == b._indx; };
-					friend bool operator!= (const Iterator& a, const Iterator& b) { return a._indx != b._indx; };
+					inline Iterator(uint i, learn_data &ld) : _indx(i), _ld(ld) {}
+					inline Iterator& operator++() { _indx++; return *this; }
+					inline Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+					inline friend bool operator== (const Iterator& a, const Iterator& b) { return a._indx == b._indx; };
+					inline friend bool operator!= (const Iterator& a, const Iterator& b) { return a._indx != b._indx; };
 
 					std::vector<act> &get_input_v();
 					std::vector<act> &get_output_v();
@@ -52,8 +52,8 @@ namespace neuro
 				
 			};
 			
-			Iterator begin() {return Iterator(0,*this);}
-			Iterator end() { return Iterator(_ldata.size(),*this); }	// Indice oltre il limite 
+			inline Iterator begin()	{ return Iterator(0,*this); }
+			inline Iterator end()	{ return Iterator(_ldata.size(),*this); }	// Indice oltre il limite 
 
 		public:
 
@@ -63,13 +63,13 @@ namespace neuro
 			uint add_input(std::vector<act> v);
 			uint add_output(std::vector<act> v);
 			void add_data(uint index_input, uint index_output);
-			void clear_data() {_ldata.clear();}
-			void clear_all() {clear_data(); _vinp.clear(); _vout.clear();}
+			inline void clear_data() {_ldata.clear();}
+			inline void clear_all() {clear_data(); _vinp.clear(); _vout.clear();}
 
 			std::vector<act> &get_input(uint i);
 			std::vector<act> &get_output(uint i);
 			std::tuple<std::vector<act>&, std::vector<act>&> get_data(uint i);
-			uint get_data_size() {return _ldata.size();}
+			inline uint get_data_size() {return _ldata.size();}
 			bool check_data_size();
 	};
 

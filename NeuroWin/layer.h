@@ -25,27 +25,27 @@ namespace neuro
 			std::vector<neuron>::iterator _it;
 
 			public:
-				Iterator(std::vector<neuron>::iterator iterator) : _it(iterator) {}
-				Iterator& operator++() { ++_it; return *this; }
-				bool operator!=(const Iterator& iter) const { return _it != iter._it; }
-				bool operator==(const Iterator& iter) const { return _it == iter._it; }
-				reference operator*() const {return *_it;}
+				inline Iterator(std::vector<neuron>::iterator iterator) : _it(iterator) {}
+				inline Iterator& operator++() { ++_it; return *this; }
+				inline bool operator!=(const Iterator& iter) const { return _it != iter._it; }
+				inline bool operator==(const Iterator& iter) const { return _it == iter._it; }
+				inline reference operator*() const {return *_it;}
 		};
 
 		public:
-			layer(uint num, network &net, bool b) : _neurons(num, { net, b}) {};
-			layer(uint num, network &net, layer &lay) : _neurons(num, { net, lay.get_neurons()}) {};
+			inline layer(uint num, network &net, bool b) : _neurons(num, { net, b}) {};
+			inline layer(uint num, network &net, layer &lay) : _neurons(num, { net, lay.get_neurons()}) {};
 
-			neuron &operator[](uint i) { return _neurons[i]; }
-			std::vector<neuron> &get_neurons() { return _neurons; }
-			bool get_recalc_w() { return _recalc_w; }
-			void set_recalc_w(bool recalc) { _recalc_w = recalc; }
+			inline neuron &operator[](uint i) { return _neurons[i]; }
+			inline std::vector<neuron> &get_neurons() { return _neurons; }
+			inline bool get_recalc_w() { return _recalc_w; }
+			inline void set_recalc_w(bool recalc) { _recalc_w = recalc; }
 
-			constexpr size_t size() { return _neurons.size(); }
-			constexpr void push_back(const neuron& n) { _neurons.push_back(n); }
+			inline constexpr size_t size() { return _neurons.size(); }
+			inline constexpr void push_back(const neuron& n) { _neurons.push_back(n); }
 
-			Iterator begin() { return Iterator(_neurons.begin()); }
-			Iterator end() { return Iterator(_neurons.end()); }
+			inline Iterator begin() { return Iterator(_neurons.begin()); }
+			inline Iterator end() { return Iterator(_neurons.end()); }
 
 	};
 }

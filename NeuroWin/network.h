@@ -85,41 +85,19 @@ namespace neuro
 					/// <param name="type"></param>
 					/// <param name="is_error"></param>
 					/// <param name="desc"></param>
-					neuro_exception(const type type = type::none, bool is_error = true, std::string desc = "") noexcept :
+					inline neuro_exception(const type type = type::none, bool is_error = true, std::string desc = "") noexcept :
 						_type(type), _is_error(is_error), _desc(desc), _time(std::chrono::system_clock::now()) {}
 
 				public:
-					neuro_exception(neuro_exception const &other)  noexcept :
+					inline neuro_exception(neuro_exception const &other)  noexcept :
 									_type(other._type), _is_error(other._is_error), _desc(other._desc), _time(other._time) {}
-					neuro_exception& operator=(neuro_exception const &other) noexcept
-					{
-						if (this != &other)
-						{
-							_type = other._type;
-							_is_error = other._is_error;
-							_desc = other._desc;
-							_time = other._time;
-						}
-						return *this;
+					neuro_exception& operator=(neuro_exception const &other) noexcept;
 
-					}
-
-					static bool is_ex_error(neuro_exception &nex) { return nex._is_error; }
-					bool is_error() { return _is_error; }
+					inline static bool is_ex_error(neuro_exception &nex) { return nex._is_error; }
+					inline bool is_error() { return _is_error; }
 				
 				public:
-					const std::string what() const noexcept		// Nessun override di virtual const char* what() const noexcept
-					{
-						std::string txt;
-						txt = "[";
-						std::string x = std::format("{0}", _time);
-						txt += x;
-						txt += "] ";
-						txt += _str[_type];
-						if (_desc.size() > 0)	txt += " : " + _desc;
-						return txt;
-					}
-
+					const std::string what() const noexcept;		// Nessun override di virtual const char* what() const noexcept
 
 			};  // class neuro_exception
 
@@ -131,7 +109,7 @@ namespace neuro
 			#endif
 			
 			typedef act(*learn_const_func) (network &net, uint iLay, uint iNeu);	// Cost. di apprendim. (puntatore a funzione)
-			static act lcf_costant_value(network &net, uint iLay, uint iNeu) { return net._learn_const; }
+			inline static act lcf_costant_value(network &net, uint iLay, uint iNeu) { return net._learn_const; }
 			static std::string display_vector(std::vector<act> &v);
 
 		private:
@@ -164,7 +142,7 @@ namespace neuro
             /// <param name="lay"></param>
             /// <param name="num"></param>
             /// <returns></returns>
-            neuron &get_at(uint lay, uint num) {return (_layers[lay])[num];}	// No check indici
+			inline neuron &get_at(uint lay, uint num) {return (_layers[lay])[num];}	// No check indici
             
 
 
@@ -252,38 +230,71 @@ namespace neuro
 			/// Corregge i pesi
 			/// </summary>
 			void update_w();								// Aggiorna i pesi
-
+			/// <summary>
+			/// Calcola back-propagation senza controllare il numero di nodi dei livelli
+			/// </summary>
+			/// <param name="inp_lay"></param>
+			/// <param name="out_lay"></param>
+			/// <param name="cycles"></param>
+			/// <param name="error_tot">errore totale (al quadrato)</param>
+			/// <returns></returns>
 			bool backward_propagate_no_check(const std::vector<act> &inp_lay, const std::vector<act> &out_lay, uint cycles, act &error_tot);
 
         public:
+            /// <summary>
+            /// Ctor con dati di inizializzazione
+            /// </summary>
+            /// <param name="ini_data"></param>
             network(init_data &ini_data);
+            /// <summary>
+            /// dtor
+            /// </summary>
             ~network();
-
+            /// <summary>
+            /// to_string
+            /// </summary>
+            /// <returns></returns>
             std::string to_string();
-
-			network &get_reference() {return *this;}
-
-			constexpr neuro_exception &create_exception(const neuro_exception::type type = neuro_exception::type::none, bool is_error = true, std::string desc = "")
-			{
-				_exceptions.push_back(neuro_exception(type, is_error, desc));
-				return _exceptions.back();
-			}
-
+			/// <summary>
+			/// Reference a *this
+			/// </summary>
+			/// <returns></returns>
+			inline network &get_reference() {return *this;}
+			/// <summary>
+			/// Crea un'eccezione (e la aggiunge all'elenco), non esegue alcun throw
+			/// </summary>
+			/// <param name="type"></param>
+			/// <param name="is_error"></param>
+			/// <param name="desc"></param>
+			/// <returns></returns>
+			constexpr neuro_exception &create_exception(const neuro_exception::type type = neuro_exception::type::none, bool is_error = true, std::string desc = "");
+			/// <summary>
+			/// Svuota l'elenco delle eccezioni
+			/// </summary>
 			void clear_exceptions();
+			/// <summary>
+			/// Controlla se, nella lista delle eccezioni, ci sono errori (o soltanto avvertimenti)
+			/// </summary>
+			/// <returns></returns>
 			bool isOk();
+			/// <summary>
+			/// Stringa con l'elenco delle eccezioni
+			/// </summary>
+			/// <param name="show_warnings">se true, include gli avvertimenti</param>
+			/// <returns></returns>
 			std::string get_exceptions_string(bool show_warnings = false);
 				
 
-			uint get_n_layers() const {return _nLays;}
-			uint get_input_layer_sz() const { return _nInputs; }
-			uint get_output_layer_sz() const { return _nOutputs; }
+			inline uint get_n_layers() const {return _nLays;}
+			inline uint get_input_layer_size() const { return _nInputs; }
+			inline uint get_output_layer_size() const { return _nOutputs; }
 
-			act get_learn_const() const {return _learn_const;}
-			void set_learn_const(act lrn_c) {_learn_const = lrn_c;}
-			std::execution::parallel_policy get_exe_pol(EXE_POL pol) const { return exe_pol[(int)pol]; }
+			inline act get_learn_const() const {return _learn_const;}
+			inline void set_learn_const(act lrn_c) {_learn_const = lrn_c;}
+			inline std::execution::parallel_policy get_exe_pol(EXE_POL pol) const { return exe_pol[(int)pol]; }
 			
-			learn_const_func get_f_learn() const { return _learn_const_pf; };
-			void set_f_learn(learn_const_func lrn_f) { _learn_const_pf = lrn_f; };
+			inline learn_const_func get_f_learn() const { return _learn_const_pf; };
+			inline void set_f_learn(learn_const_func lrn_f) { _learn_const_pf = lrn_f; };
 			
             /// <summary>
             /// Riferimento al neurone del livello 'lay' e con indice 'num'
@@ -294,9 +305,33 @@ namespace neuro
             /// <returns></returns>
             neuron &get_neuron(uint lay, uint num);			// Riferimento al neurone del livello 'lay' e con indice 'num'
 
+			/// <summary>
+			/// Esegue una forward propagation per calcolare i valori di uscita
+			/// </summary>
+			/// <param name="inp_lay">valori di ingresso</param>
+			/// <param name="out_lay">valori</param>
+			/// <returns></returns>
 			bool forward_propagate(const std::vector<act> &inp_lay, std::vector<act> &out_lay);
-			
+			/// <summary>
+			/// Esegue cicli di ricalcolo back propagation, aggiornando i pesi
+			/// per approssimare i valori in uscita partendo dai valori di ingresso
+			/// </summary>
+			/// <param name="inp_lay">valori di ingresso</param>
+			/// <param name="out_lay">valori di uscita desiderati</param>
+			/// <param name="cycles">numero di cicli</param>
+			/// <param name="error_tot">errore totale (al quadrato)</param>
+			/// <param name="msec_elap">millisecondi impiegati</param>
+			/// <returns></returns>
 			bool backward_propagate(const std::vector<act> &inp_lay, const std::vector<act> &out_lay, uint cycles, act &error_tot, std::chrono::milliseconds &msec_elap);
+			/// <summary>
+			/// Ripete cicli ricalcolo dei pesi (con back propagation) sui dati di apprendimento
+			/// </summary>
+			/// <param name="pldata">dati di apprendimento</param>
+			/// <param name="cycles">numero di cicli di apprendimento</param>
+			/// <param name="subcycles">numero di ripetizioni per ogni caso</param>
+			/// <param name="error_med">errore quadratico medio</param>
+			/// <param name="msec_elap">millisecondi impiegati</param>
+			/// <returns></returns>
 			bool backward_propagate(std::shared_ptr<learn_data> pldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap);
 
     };  // class network

@@ -13,8 +13,6 @@
 	#define _DEBUG_NEURO_DET false
 #endif
 
-//#include "network.h"
-
 #include <iostream>
 #include <string> 
 #include <execution>
@@ -31,7 +29,7 @@ namespace neuro
 	
 	#define EPSILON 1E-12
 
-	typedef size_t uint;		// In alternativa: typedef unsigned int uint;
+	typedef size_t uint;			// In alternativa: typedef unsigned int uint;
 
     enum class FACT { sigmoid = 0, tanh, relu, one, id, test_error, Count };
 	

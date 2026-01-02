@@ -13,7 +13,7 @@ namespace neuro
 	// TODO : Prevedere cancellazione e creazione di sinapsi (alcuni livelli potrebbero avere solo poche sinapsi al livello precedente).
 	// TODO : Vedere se e quando disabilitare dei nodi (se funzione relu < 0), ma probabilmente è meglio di no.
 
-    neuron::neuron(/*const*/ network &netwrk) : net(netwrk)								//neuron::neuron(std::shared_ptr<network> netwrk) : pnet(netwrk)
+    neuron::neuron(network &netwrk) : net(netwrk)								//neuron::neuron(std::shared_ptr<network> netwrk) : pnet(netwrk)
     {
         x = y = 0;
 		ei = 0;
@@ -24,7 +24,7 @@ namespace neuro
         cout << "neuron()\n";
         #endif
     }
-	neuron::neuron(/*const*/ network &netwrk, bool isInput) : neuron(netwrk)			//neuron::neuron(std::shared_ptr<network> netwrk, bool isInput) : neuron(netwrk)
+	neuron::neuron(network &netwrk, bool isInput) : neuron(netwrk)			//neuron::neuron(std::shared_ptr<network> netwrk, bool isInput) : neuron(netwrk)
 	{
 		if(isInput)					// Se è un neurone di input, imposta la funzione di attivazion identità  (ed il flag)
 		{
@@ -32,7 +32,7 @@ namespace neuro
 			input = true;			// ...poi imposta input a true, che disabilita set_fact()
 		}
 	}
-	neuron::neuron(/*const*/ network &netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)		//neuron::neuron(std::shared_ptr<network> netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)
+	neuron::neuron(network &netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)		//neuron::neuron(std::shared_ptr<network> netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)
     {
 		for(uint i=0; i<prev.size(); i++)						// Imposta il vettore delle sinapsi (non è un neurone di input)
 		{														// con pesi e bias indicati

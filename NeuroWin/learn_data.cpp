@@ -9,8 +9,8 @@ namespace neuro
 
 	learn_data::learn_data(std::shared_ptr<network> pnet) :
 		_pnet(pnet),
-		_inp_sz(pnet->get_input_layer_sz()),
-		_out_sz(pnet->get_output_layer_sz()
+		_inp_sz(pnet->get_input_layer_size()),
+		_out_sz(pnet->get_output_layer_size()
 		)
 	{}
 
@@ -109,7 +109,7 @@ namespace neuro
 		{
 			uint visz = it.get_input_v().size();
 			uint vosz = it.get_output_v().size();
-			if ( (visz != _pnet->get_input_layer_sz())||(vosz != _pnet->get_output_layer_sz()) )
+			if ( (visz != _pnet->get_input_layer_size())||(vosz != _pnet->get_output_layer_size()) )
 			{
 				ok = false;
 				break;
