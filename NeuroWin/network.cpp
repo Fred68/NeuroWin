@@ -4,7 +4,7 @@
 #include "network.h"
 
 #include <sstream>
-#include <numeric>		// std::accumulate
+#include <numeric>		// Per std::accumulate
 
 //#define _PARALLEL	true
 
@@ -48,7 +48,7 @@ namespace neuro
     /*                                         */
     /*******************************************/
 
-    network::network(init_data &ini_data) /*: _this(shared_from_this())*/
+    network::network(init_data &ini_data)
     {
         if(!ini_data.is_ok())
 		{
@@ -57,12 +57,6 @@ namespace neuro
 		}
 
 		_nLays = ini_data.get_layers_num();
-
-		/*#ifdef ACT_DBL
-			_err_tot = 0.0;
-		#else
-			_err_tot = 0.0f;
-        #endif*/
 
 		_learn_const = ini_data.get_learn_const();
 		set_f_learn(lcf_costant_value);
@@ -368,6 +362,13 @@ namespace neuro
 		}
 	}
 
+	void network::calc_index_lay(uint nlay)
+	{
+		layer &lay = _layers[nlay];
+		auto v = std::ranges::iota_view((uint)0, (uint)lay.size());
+		auto func_calc_i = [&](uint i) {lay[i].set_index(i);};
+		std::for_each(std::execution::seq, v.begin(), v.end(), func_calc_i);
+	}
 
 	bool network::prop_fw(const std::vector<act> &inp_lay)
 	{
@@ -497,6 +498,14 @@ namespace neuro
 		msec_elap = std::chrono::duration_cast<std::chrono::milliseconds>(fine - inizio);
 
 		return ok;
+	}
+
+	void network::calc_indexes()
+	{
+		for (uint i = 0; i < _nLays; i++)
+		{
+			calc_index_lay(i);
+		}
 	}
 
 }

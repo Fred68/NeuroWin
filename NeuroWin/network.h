@@ -1,15 +1,6 @@
 
 
 
-/*************************************************/
-/* neuro.cpp                                     */
-/* Implementation for neural network components  */
-/* Standard C++ 20.0                             */
-/* Version 0.1                                   */
-/* Copyright FcSoft november 2025                */
-/* Work in progress...                           */
-/*************************************************/
-
 
 
 #ifndef NETWORK_H
@@ -55,7 +46,7 @@ namespace neuro
     /// <summary>
     /// Class network
     /// </summary>
-    class network /*: public std::enable_shared_from_this<network>*/
+    class network
     {
 		public:
 			
@@ -115,15 +106,21 @@ namespace neuro
 		private:
 			typedef void (*lay_func) (std::vector<neuron> &layer, uint i);					// Calcolo di un livello
 			typedef act (*weight_func) (uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Inizializzazione di un peso
-		
-			//const std::shared_ptr<network> _this;	// shared this 
-			std::vector<layer> _layers;				// Modificato solo nel ctor
+			
+			// TODO ctor vuoto + + FUNZIONE INIT(INITDATA)
+			// TODO funzioni di I/O per:
+			// std::vector<layer> _layers;
+			// act _learn_const;
+
+			std::vector<layer> _layers;
             uint _nLays = 0;
 			uint _nInputs = 0;
 			uint _nOutputs = 0;
 			
 			act _learn_const = Default_learn_const;
 			learn_const_func _learn_const_pf;				// Puntatore alla funzione che restituisce la costante di apprendimento	
+
+			std::vector<neuro_exception> _exceptions;
 
 			// std::execution::seq = sequenziale, singolo thread. Nessun 'data race'
 			// std::execution::par = parallelo su più thread. Evitare 'data race' con mutex o atomic. 
@@ -133,7 +130,6 @@ namespace neuro
 			// In ogni caso un mutex introduce un overhead. Se l'operazione è semplice, meglio usare dati atomici
 			std::execution::parallel_policy exe_pol[3] = {std::execution::par, std::execution::par, std::execution::par};
 
-			std::vector<neuro_exception> _exceptions;
 
             /// <summary>
             /// Neurone del livello 'lay' e con indice 'num'.
@@ -209,7 +205,12 @@ namespace neuro
 			/// <param name="nlay"></param>
 			/// <returns></returns>
 			void calc_w_lay(uint nlay);					// Ricalcola i pesi delle sinapsi dei nodi del livello nlay (se recalc_w è vero)
-
+			/// <summary>
+			/// Assegna gli indici ai neuroni del livello (per salvataggio successivo)
+			/// </summary>
+			/// <param name="nlay"></param>
+			void calc_index_lay(uint nlay);				// Assegna gli indici ai neuroni del livello (per salvataggio successivo)
+			
 			/// <summary>
 			/// Calcola la rete con forward propagation, partendo dai valori del vettore di input.
 			/// Per ogni nodo (dal primo all'ultimo livello)...
@@ -333,6 +334,10 @@ namespace neuro
 			/// <param name="msec_elap">millisecondi impiegati</param>
 			/// <returns></returns>
 			bool backward_propagate(std::shared_ptr<learn_data> pldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap);
+			/// <summary>
+			/// Calcola gli indici dei neuroni (per salvataggio successivo)
+			/// </summary>
+			void calc_indexes();
 
     };  // class network
 

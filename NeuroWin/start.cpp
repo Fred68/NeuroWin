@@ -66,6 +66,8 @@ int main()
     std::cout << "neuro test" << std::endl;
     std::cout << "-----------------------------------------------\n";
 
+	std::cout << get_build_time() << endl;
+
 	// Ini
     std::vector<int> lays = {3, 5, 2};
     std::vector<FACT> facts ={FACT::sigmoid, FACT::sigmoid, FACT::sigmoid};
@@ -169,6 +171,7 @@ int main()
 	net->backward_propagate(ld, cicli, subcicli, errmed, msec_elap);
 	cout << "Tempo: " << msec_elap << '\n';
 	cout << "Err med (quadratico): " << errmed << '\n';
+	getchar(),getchar();
 
 	cout << "\nnet after learning:\n" << net->to_string() << endl;
 
@@ -185,9 +188,14 @@ int main()
 		cout << "vres (using): " << network::display_vector(vres) << endl;
 	}
 
+	
+	net->calc_indexes();
+	cout << "\n\nSave neuron indexes:\n" << net->to_string() << endl;
+
 	std::cout << "\n-----------------------------------------------\n";
 	std::cout << "end of test" << std::endl;
 	std::cout << "-----------------------------------------------\n";
+
 
 	//cout << learn_data::UINT_ERROR << endl;
 	//cout << (uint) -1 << endl;

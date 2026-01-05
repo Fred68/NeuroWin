@@ -1,4 +1,15 @@
 
+/*************************************************/
+/* namespace neuro                               */
+/* Implementation for neural network components  */
+/* Standard C++ 20.0                             */
+/* Version 0.2                                   */
+/* Copyright FcSoft november 2025...             */
+/* ...gennaio 2026                               */
+/* Work in progress...                           */
+/*************************************************/
+
+
 
 #ifndef NEURO_DEF_H
 #define NEURO_DEF_H
@@ -15,6 +26,7 @@
 
 #include <iostream>
 #include <string> 
+#include <format> 
 #include <execution>
 #include <limits>
 
@@ -30,6 +42,8 @@ namespace neuro
 	#define EPSILON 1E-12
 
 	typedef size_t uint;			// In alternativa: typedef unsigned int uint;
+
+	//typedef std::shared_ptr<neuron> ptN;
 
     enum class FACT { sigmoid = 0, tanh, relu, one, id, test_error, Count };
 	
@@ -60,6 +74,12 @@ namespace neuro
 			break;
 		}
 		return str;
+	}
+
+	static std::string get_build_time()
+	{
+		
+		return std::format("Compile timestamp: {0}",__TIMESTAMP__);
 	}
 }
 

@@ -33,6 +33,9 @@
     <ClCompile Include="learn_data.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="layer.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="network.h">

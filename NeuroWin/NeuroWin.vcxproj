@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="init_data.cpp" />
+    <ClCompile Include="layer.cpp" />
     <ClCompile Include="learn_data.cpp" />
     <ClCompile Include="network.cpp" />
     <ClCompile Include="neuron.cpp" />

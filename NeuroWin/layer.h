@@ -6,11 +6,17 @@
 #include "neuron.h"
 #include <vector>
 #include <memory>
+#include <fstream>			// I/O su stream (binario)
 
 namespace neuro
 {
 	class layer
 	{
+		// TODO funzioni di I/O per:
+		// std::vector<neuron> _neurons;
+		// bool _recalc_w;
+
+		network &_net;
 		std::vector<neuron> _neurons;	/// Vettore con i neuroni. Classe derivata: più complessa da scrivere.
 		bool _recalc_w = true;			/// Ricalcola i pesi con back propagation. Se false: bloccati
 		
@@ -33,8 +39,23 @@ namespace neuro
 		};
 
 		public:
-			inline layer(uint num, network &net, bool b) : _neurons(num, { net, b}) {};
-			inline layer(uint num, network &net, layer &lay) : _neurons(num, { net, lay.get_neurons()}) {};
+			/// <summary>
+			/// Ctor
+			/// Chiama il costruttore di vector<neuron> passando il numero di elementi e gli argomenti per il ctor di neuron
+			/// </summary>
+			/// <param name="num">numero di neuroni</param>
+			/// <param name="net">rif. alla rete</param>
+			/// <param name="b">livello di input ?</param>
+			inline layer(uint num, network &net, bool b) : _neurons(num, { net, b}), _net(net) {};
+
+			/// <summary>
+			/// Ctor
+			/// Chiama il costruttore di vector<neuron> passando il numero di elementi e gli argomenti per il ctor di neuron
+			/// </summary>
+			/// <param name="num">numero di neuroni</param>
+			/// <param name="net">rif. alla rete</param>
+			/// <param name="lay">livello precedente</param>
+			inline layer(uint num, network &net, layer &lay) : _neurons(num, { net, lay.get_neurons()}), _net(net) {};
 
 			inline neuron &operator[](uint i) { return _neurons[i]; }
 			inline std::vector<neuron> &get_neurons() { return _neurons; }
@@ -47,6 +68,8 @@ namespace neuro
 			inline Iterator begin() { return Iterator(_neurons.begin()); }
 			inline Iterator end() { return Iterator(_neurons.end()); }
 
+			void write(std::ofstream &fs);
+			void read(std::ifstream &fs);
 	};
 }
 

@@ -12,25 +12,41 @@
 #include <algorithm>        // for_each
 #include <atomic>           // atomic<float>
 #include <ranges>			// iota
+#include <variant>			// union non anonima in classe usata in un vettore sarebbe più complessa.
 
+#include <fstream>			// I/O su stream (binario)
+
+
+// Formato per neuron::to_string(), con stat::ei o stat::beta
 #define TO_STR_FORMAT_N(n,b) ("x={0:." #n "f},y={1:." #n "f},{5}={4:." #b "f}(f={2}){3}")
+#define TO_STR_FORMAT_N_INDX(n) ("x={0:." #n "f},y={1:." #n "f},{5}={4}(f={2}){3}")
 #define TO_STR_FORMAT_W(n) ("[{0}{1:." #n "f}]")
 
 namespace neuro
 {
+
+	class neuron;
 	class network;
 	class synapse;	
+	class pippo;
+
+	typedef std::shared_ptr<neuron> ptN;
 
 	class neuron
     {
-		
+		enum stat : char { _beta, _ei, _index };
+
 		class synapse
 		{
 			friend class neuron;
 
 			private:
-				std::shared_ptr<neuron> pn;
-				act    w;
+				
+				std::variant<ptN,uint> pn;							// Prima era: ptN pn;
+				act w;
+
+				void write(std::ofstream &fs);
+				void read(std::ifstream &fs);
 
 			public:
 				synapse();
@@ -55,7 +71,9 @@ namespace neuro
 
 		public:
 			static constexpr const char *to_string_frm_n = TO_STR_FORMAT_N(3,5);
+			static constexpr const char *to_string_frm_n_indx = TO_STR_FORMAT_N_INDX(3);
 			static constexpr const char *to_string_frm_w = TO_STR_FORMAT_W(3);
+
 
 		public:
 			static constexpr act w_ini_const = 0.05;
@@ -67,10 +85,12 @@ namespace neuro
 			network &net;							/// Riferimento alla rete di appartenenza
             act x;                                  /// Segnale in ingresso
             act y;                                  /// Attività in uscita
+
 			union
-			{										// Union inutile, messa solo per chiarezza
+			{
+				uint index_in_layer;				/// Per I/O
 				act beta;							/// beta (primo calcolo), poi...
-				act ei;								/// ...EI = beta * F' (secondo calcolo) 			
+				act ei;								/// ...EI = beta * F' (secondo calcolo)
 			};
             std::vector<synapse> syns;              /// Sinapsi
             act_func f_act;                         /// Funzione di attivazione (puntatore)
@@ -79,9 +99,9 @@ namespace neuro
 			FACT fact;                              /// Tipo di funzione di attivazione
             bool active = true;                     /// Se false, non calcola né x dai pesi né y.
             bool input = false;                     /// Se true: nodo di input, non calcola la x, solo la y, e abilita set_input
-			#if _DEBUG
-			bool isBeta = true;						/// beta or EI
-			#endif
+
+			stat _nstat = stat::_beta;				/// beta, EI o index (for I/O)
+
 			#if TXT_INFO
             std::string name = "";
             #endif
@@ -138,6 +158,17 @@ namespace neuro
 			void calc_y();
 
 			/// <summary>
+			/// Indice del neurone nel livello (per salvataggio)
+			/// </summary>
+			/// <returns></returns>
+			uint get_index();
+			/// <summary>
+			/// Imposta l'indice del neurone nel livello (per salvataggio)
+			/// </summary>
+			/// <param name="i"></param>
+			void set_index(uint i);
+
+			/// <summary>
 			/// Valore della derivata dell'errore (ei, in unione con beta)
 			/// </summary>
 			/// <returns></returns>
@@ -147,6 +178,7 @@ namespace neuro
 			/// </summary>
 			/// <param name="beta_in"></param>
 			void set_beta(act beta_in);
+
 			/// <summary>
 			/// Valore della derivata dell'errore (ei, in unione con beta)
 			/// </summary>
@@ -180,10 +212,18 @@ namespace neuro
 			/// Formula [9], ma contributi del nodo j attuale alle beta dei nodi i precedenti
 			/// </summary>
 			void calc_parz_eai();					// Calcolo parziale delle EA = beta dei nodi del livello precedente
-
+			/// <summary>
+			/// Ricalcola i pesi (riceve da network la costante di apprendimento)
+			/// </summary>
+			/// <param name="learn_const"></param>
 			void calc_w(act learn_const);			// Ricalcolo dei pesi (riceve da network la costante di apprendimento)
+
+			void write(std::ofstream &fs);
+			void read(std::ifstream &fs);
     };
 	
+	
+
 }
 
 #endif

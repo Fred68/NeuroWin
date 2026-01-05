@@ -11,6 +11,7 @@
 				activation_function = 0,\
 				EI_mismatch,\
 				beta_mismatch,\
+				index_mismatch,\
 				learn_data_index,\
 				init_data,\
 				layer_number,\
@@ -31,6 +32,7 @@
 				"activation function type not recognized",\
 				"ei is not set",\
 				"beta is not set",\
+				"index is not set",\
 				"learn data index is wrong",\
 				"initialization data are invalid",\
 				"layer number is wrong!",\
