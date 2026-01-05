@@ -107,11 +107,12 @@ namespace neuro
 			typedef void (*lay_func) (std::vector<neuron> &layer, uint i);					// Calcolo di un livello
 			typedef act (*weight_func) (uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Inizializzazione di un peso
 			
-			// TODO ctor vuoto + + FUNZIONE INIT(INITDATA)
 			// TODO funzioni di I/O per:
 			// std::vector<layer> _layers;
 			// act _learn_const;
+			// Usare reset() e set(initdata &dt)...
 
+			bool _isSet = false;
 			std::vector<layer> _layers;
             uint _nLays = 0;
 			uint _nInputs = 0;
@@ -130,6 +131,8 @@ namespace neuro
 			// In ogni caso un mutex introduce un overhead. Se l'operazione è semplice, meglio usare dati atomici
 			std::execution::parallel_policy exe_pol[3] = {std::execution::par, std::execution::par, std::execution::par};
 
+			void reset(bool clear_errors = true);
+			bool set(init_data &ini_data);
 
             /// <summary>
             /// Neurone del livello 'lay' e con indice 'num'.
@@ -139,8 +142,6 @@ namespace neuro
             /// <param name="num"></param>
             /// <returns></returns>
 			inline neuron &get_at(uint lay, uint num) {return (_layers[lay])[num];}	// No check indici
-            
-
 
 			#if TXT_INFO
             void name_elements();
@@ -242,6 +243,10 @@ namespace neuro
 			bool backward_propagate_no_check(const std::vector<act> &inp_lay, const std::vector<act> &out_lay, uint cycles, act &error_tot);
 
         public:
+			/// <summary>
+			/// Ctor
+			/// </summary>
+			network();
             /// <summary>
             /// Ctor con dati di inizializzazione
             /// </summary>

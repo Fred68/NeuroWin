@@ -47,64 +47,16 @@ namespace neuro
     /* network                                 */
     /*                                         */
     /*******************************************/
+	network::network()
+	{
+		reset(true);
+	}
 
     network::network(init_data &ini_data)
     {
-        if(!ini_data.is_ok())
+		if(!set(ini_data))
 		{
 			throw this->create_exception(neuro_exception::init_data,true,"in network ctor");
-			return;
-		}
-
-		_nLays = ini_data.get_layers_num();
-
-		_learn_const = ini_data.get_learn_const();
-		set_f_learn(lcf_costant_value);
-
-		// TODO: Impostare exe_pol in base al numero totale di nodi e al numero di nodi per livello
-		// TODO: Fare delle prove di velocità
-		exe_pol[(int)EXE_POL::neuron] = std::execution::par;
-		exe_pol[(int)EXE_POL::layer] = std::execution::par;
-		exe_pol[(int)EXE_POL::network] = std::execution::par;
-
-		if(_nLays > 1)
-		{
-			for(uint i=0; i < _nLays; i++)		// Crea i livelli, ognuno con un nodo in più (uscita 1, disattivo, per i bias)
-			{
-				layer *ln;
-
-				if(i==0)								// Per il primo livello, crea neuroni di input, usando come ctor:
-				{										// ...neuron(bool true) 
-					ln = new layer(ini_data.get_layers()[i] + 1, *this,true );
-				}
-				else
-				{										// Per gli altri livelli, usa neuron()   
-					ln = new layer(ini_data.get_layers()[i] + 1, *this, _layers[i - 1]);
-				}
-				_layers.push_back(*ln);
-
-				uint jmax = (uint) _layers.back().size();
-				for(uint j=0; j<jmax; j++)
-				{
-					if(j == jmax-1)
-					{
-						_layers.back()[j].set_fact(FACT::one);           // Nodo aggiunto: uscita sempre a 1
-						_layers.back()[j].calc_y();                      // Calcola l'uscita e...
-						_layers.back()[j].set_active(false);             // ...disattiva
-					}
-					else
-					{
-						_layers.back()[j].set_fact(ini_data.get_types()[i]);
-					}
-				}
-			}
-
-			_nInputs = _layers[0].size()-1;
-			_nOutputs = _layers[_nLays-1].size()-1;
-		}
-		else
-		{
-			throw this->create_exception(neuro_exception::layer_number, true, "minimum two layers required in network ctor");
 			return;
 		}
 
@@ -120,11 +72,83 @@ namespace neuro
     network::~network()
     {
         _nLays = 0;
-
         #if _DEBUG
         std::cout << "~network()\n";
         int x = getchar();
         #endif
+    }
+
+	void network::reset(bool clear_errors)
+	{
+		_isSet = false;
+		_layers.clear();
+		_nLays = _nInputs = _nOutputs = 0;
+		_learn_const = Default_learn_const;
+		_learn_const_pf = lcf_costant_value;
+		if(clear_errors)	clear_exceptions();
+	}
+
+	bool network::set(init_data &ini_data)
+    {
+		reset(false);
+        if(ini_data.is_ok())
+		{
+			_nLays = ini_data.get_layers_num();
+			_learn_const = ini_data.get_learn_const();
+			set_f_learn(lcf_costant_value);
+			
+			// TODO: Impostare exe_pol in base al numero totale di nodi e al numero di nodi per livello
+			// TODO: Fare delle prove di velocità
+			exe_pol[(int)EXE_POL::neuron] = std::execution::par;
+			exe_pol[(int)EXE_POL::layer] = std::execution::par;
+			exe_pol[(int)EXE_POL::network] = std::execution::par;
+
+			if (_nLays > 1)
+			{
+				for (uint i = 0; i < _nLays; i++)		// Crea i livelli, ognuno con un nodo in più (uscita 1, disattivo, per i bias)
+				{
+					layer *ln;
+
+					if (i == 0)								// Per il primo livello, crea neuroni di input, usando come ctor:
+					{										// ...neuron(bool true) 
+						ln = new layer(ini_data.get_layers()[i] + 1, *this, true);
+					}
+					else
+					{										// Per gli altri livelli, usa neuron()   
+						ln = new layer(ini_data.get_layers()[i] + 1, *this, _layers[i - 1]);
+					}
+					_layers.push_back(*ln);
+
+					uint jmax = (uint)_layers.back().size();
+					for (uint j = 0; j < jmax; j++)
+					{
+						if (j == jmax - 1)
+						{
+							_layers.back()[j].set_fact(FACT::one);           // Nodo aggiunto: uscita sempre a 1
+							_layers.back()[j].calc_y();                      // Calcola l'uscita e...
+							_layers.back()[j].set_active(false);             // ...disattiva
+						}
+						else
+						{
+							_layers.back()[j].set_fact(ini_data.get_types()[i]);
+						}
+					}
+				}
+
+				_nInputs = _layers[0].size() - 1;
+				_nOutputs = _layers[_nLays - 1].size() - 1;
+				_isSet = true;
+			}
+			else
+			{
+				this->create_exception(neuro_exception::layer_number, true, "minimum two layers required in network ctor");
+			}
+		}
+		else
+		{
+			this->create_exception(neuro_exception::init_data,true,"in network::set(...)");
+		}
+		return _isSet;
     }
 
     std::string network::to_string()
@@ -159,7 +183,7 @@ namespace neuro
 	bool network::isOk()
 	{
 		uint count = std::count_if(_exceptions.begin(), _exceptions.end(), neuro_exception::is_ex_error);
-		return (count == 0);
+		return ((count == 0)&&_isSet);
 	}
 	
 	std::string network::get_exceptions_string(bool show_warnings)
