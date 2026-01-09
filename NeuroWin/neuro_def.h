@@ -25,6 +25,9 @@
 	#define _DEBUG_NEURO_DET false
 #endif
 
+#define _COPY_CTORS_ false
+#define _MOVE_CTORS_ false
+
 #include <iostream>
 #include <string> 
 #include <format> 

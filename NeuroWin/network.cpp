@@ -133,9 +133,8 @@ namespace neuro
 					}
 				}
 
-				calc_numbers();
 
-				set_exe_pol();
+				
 
 				_isSet = true;
 			}
@@ -143,6 +142,9 @@ namespace neuro
 			{
 				this->create_exception(neuro_exception::layer_number, true, "minimum two layers required in network ctor");
 			}
+
+			calc_numbers();
+			set_exe_pol();
 		}
 		else
 		{
@@ -665,9 +667,10 @@ namespace neuro
 
 	void network::save(const std::string &fname)
 	{
+		std::ofstream fs;
 		try
 		{
-			std::ofstream fs(fname, std::ios::binary);
+			fs.open(fname, std::ios::binary);
 			if(fs)
 			{
 				write(fs);	
@@ -689,15 +692,17 @@ namespace neuro
 			std::cerr << "Eccezione neuro_exception in network::save(...): " << nex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) net.create_exception...
 		}
+		if(fs.is_open())	fs.close();
 
 
 	}
 
 	void network::load(const std::string &fname)
 	{
+		std::ifstream fs;
 		try
 		{
-			std::ifstream fs(fname, std::ios::binary);
+			fs.open(fname, std::ios::binary);
 			if (fs)
 			{
 				read(fs);
@@ -719,7 +724,7 @@ namespace neuro
 			std::cerr << "Eccezione neuro_exception in network::load(...): " << nex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) net.create_exception...
 		}
-
+		if (fs.is_open())	fs.close();
 		/*if(calc_pointers())
 		{
 			calc_numbers();

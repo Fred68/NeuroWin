@@ -94,14 +94,14 @@ int main()
 		cerr << "Catturata neuro::neuro_exception:\n" << nex.what() << std::endl;
 	}
 
-	try
+	/*try
 	{
 		net->get_neuron(1, 0).set_fact(neuro::FACT::test_error);
 	}
 	catch (network::neuro_exception const &nex)
 	{
 		cerr << "Catturata neuro::neuro_exception:\n" << nex.what() << std::endl;
-	}
+	}*/
 
 	
 
@@ -198,6 +198,7 @@ int main()
 
 	// TODO ::: APRIRE QUI UN FILE per SALVARE e RICARICARE prima i singoli componenti (synapse, neuron, layer...) !!!
 
+	#if false
 	std::ofstream fs("test.bin", std::ios::binary);
 
 	neuron x(*net);
@@ -213,7 +214,7 @@ int main()
 	neuron y(*net);
 	y.read(fsr);
 	fsr.close();
-
+	#endif
 
 	getchar();
 	getchar();

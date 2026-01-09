@@ -45,12 +45,13 @@ namespace neuro
         #endif
     }
 
+	#if _COPY_CTORS_
 	neuron::neuron(const neuron& other) :	net{other.net},
 											x{other.x}, y{other.y},
 											f_act{other.f_act}, f_act_der{other.f_act_der}, fact{other.fact},
 											active{other.active}, input{other.input},
-											_nstat{other._nstat},
-											syns(other.syns.size())
+											_nstat{other._nstat}
+											//syns(other.syns.size())
 	{
 		switch(other._nstat)
 		{
@@ -69,35 +70,11 @@ namespace neuro
 		}
 		for(uint i=0; i<other.syns.size(); i++)
 		{
-			syns[i] = other.syns[i];
+			//syns[i] = other.syns[i];
+			#error AGGIORNARE IL RIFERIMENTO DELLA SINAPSI ALLA NUOVA RETE
+			syns.push_back(synapse(other.syns[i]));
 		}
 	}
-
-	neuron::neuron(neuron&& other) :	net{ other.net },
-										x{ other.x }, y{ other.y },
-										f_act{ other.f_act }, f_act_der{ other.f_act_der }, fact{ other.fact },
-										active{ other.active }, input{ other.input },
-										_nstat{ other._nstat }
-	{
-		switch (other._nstat)
-		{
-		case stat::_beta:
-			beta = other.beta;
-			break;
-		case stat::_ei:
-			ei = other.ei;
-			break;
-		case stat::_index:
-			index_in_layer = other.index_in_layer;
-			break;
-		default:
-			// TODO aggiungere throw eccezione
-			break;
-		}
-		syns = std::move(other.syns);
-	}
-
-
 	neuron& neuron::operator=(const neuron& other)
 	{
 		net = other.net;
@@ -125,15 +102,42 @@ namespace neuro
 			break;
 		}
 		syns.clear();
-		syns.resize(other.syns.size());
+		//syns.resize(other.syns.size());
 		for (uint i = 0; i < other.syns.size(); i++)
 		{
-			syns[i] = other.syns[i];
+			//syns[i] = other.syns[i];
+			#error AGGIORNARE IL RIFERIMENTO DELLA SINAPSI ALLA NUOVA RETE
+			syns.push_back(synapse(other.syns[i]));
 		}
 		return *this;
 	}
-
-	neuron& neuron::operator=(const neuron&& other)
+	#endif
+	#if _MOVE_CTORS_
+	neuron::neuron(neuron&& other) :	net{ other.net },
+										x{ other.x }, y{ other.y },
+										f_act{ other.f_act }, f_act_der{ other.f_act_der }, fact{ other.fact },
+										active{ other.active }, input{ other.input },
+										_nstat{ other._nstat }
+	{
+		switch (other._nstat)
+		{
+		case stat::_beta:
+			beta = other.beta;
+			break;
+		case stat::_ei:
+			ei = other.ei;
+			break;
+		case stat::_index:
+			index_in_layer = other.index_in_layer;
+			break;
+		default:
+			// TODO aggiungere throw eccezione
+			break;
+		}
+		syns.clear();
+		syns = std::move(other.syns);
+	}
+	neuron& neuron::operator=(neuron&& other)
 	{
 		net = other.net;
 		x = other.x;
@@ -163,7 +167,7 @@ namespace neuro
 		syns = std::move(other.syns);
 		return *this;
 	}
-
+	#endif
 
     neuron::~neuron()
     {

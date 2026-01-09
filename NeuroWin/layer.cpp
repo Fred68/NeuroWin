@@ -6,14 +6,14 @@ namespace neuro
 {
 	class network;
 
-	layer::layer(const layer& other) : _net{ other._net }, _recalc_w{ other._recalc_w }
+	#if _COPY_CTORS_
+	layer::layer(const layer& other) : _neurons(other._neurons.size(), { other._net, true }), _net{ other._net }, _recalc_w{ other._recalc_w }
 	{
 		for(uint i=0; i<_neurons.size(); i++)
 		{
 			_neurons[i] = other._neurons[i];
 		}
 	}
-
 	layer& layer::operator=(const layer& other)
 	{
 		_net = other._net;
@@ -27,12 +27,12 @@ namespace neuro
 		}
 		return *this;
 	}
-
+	#endif
+	#if _MOVE_CTORS_
 	layer::layer(const layer&& other) : _net{ other._net }, _recalc_w{ other._recalc_w }
 	{
 		_neurons = std::move(other._neurons);
 	}
-
 	layer& layer::operator=(const layer&& other)
 	{
 		_net = other._net;
@@ -40,7 +40,7 @@ namespace neuro
 		_neurons = std::move(other._neurons);
 		return *this;
 	}
-
+	#endif
 
 	void layer::write(std::ofstream &fs)
 	{

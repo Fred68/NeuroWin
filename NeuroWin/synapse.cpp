@@ -39,12 +39,35 @@ namespace neuro
         #endif
     }
 
+	#if _COPY_CTORS_
+	neuron::synapse::synapse(const synapse& other) : _in{other._in}, _pn{other._pn}, w{other.w}
+	{}
+	neuron::synapse& neuron::synapse::operator=(const synapse& other)
+	{
+		_in = other._in;
+		_pn = other._pn;
+		w = other.w;
+		return *this;
+	}
+	#endif
+	#if _MOVE_CTORS_
+	neuron::synapse::synapse(synapse&& other) : _in { other._in }, _pn{ other._pn }, w{ other.w }
+	{}
+	neuron::synapse& neuron::synapse::operator=(synapse&& other)
+	{
+		_in = other._in;
+		_pn = other._pn;
+		w = other.w;
+		return *this;
+	}
+	#endif
+
 	void neuron::synapse::write(std::ofstream &fs)
 	{
 		try
 		{
-			uint neuron_indx = _pn->get_index();		// Era uint neuron_indx = std::get<ptN>(_pn)->get_index();
-			fs.write(reinterpret_cast<char*>(&neuron_indx), sizeof(neuron_indx));
+			_in = _pn->get_index();		// Era uint neuron_indx = std::get<ptN>(_pn)->get_index();
+			fs.write(reinterpret_cast<char*>(&_in), sizeof(_in));
 			fs.write(reinterpret_cast<char*>(&w), sizeof(w));
 		}
 		catch (std::exception &ex)

@@ -107,7 +107,7 @@ namespace neuro
 			typedef void (*lay_func) (std::vector<neuron> &layer, uint i);					// Calcolo di un livello
 			typedef act (*weight_func) (uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Inizializzazione di un peso
 			
-			bool _isSet = false;
+			
 			std::vector<layer> _layers;
             uint _nLays = 0;
 			uint _nInputs = 0;
@@ -117,6 +117,7 @@ namespace neuro
 			learn_const_func _learn_const_pf;				// Puntatore alla funzione che restituisce la costante di apprendimento	
 
 			std::vector<neuro_exception> _exceptions;
+			bool _isSet = false;
 
 			// std::execution::seq = sequenziale, singolo thread. Nessun 'data race'
 			// std::execution::par = parallelo su più thread. Evitare 'data race' con mutex o atomic. 

@@ -42,11 +42,14 @@ namespace neuro
 			/// <param name="net"></param>
 			inline layer(network &net) : _neurons(0, {net, true}), _net(net) {};
 
+			#if _COPY_CTORS_
 			layer(const layer& other);
-			layer(const layer&& other);
 			layer& operator=(const layer& other);
+			#endif
+			#if _MOVE_CTORS_
+			layer(const layer&& other);
 			layer& operator=(const layer&& other);
-
+			#endif
 
 			/// <summary>
 			/// Ctor

@@ -52,6 +52,14 @@ namespace neuro
 				synapse();							// default ctor
 				synapse(neuron &p_n, act ws);		// ctor
 				~synapse();							// dtor
+				#if _COPY_CTORS_
+				synapse(const synapse& other);
+				synapse& operator=(const synapse& other);
+				#endif
+				#if _MOVE_CTORS_
+				synapse(synapse&& other);
+				synapse& operator=(synapse&& other);
+				#endif
 				// Necessari costruttore di copia e assegnazione di copia standard (copia bit per bit).
 				// synapse(const synapse&)=delete e synapse& operator=(const synapse&)=delete generano errore di compilazione.
 		};
@@ -110,10 +118,14 @@ namespace neuro
 			neuron(network &netwrk);
 			neuron(network &netwrk, bool isInput);
 			neuron(network &netwrk, std::vector<neuron> &prev, act std_w = w_ini_const, act bias_w = b_ini_const);
+			#if _COPY_CTORS_
 			neuron(const neuron& other);
 			neuron& operator=(const neuron& other);
+			#endif
+			#if _MOVE_CTORS_
 			neuron(neuron&& other);
-			neuron& operator=(const neuron&& other);
+			neuron& operator=(neuron&& other);
+			#endif
             ~neuron();
 
             std::string to_string();

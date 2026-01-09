@@ -31,7 +31,7 @@
 			{\
 				"activation function type not recognized",\
 				"ei is not set",\
-				"beta is not set",\
+				"TYPE beta is not set",\
 				"index is not set",\
 				"learn data index is wrong",\
 				"initialization data are invalid",\
