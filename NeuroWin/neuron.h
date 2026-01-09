@@ -41,17 +41,19 @@ namespace neuro
 			friend class neuron;
 
 			private:
-				
-				std::variant<ptN,uint> pn;							// Prima era: ptN pn;
+				uint _in;			// Indice del nodo collegato
+				ptN _pn;			// Puntatore al nodo (era std::variant<ptN,uint> _pn)
 				act w;
-
+		
 				void write(std::ofstream &fs);
 				void read(std::ifstream &fs);
 
 			public:
-				synapse();
-				synapse(neuron &p_n, act ws);
-				~synapse();
+				synapse();							// default ctor
+				synapse(neuron &p_n, act ws);		// ctor
+				~synapse();							// dtor
+				// Necessari costruttore di copia e assegnazione di copia standard (copia bit per bit).
+				// synapse(const synapse&)=delete e synapse& operator=(const synapse&)=delete generano errore di compilazione.
 		};
         
         typedef act (*act_func) (neuron*);							// Puntatore a funzione di attivazione
@@ -85,7 +87,6 @@ namespace neuro
 			network &net;							/// Riferimento alla rete di appartenenza
             act x;                                  /// Segnale in ingresso
             act y;                                  /// Attività in uscita
-
 			union
 			{
 				uint index_in_layer;				/// Per I/O
@@ -99,7 +100,6 @@ namespace neuro
 			FACT fact;                              /// Tipo di funzione di attivazione
             bool active = true;                     /// Se false, non calcola né x dai pesi né y.
             bool input = false;                     /// Se true: nodo di input, non calcola la x, solo la y, e abilita set_input
-
 			stat _nstat = stat::_beta;				/// beta, EI o index (for I/O)
 
 			#if TXT_INFO
@@ -110,20 +110,24 @@ namespace neuro
 			neuron(network &netwrk);
 			neuron(network &netwrk, bool isInput);
 			neuron(network &netwrk, std::vector<neuron> &prev, act std_w = w_ini_const, act bias_w = b_ini_const);
+			neuron(const neuron& other);
+			neuron& operator=(const neuron& other);
+			neuron(neuron&& other);
+			neuron& operator=(const neuron&& other);
             ~neuron();
 
             std::string to_string();
 
-			inline uint get_n_syn() {return syns.size();}	// Numero di sinapsi
-			inline bool get_active() {return active;}		// Neurone attivo / disattivo		
+			inline uint get_n_syn() const {return syns.size();}	// Numero di sinapsi
+			inline bool get_active() const {return active;}		// Neurone attivo / disattivo		
             void set_active(bool stat);
 			
-			inline bool get_input() { return input;}		// Neurone di input o standard
-			void set_input(bool inp);						// Non modifica il vettore delle sinapsi
+			inline bool get_input() const { return input;}		// Neurone di input o standard
+			void set_input(bool inp);							// Non modifica il vettore delle sinapsi
 			
-			inline FACT get_fact() {return fact;}			// Funzione di attivazione
-			std::string get_fact_name();					// Nome della funzione di attivazione
-			void set_fact(FACT f);							// Cambia la funzione di attivazione, solo se non è un nodo di input
+			inline FACT get_fact() {return fact;}				// Funzione di attivazione
+			std::string get_fact_name();						// Nome della funzione di attivazione
+			void set_fact(FACT f);								// Cambia la funzione di attivazione, solo se non è un nodo di input
 			
 			#if TXT_INFO
 			inline std::string get_name() { return name; }
@@ -167,7 +171,7 @@ namespace neuro
 			/// </summary>
 			/// <param name="i"></param>
 			void set_index(uint i);
-
+			
 			/// <summary>
 			/// Valore della derivata dell'errore (ei, in unione con beta)
 			/// </summary>
@@ -217,6 +221,8 @@ namespace neuro
 			/// </summary>
 			/// <param name="learn_const"></param>
 			void calc_w(act learn_const);			// Ricalcolo dei pesi (riceve da network la costante di apprendimento)
+
+			void update_ptr(uint in, uint ilay);	// Aggiorna i puntatori delle sinapsi
 
 			void write(std::ofstream &fs);
 			void read(std::ifstream &fs);

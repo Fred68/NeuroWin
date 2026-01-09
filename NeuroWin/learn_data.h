@@ -13,8 +13,8 @@ namespace neuro
 	class learn_data
 	{
 		
-		public:
-			static const uint UINT_ERROR = UINT_MAX;		/// Errorw per uint, equivalente a (uint) -1;
+		//public:
+		//	static const uint UINT_ERROR = UINT_MAX;		/// Errorw per uint, equivalente a (uint) -1;
 
 		private:
 			const std::shared_ptr<network> _pnet;			/// Puntatore alla rete

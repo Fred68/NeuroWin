@@ -20,6 +20,7 @@
 #define TXT_INFO		false		// Informazioni aggiuntive in nodi e sinapsi
 
 #define TXT_FLOAT_FRM	".4f"
+
 #if _DEBUG	
 	#define _DEBUG_NEURO_DET false
 #endif
@@ -43,11 +44,11 @@ namespace neuro
 
 	typedef size_t uint;			// In alternativa: typedef unsigned int uint;
 
-	//typedef std::shared_ptr<neuron> ptN;
-
     enum class FACT { sigmoid = 0, tanh, relu, one, id, test_error, Count };
 	
 	enum class EXE_POL { neuron = 0, layer, network };
+
+	static const uint UINT_ERROR = UINT_MAX;		/// Error per uint, equivalente a (uint) -1;
 
 	static std::string fact2string(FACT f)
 	{

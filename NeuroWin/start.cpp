@@ -192,6 +192,38 @@ int main()
 	net->calc_indexes();
 	cout << "\n\nSave neuron indexes:\n" << net->to_string() << endl;
 
+	cout << "Salvataggio file..." << endl;
+	net->save("pippo.bin");
+	//net = nullptr;
+
+	// TODO ::: APRIRE QUI UN FILE per SALVARE e RICARICARE prima i singoli componenti (synapse, neuron, layer...) !!!
+
+	std::ofstream fs("test.bin", std::ios::binary);
+
+	neuron x(*net);
+	x.set_index(10);
+	x.set_active(true);
+	x.set_fact(neuro::FACT::relu);
+	//x.write(fs);
+	neuron nn = net->get_neuron(1,1);
+	nn.write(fs);
+	fs.close();
+
+	std::ifstream fsr("test.bin", std::ios::binary);
+	neuron y(*net);
+	y.read(fsr);
+	fsr.close();
+
+
+	getchar();
+	getchar();
+	network net2;
+
+	cout << "Caricamento file..." << endl;
+	net2.load("pippo.bin");
+
+	cout << "\nnet2 dopo caricamento:\n" << net2.to_string() << endl;
+
 	std::cout << "\n-----------------------------------------------\n";
 	std::cout << "end of test" << std::endl;
 	std::cout << "-----------------------------------------------\n";

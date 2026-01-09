@@ -14,7 +14,7 @@ namespace neuro
 	// TODO : Prevedere cancellazione e creazione di sinapsi (alcuni livelli potrebbero avere solo poche sinapsi al livello precedente).
 	// TODO : Vedere se e quando disabilitare dei nodi (se funzione relu < 0), ma probabilmente è meglio di no.
 
-    neuron::neuron(network &netwrk) : net(netwrk)								//neuron::neuron(std::shared_ptr<network> netwrk) : pnet(netwrk)
+    neuron::neuron(network &netwrk) : net{netwrk}
     {
         x = y = 0;
 		ei = 0;
@@ -25,7 +25,7 @@ namespace neuro
         cout << "neuron()\n";
         #endif
     }
-	neuron::neuron(network &netwrk, bool isInput) : neuron(netwrk)			//neuron::neuron(std::shared_ptr<network> netwrk, bool isInput) : neuron(netwrk)
+	neuron::neuron(network &netwrk, bool isInput) : neuron{netwrk}
 	{
 		if(isInput)					// Se è un neurone di input, imposta la funzione di attivazion identità  (ed il flag)
 		{
@@ -33,7 +33,7 @@ namespace neuro
 			input = true;			// ...poi imposta input a true, che disabilita set_fact()
 		}
 	}
-	neuron::neuron(network &netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)		//neuron::neuron(std::shared_ptr<network> netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)
+	neuron::neuron(network &netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)
     {
 		for(uint i=0; i<prev.size(); i++)						// Imposta il vettore delle sinapsi (non è un neurone di input)
 		{														// con pesi e bias indicati
@@ -44,6 +44,127 @@ namespace neuro
         cout << "neuron(neuron &prev)\n";
         #endif
     }
+
+	neuron::neuron(const neuron& other) :	net{other.net},
+											x{other.x}, y{other.y},
+											f_act{other.f_act}, f_act_der{other.f_act_der}, fact{other.fact},
+											active{other.active}, input{other.input},
+											_nstat{other._nstat},
+											syns(other.syns.size())
+	{
+		switch(other._nstat)
+		{
+			case stat::_beta:
+				beta = other.beta;
+			break;
+			case stat::_ei:
+				ei = other.ei;
+			break;
+			case stat::_index:
+				index_in_layer = other.index_in_layer;
+			break;
+			default:
+				// TODO aggiungere throw eccezione
+			break;
+		}
+		for(uint i=0; i<other.syns.size(); i++)
+		{
+			syns[i] = other.syns[i];
+		}
+	}
+
+	neuron::neuron(neuron&& other) :	net{ other.net },
+										x{ other.x }, y{ other.y },
+										f_act{ other.f_act }, f_act_der{ other.f_act_der }, fact{ other.fact },
+										active{ other.active }, input{ other.input },
+										_nstat{ other._nstat }
+	{
+		switch (other._nstat)
+		{
+		case stat::_beta:
+			beta = other.beta;
+			break;
+		case stat::_ei:
+			ei = other.ei;
+			break;
+		case stat::_index:
+			index_in_layer = other.index_in_layer;
+			break;
+		default:
+			// TODO aggiungere throw eccezione
+			break;
+		}
+		syns = std::move(other.syns);
+	}
+
+
+	neuron& neuron::operator=(const neuron& other)
+	{
+		net = other.net;
+		x = other.x;
+		y = other.y;
+		f_act = other.f_act;
+		f_act_der = other.f_act_der;
+		fact = other.fact;
+		active = other.active;
+		input = other.input;
+		_nstat = other._nstat;
+		switch (other._nstat)
+		{
+		case stat::_beta:
+			beta = other.beta;
+			break;
+		case stat::_ei:
+			ei = other.ei;
+			break;
+		case stat::_index:
+			index_in_layer = other.index_in_layer;
+			break;
+		default:
+			// TODO aggiungere throw eccezione
+			break;
+		}
+		syns.clear();
+		syns.resize(other.syns.size());
+		for (uint i = 0; i < other.syns.size(); i++)
+		{
+			syns[i] = other.syns[i];
+		}
+		return *this;
+	}
+
+	neuron& neuron::operator=(const neuron&& other)
+	{
+		net = other.net;
+		x = other.x;
+		y = other.y;
+		f_act = other.f_act;
+		f_act_der = other.f_act_der;
+		fact = other.fact;
+		active = other.active;
+		input = other.input;
+		_nstat = other._nstat;
+		switch (other._nstat)
+		{
+		case stat::_beta:
+			beta = other.beta;
+			break;
+		case stat::_ei:
+			ei = other.ei;
+			break;
+		case stat::_index:
+			index_in_layer = other.index_in_layer;
+			break;
+		default:
+			// TODO aggiungere throw eccezione
+			break;
+		}
+		syns.clear();
+		syns = std::move(other.syns);
+		return *this;
+	}
+
+
     neuron::~neuron()
     {
 		// vector<synapse> non ha bisogno di dtor.
@@ -90,12 +211,11 @@ namespace neuro
         {
             for(synapse s : syns)
             {
-                //if(s.pn != nullptr)
-				if (std::get<ptN>(s.pn) != nullptr)
+                if(s._pn != nullptr)			// if (std::get<ptN>(s._pn) != nullptr)
                 {
                     std::string nn = "";
                     #if TXT_INFO
-                    nn = s.pn->get_name()+",";
+                    nn = s._pn->get_name()+",";
                     #endif
                     txt = txt + std::format(to_string_frm_w, nn, s.w);
                 }
@@ -215,8 +335,8 @@ namespace neuro
         
             // Calcola, su tutte le sinapsi del nodo, la somma delle uscite y dei nodi collegati, moltiplicate...
             // ...per il peso w della sinapsi. Il risultato è il segnale di ingresso x del nodo.        
-            //auto func_add = [&](const synapse &s) {sum.fetch_add(s.pn->y * s.w);};
-			auto func_add = [&](const synapse &s) {sum.fetch_add(std::get<ptN>(s.pn)->y * s.w); };
+            auto func_add = [&](const synapse &s) {sum.fetch_add(s._pn->y * s.w);};
+			//auto func_add = [&](const synapse &s) {sum.fetch_add(std::get<ptN>(s._pn)->y * s.w); };
             std::for_each(net.get_exe_pol(EXE_POL::neuron), syns.begin(), syns.end(), func_add);
 			x = sum;
         }
@@ -243,8 +363,8 @@ namespace neuro
 	{
 		if (active && !input)
 		{
-			//auto func_ea = [&](const synapse &s) {s.pn->set_beta(s.w * get_ei());};
-			auto func_ea = [&](const synapse &s) {std::get<ptN>(s.pn)->set_beta(s.w * get_ei()); };
+			auto func_ea = [&](const synapse &s) {s._pn->set_beta(s.w * get_ei());};
+			//auto func_ea = [&](const synapse &s) {std::get<ptN>(s._pn)->set_beta(s.w * get_ei()); };
 			std::for_each(net.get_exe_pol(EXE_POL::neuron), syns.begin(), syns.end(), func_ea);
 		}
 	}
@@ -256,7 +376,8 @@ namespace neuro
 			{	
 				// Corregge il peso wi della sinapsi tra in nodo j attuale e il nodo i precedente
 				// con le formule [8] e [10], usando il prodotto tra ei (del nodo j) e y (del nodo i).
-				s.w -=  learn_const * ei * std::get<ptN>(s.pn)->y;
+				//s.w -=  learn_const * ei * std::get<ptN>(s._pn)->y;
+				s.w -= learn_const * ei * s._pn->y;
 			};
 			std::for_each(net.get_exe_pol(EXE_POL::neuron), syns.begin(), syns.end(), func_updw);
 		}
@@ -397,7 +518,10 @@ namespace neuro
 			syns.resize(sz_tmp);
 			for (uint i = 0; i < sz_tmp; i++)
 			{
-				fs.read(reinterpret_cast<char*>(&syns[i]), sizeof(synapse));
+				//synapse s;
+				//s.read(fs);
+				syns[i].read(fs);
+				//syns.push_back(s);
 			}
 
 		}
@@ -410,9 +534,20 @@ namespace neuro
 			std::cerr << "Eccezione neuro_exception in neuron::read(...): " << nex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) net.create_exception...
 		}
-
-
 	}
+
+	void neuron::update_ptr(uint in, uint ilay)
+	{
+		if(!input)		// Se è un neurone di input, non ha sinapsi in ingresso
+		{
+			for(uint iS = 0; iS<get_n_syn(); iS++)
+			{
+				synapse &s = syns[iS];
+				s._pn = std::shared_ptr<neuron>(&(net.get_neuron(ilay-1,s._in)));
+			}
+		}
+	}
+
 
 
 }

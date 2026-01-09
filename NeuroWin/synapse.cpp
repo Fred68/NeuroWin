@@ -15,7 +15,8 @@ namespace neuro
 
     neuron::synapse::synapse()
     {
-        pn = std::shared_ptr<neuron>(nullptr);  // Non usa pn=std::make_shared<neuron>() perché allocherebbe un nuovo oggetto
+        _pn = std::shared_ptr<neuron>(nullptr);  // Non usa _pn=std::make_shared<neuron>() perché allocherebbe un nuovo oggetto
+		_in = UINT_ERROR;
         w = (act) 1;
         #if _DEBUG_NEURO_DET
         cout << "synapse()\n";
@@ -23,7 +24,8 @@ namespace neuro
     }
 	neuron::synapse::synapse(neuron &p_n, act ws)
     {
-		pn = std::shared_ptr<neuron>(&p_n);     // Non usa pn=std::make_shared<neuron>(p_n) perché creerebbe una copia
+		_pn = std::shared_ptr<neuron>(&p_n);     // Non usa _pn=std::make_shared<neuron>(p_n) perché creerebbe una copia
+		_in = UINT_ERROR;
         w = ws;
         #if _DEBUG_NEURO_DET
         cout << "synapse(p_n)\n";
@@ -41,7 +43,7 @@ namespace neuro
 	{
 		try
 		{
-			uint neuron_indx = std::get<ptN>(pn)->get_index();
+			uint neuron_indx = _pn->get_index();		// Era uint neuron_indx = std::get<ptN>(_pn)->get_index();
 			fs.write(reinterpret_cast<char*>(&neuron_indx), sizeof(neuron_indx));
 			fs.write(reinterpret_cast<char*>(&w), sizeof(w));
 		}
@@ -59,8 +61,9 @@ namespace neuro
 			act w_tmp;
 			fs.read(reinterpret_cast<char*>(&i_tmp), sizeof(i_tmp));
 			fs.read(reinterpret_cast<char*>(&w_tmp), sizeof(w_tmp));
+			_in = i_tmp;
+			_pn = ptN(nullptr);
 			w = w_tmp;
-			pn = i_tmp;
 		}
 		catch (std::exception &ex)
 		{

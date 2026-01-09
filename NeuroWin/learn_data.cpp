@@ -48,7 +48,7 @@ namespace neuro
 	}
 	void learn_data::add_data(uint index_input, uint index_output)
 	{
-		if ((index_input != learn_data::UINT_ERROR) && (index_output != learn_data::UINT_ERROR))
+		if ((index_input != neuro::UINT_ERROR) && (index_output != neuro::UINT_ERROR))
 		{
 			_ldata.emplace_back(index_input,index_output);
 		}

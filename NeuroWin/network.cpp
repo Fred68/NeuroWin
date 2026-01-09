@@ -27,7 +27,6 @@ namespace neuro
 		return txt;
 	}
 
-
 	network::neuro_exception& network::neuro_exception::operator=(neuro_exception const &other) noexcept
 	{
 		if (this != &other)
@@ -41,7 +40,12 @@ namespace neuro
 
 	}
 
-	
+	// TODO: ATTENZIONE !!!!
+	// TODO
+	// TODO vector<obj>::push_back(obj&) fa UNA COPIA dell'oggetto passato per reference !!!!
+	// TODO In alternativa usare std::move.... da studiare
+	// TODO
+
     /*******************************************/
     /*                                         */
     /* network                                 */
@@ -97,12 +101,6 @@ namespace neuro
 			_learn_const = ini_data.get_learn_const();
 			set_f_learn(lcf_costant_value);
 			
-			// TODO: Impostare exe_pol in base al numero totale di nodi e al numero di nodi per livello
-			// TODO: Fare delle prove di velocità
-			exe_pol[(int)EXE_POL::neuron] = std::execution::par;
-			exe_pol[(int)EXE_POL::layer] = std::execution::par;
-			exe_pol[(int)EXE_POL::network] = std::execution::par;
-
 			if (_nLays > 1)
 			{
 				for (uint i = 0; i < _nLays; i++)		// Crea i livelli, ognuno con un nodo in più (uscita 1, disattivo, per i bias)
@@ -135,8 +133,10 @@ namespace neuro
 					}
 				}
 
-				_nInputs = _layers[0].size() - 1;
-				_nOutputs = _layers[_nLays - 1].size() - 1;
+				calc_numbers();
+
+				set_exe_pol();
+
 				_isSet = true;
 			}
 			else
@@ -150,6 +150,25 @@ namespace neuro
 		}
 		return _isSet;
     }
+
+	void network::calc_numbers()
+	{
+		_nLays = _layers.size();
+		if(_nLays > 0)
+		{
+			_nInputs = _layers[0].size() - 1;
+			_nOutputs = _layers[_nLays - 1].size() - 1;
+		}
+	}
+
+	void network::set_exe_pol()
+	{
+		// TODO: Impostare exe_pol in base al numero totale di nodi e al numero di nodi per livello
+		// TODO: Fare delle prove di velocità
+		exe_pol[(int)EXE_POL::neuron] = std::execution::par;
+		exe_pol[(int)EXE_POL::layer] = std::execution::par;
+		exe_pol[(int)EXE_POL::network] = std::execution::par;
+	}
 
     std::string network::to_string()
     {
@@ -234,7 +253,6 @@ namespace neuro
 		return ret;
 	}
 
-
 	std::string network::display_vector(std::vector<act> &v)
 	{
 		std::ostringstream ss;
@@ -248,7 +266,6 @@ namespace neuro
 		ss << "]";
 		return ss.str();
 	}
-
 
     neuron& network::get_neuron(uint lay, uint num)
     {
@@ -351,6 +368,7 @@ namespace neuro
 	}
 
 
+
 	bool network::calc_y_lay(uint nlay)
 	{
 		bool ret = true;
@@ -436,6 +454,7 @@ namespace neuro
 	}
 
 
+
 	bool network::forward_propagate(const std::vector<act> &inp_lay, std::vector<act> &out_lay)
 	{
 		bool ok;
@@ -455,7 +474,6 @@ namespace neuro
 		}
 		return ok;
 	}
-
 
 	bool network::backward_propagate_no_check(const std::vector<act> &inp_lay, const std::vector<act> &out_lay, uint cycles, act &error_tot)
 	{
@@ -524,6 +542,8 @@ namespace neuro
 		return ok;
 	}
 
+
+
 	void network::calc_indexes()
 	{
 		for (uint i = 0; i < _nLays; i++)
@@ -531,5 +551,180 @@ namespace neuro
 			calc_index_lay(i);
 		}
 	}
+	
+	bool network::calc_pointers()
+	{
+		bool ok = false;
+		uint iL,iN;
+		if(_nLays > 1)
+			{
+			ok = true;
+			for (iL = 1; iL < _nLays; iL++) // Ciclo
+			{
+				layer &lay = _layers[iL];
+				for(iN=0; iN < lay.size(); iN++)
+				{
+					try
+					{
+						neuron &n = get_neuron(iL,iN);
+						n.update_ptr(iN,iL);
+					}
+					catch(neuro_exception &nex)
+					{
+						ok = false;
+						std::cerr << "Errore in network::calc_pointers()" << nex.what() << std::endl;
+					}
+				}
+			}
+		}
+		return ok;
+	}
 
+	void network::write(std::ofstream &fs)
+	{
+		try
+		{
+			calc_indexes();
+			fs.write(reinterpret_cast<char*>(&_learn_const), sizeof(_learn_const));
+			fs.write(reinterpret_cast<char*>(&_nLays), sizeof(_nLays));
+			for (uint i = 0; i < _nLays; i++)
+			{
+				uint iN = _layers[i].size();
+				fs.write(reinterpret_cast<char*>(&iN), sizeof(iN));
+			}
+			/*for (uint i = 0; i < _nLays; i++)
+			{
+				_layers[i].write(fs);
+			}*/
+		}
+		catch (std::exception &ex)
+		{
+			std::cerr << "Eccezione exception in network::write(...): " << ex.what() << std::endl;
+			// TODO poi aggiungere (con o senza throw) net.create_exception...
+		}
+		catch (network::neuro_exception &nex)
+		{
+			std::cerr << "Eccezione neuro_exception in network::write(...): " << nex.what() << std::endl;
+			// TODO poi aggiungere (con o senza throw) net.create_exception...
+		}
+	}
+
+	void network::read(std::ifstream &fs)
+	{
+		reset(true);
+		try
+		{
+			act l_tmp;
+			size_t sz_tmp;
+			fs.read(reinterpret_cast<char*>(&l_tmp), sizeof(l_tmp));
+			fs.read(reinterpret_cast<char*>(&sz_tmp), sizeof(sz_tmp));
+			std::vector<uint> iN(sz_tmp);
+			_learn_const = l_tmp;
+			for (uint i = 0; i < sz_tmp; i++)
+			{
+				fs.read(reinterpret_cast<char*>(&(iN[i])), sizeof(iN[i]));
+			}
+
+			#if false
+			// TODO errore bad allocation !!!
+			//_layers.resize(sz_tmp, {*this});	// Ridimensiona, passando gli argomenti del costruttore di layer
+			_layers.clear();
+			_layers.resize(sz_tmp, *this);	// Ridimensiona, passando gli argomenti del costruttore di layer
+
+			for (uint i = 0; i < sz_tmp; i++)
+			{
+				layer *tmp = new layer(*this);
+				tmp->read(fs);
+				_layers.push_back(*tmp);
+				//_layers[i].read(fs);
+				//fs.read(reinterpret_cast<char*>(&_layers[i]), sizeof(layer));
+			}
+
+			if(calc_pointers())
+			{
+				calc_numbers();
+				_isSet = true;
+			}
+			#endif
+
+			int x = 1;
+		}
+		catch (std::exception &ex)
+		{
+			std::cerr << "Eccezione exception in network::read(...): " << ex.what() << std::endl;
+			// TODO poi aggiungere (con o senza throw) net.create_exception...
+		}
+		catch (network::neuro_exception &nex)
+		{
+			std::cerr << "Eccezione neuro_exception in network::read(...): " << nex.what() << std::endl;
+			// TODO poi aggiungere (con o senza throw) net.create_exception...
+		}
+
+		return;
+	}
+
+	void network::save(const std::string &fname)
+	{
+		try
+		{
+			std::ofstream fs(fname, std::ios::binary);
+			if(fs)
+			{
+				write(fs);	
+			}
+			else
+			{
+				std::cerr << "Errore nell'apertura del file: " << fname << "in network::save(...): " << std::endl;
+				return;
+			}
+			fs.close();
+		}
+		catch (std::exception &ex)
+		{
+			std::cerr << "Eccezione exception in network::save(...): " << ex.what() << std::endl;
+			// TODO poi aggiungere (con o senza throw) net.create_exception...
+		}
+		catch (network::neuro_exception &nex)
+		{
+			std::cerr << "Eccezione neuro_exception in network::save(...): " << nex.what() << std::endl;
+			// TODO poi aggiungere (con o senza throw) net.create_exception...
+		}
+
+
+	}
+
+	void network::load(const std::string &fname)
+	{
+		try
+		{
+			std::ifstream fs(fname, std::ios::binary);
+			if (fs)
+			{
+				read(fs);
+			} else
+			{
+				std::cerr << "Errore nell'apertura del file: " << fname << "in network::load(...): " << std::endl;
+				return;
+			}
+			fs.close();
+
+		}
+		catch (std::exception &ex)
+		{
+			std::cerr << "Eccezione exception in network::load(...): " << ex.what() << std::endl;
+			// TODO poi aggiungere (con o senza throw) net.create_exception...
+		}
+		catch (network::neuro_exception &nex)
+		{
+			std::cerr << "Eccezione neuro_exception in network::load(...): " << nex.what() << std::endl;
+			// TODO poi aggiungere (con o senza throw) net.create_exception...
+		}
+
+		/*if(calc_pointers())
+		{
+			calc_numbers();
+			_isSet = true;
+		}*/
+
+	}
 }

@@ -14,8 +14,6 @@
 #include "layer.h"
 #include "learn_data.h"
 
-
-
 #include <string>			// std::format
 #include <vector>
 #include <memory>
@@ -27,6 +25,7 @@
 #include <atomic>           // atomic<float>
 #include <ranges>			// iota
 #include <chrono>			// high_resolution_clock
+#include <fstream>			// I/O su stream (binario)
 
 #define TO_STR_FORMAT_FLOAT(n) ("{0:." #n "f}")
 
@@ -53,9 +52,10 @@ namespace neuro
 			/*******************************************/
 			// neuro_exception
 			/*******************************************/
+
 			class neuro_exception
 			{
-				friend network;
+				friend class network;
 
 				public:
 					_NEURO_EXC_ENUM;		// Usa la costante con l'enumerazione degli errori
@@ -107,11 +107,6 @@ namespace neuro
 			typedef void (*lay_func) (std::vector<neuron> &layer, uint i);					// Calcolo di un livello
 			typedef act (*weight_func) (uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Inizializzazione di un peso
 			
-			// TODO funzioni di I/O per:
-			// std::vector<layer> _layers;
-			// act _learn_const;
-			// Usare reset() e set(initdata &dt)...
-
 			bool _isSet = false;
 			std::vector<layer> _layers;
             uint _nLays = 0;
@@ -130,9 +125,11 @@ namespace neuro
 			// Con unseq lo stesso thread potrebbe scrivere simultaneamente (con unica istruzione che agisce su più dati).
 			// In ogni caso un mutex introduce un overhead. Se l'operazione è semplice, meglio usare dati atomici
 			std::execution::parallel_policy exe_pol[3] = {std::execution::par, std::execution::par, std::execution::par};
+			void set_exe_pol();
 
 			void reset(bool clear_errors = true);
 			bool set(init_data &ini_data);
+			void calc_numbers();
 
             /// <summary>
             /// Neurone del livello 'lay' e con indice 'num'.
@@ -211,7 +208,7 @@ namespace neuro
 			/// </summary>
 			/// <param name="nlay"></param>
 			void calc_index_lay(uint nlay);				// Assegna gli indici ai neuroni del livello (per salvataggio successivo)
-			
+
 			/// <summary>
 			/// Calcola la rete con forward propagation, partendo dai valori del vettore di input.
 			/// Per ogni nodo (dal primo all'ultimo livello)...
@@ -339,10 +336,23 @@ namespace neuro
 			/// <param name="msec_elap">millisecondi impiegati</param>
 			/// <returns></returns>
 			bool backward_propagate(std::shared_ptr<learn_data> pldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap);
+			
+			
 			/// <summary>
 			/// Calcola gli indici dei neuroni (per salvataggio successivo)
 			/// </summary>
 			void calc_indexes();
+
+			/// <summary>
+			/// Calcola i puntatori ai neuroni (dopo caricamento)
+			/// </summary>
+			bool calc_pointers();
+
+			void write(std::ofstream &fs);
+			void read(std::ifstream &fs);
+
+			void save(const std::string &fname);
+			void load(const std::string &fname);
 
     };  // class network
 

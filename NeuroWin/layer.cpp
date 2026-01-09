@@ -6,6 +6,42 @@ namespace neuro
 {
 	class network;
 
+	layer::layer(const layer& other) : _net{ other._net }, _recalc_w{ other._recalc_w }
+	{
+		for(uint i=0; i<_neurons.size(); i++)
+		{
+			_neurons[i] = other._neurons[i];
+		}
+	}
+
+	layer& layer::operator=(const layer& other)
+	{
+		_net = other._net;
+		_recalc_w = other._recalc_w;
+		_neurons.clear();
+		_neurons.resize(other._neurons.size(), { _net, false });
+		for (uint i = 0; i < other._neurons.size(); i++)
+		{
+			// _neurons.push_back(other._neurons[i]);
+			_neurons[i] = other._neurons[i];
+		}
+		return *this;
+	}
+
+	layer::layer(const layer&& other) : _net{ other._net }, _recalc_w{ other._recalc_w }
+	{
+		_neurons = std::move(other._neurons);
+	}
+
+	layer& layer::operator=(const layer&& other)
+	{
+		_net = other._net;
+		_recalc_w = other._recalc_w;
+		_neurons = std::move(other._neurons);
+		return *this;
+	}
+
+
 	void layer::write(std::ofstream &fs)
 	{
 		try
@@ -30,7 +66,6 @@ namespace neuro
 		}
 	}
 
-
 	void layer::read(std::ifstream &fs)
 	{
 		try
@@ -42,7 +77,7 @@ namespace neuro
 
 			_recalc_w = r_tmp;
 			_neurons.clear();
-			_neurons.resize(sz_tmp, { _net, true });
+			_neurons.resize(sz_tmp, { _net, true });	// Ridimensiona, passando gli argomenti del costruttore di neuron
 
 			for (uint i = 0; i < sz_tmp; i++)
 			{

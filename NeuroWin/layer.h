@@ -12,9 +12,6 @@ namespace neuro
 {
 	class layer
 	{
-		// TODO funzioni di I/O per:
-		// std::vector<neuron> _neurons;
-		// bool _recalc_w;
 
 		network &_net;
 		std::vector<neuron> _neurons;	/// Vettore con i neuroni. Classe derivata: più complessa da scrivere.
@@ -40,12 +37,24 @@ namespace neuro
 
 		public:
 			/// <summary>
+			/// Ctor (semplice)
+			/// </summary>
+			/// <param name="net"></param>
+			inline layer(network &net) : _neurons(0, {net, true}), _net(net) {};
+
+			layer(const layer& other);
+			layer(const layer&& other);
+			layer& operator=(const layer& other);
+			layer& operator=(const layer&& other);
+
+
+			/// <summary>
 			/// Ctor
 			/// Chiama il costruttore di vector<neuron> passando il numero di elementi e gli argomenti per il ctor di neuron
 			/// </summary>
 			/// <param name="num">numero di neuroni</param>
 			/// <param name="net">rif. alla rete</param>
-			/// <param name="b">livello di input ?</param>
+			/// <param name="b">livello di input?</param>
 			inline layer(uint num, network &net, bool b) : _neurons(num, { net, b}), _net(net) {};
 
 			/// <summary>
@@ -54,8 +63,11 @@ namespace neuro
 			/// </summary>
 			/// <param name="num">numero di neuroni</param>
 			/// <param name="net">rif. alla rete</param>
-			/// <param name="lay">livello precedente</param>
+			/// <param name="lay">rif. al livello precedente</param>
 			inline layer(uint num, network &net, layer &lay) : _neurons(num, { net, lay.get_neurons()}), _net(net) {};
+
+
+
 
 			inline neuron &operator[](uint i) { return _neurons[i]; }
 			inline std::vector<neuron> &get_neurons() { return _neurons; }
