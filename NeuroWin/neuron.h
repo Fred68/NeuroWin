@@ -52,6 +52,7 @@ namespace neuro
 				synapse();							// default ctor
 				synapse(neuron &p_n, act ws);		// ctor
 				~synapse();							// dtor
+				void reset();
 				#if _COPY_CTORS_
 				synapse(const synapse& other);
 				synapse& operator=(const synapse& other);
@@ -127,6 +128,8 @@ namespace neuro
 			neuron& operator=(neuron&& other);
 			#endif
             ~neuron();
+
+			void reset();
 
             std::string to_string();
 

@@ -40,7 +40,21 @@ namespace neuro
 	/*                                         */
     /*******************************************/
 
+	
+	// TODO Creare: funzioni di reset (cancella tutti i dati), costruttori vuoi, funzioni set (per impostare i valori)
 	// TODO Aggiungere salvataggio e caricamento di una rete (con i pesi), per eseguire l'addestramento in più fasi
+
+	// I dati di sinapsi, neuroni e livelli sono legati a puntatori e reference a rete, neuroni e livelli.
+	// I costruttori e gli operatori di assegnazione (di copia e di spostamento) sono complessi, preché dovrebbero aggiornare...
+	// ... i riferimenti ai nuovi oggetti creati. Non sono stati ridefiniti, si usano quelli di default (copia bit epr bit).
+
+	// Conviene allocare prima lo spazio per tutti i dati della rete, poi riempirlo con le letture in binario dagli stream e...
+	// ...poi aggiornare tutti i puntatori e riferimenti.
+
+	// Quindi, della rete, si salvano prima i dati fissi e le dimensioni.
+	// Numero di livelli, numero di nodi per livello, numero di sinapsi per nodo.
+	 
+
 
     /// <summary>
     /// Class network
@@ -126,7 +140,6 @@ namespace neuro
 			// Con unseq lo stesso thread potrebbe scrivere simultaneamente (con unica istruzione che agisce su più dati).
 			// In ogni caso un mutex introduce un overhead. Se l'operazione è semplice, meglio usare dati atomici
 			std::execution::parallel_policy exe_pol[3] = {std::execution::par, std::execution::par, std::execution::par};
-			void set_exe_pol();
 
 			void reset(bool clear_errors = true);
 			bool set(init_data &ini_data);
@@ -145,6 +158,10 @@ namespace neuro
             void name_elements();
             #endif
 
+			/// <summary>
+			/// Imposta le modalitù di esecuzione dei cicli (parallelo, sequenziale)
+			/// </summary>
+			void set_exe_pol();
 			/// <summary>
 			/// Imposta gli ingressi. Lunghezza del vettore non controllata.
 			/// </summary>

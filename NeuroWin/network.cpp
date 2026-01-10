@@ -40,11 +40,7 @@ namespace neuro
 
 	}
 
-	// TODO: ATTENZIONE !!!!
-	// TODO
-	// TODO vector<obj>::push_back(obj&) fa UNA COPIA dell'oggetto passato per reference !!!!
-	// TODO In alternativa usare std::move.... da studiare
-	// TODO
+	// TODO ATTENZIONE: vector<obj>::push_back(obj&) fa UNA COPIA dell'oggetto passato per reference !!!! Vd. std::move()
 
     /*******************************************/
     /*                                         */
@@ -85,11 +81,18 @@ namespace neuro
 	void network::reset(bool clear_errors)
 	{
 		_isSet = false;
+		for (uint i = 0; i < _layers.size(); i++)
+		{
+			_layers[i].reset();
+		}
 		_layers.clear();
 		_nLays = _nInputs = _nOutputs = 0;
 		_learn_const = Default_learn_const;
 		_learn_const_pf = lcf_costant_value;
-		if(clear_errors)	clear_exceptions();
+		if(clear_errors)
+		{
+			clear_exceptions();
+		}
 	}
 
 	bool network::set(init_data &ini_data)
@@ -587,13 +590,24 @@ namespace neuro
 		try
 		{
 			calc_indexes();
-			fs.write(reinterpret_cast<char*>(&_learn_const), sizeof(_learn_const));
-			fs.write(reinterpret_cast<char*>(&_nLays), sizeof(_nLays));
-			for (uint i = 0; i < _nLays; i++)
+			
+			// Salva le dimensioni
+			fs.write(reinterpret_cast<char*>(&_nLays), sizeof(_nLays));		// Numero di livelli
+			for (uint iL = 0; iL < _nLays; iL++)
 			{
-				uint iN = _layers[i].size();
-				fs.write(reinterpret_cast<char*>(&iN), sizeof(iN));
+				layer &lay = _layers[iL];
+				uint nN = _layers[iL].size();								// Numero di neuroni del livello
+				fs.write(reinterpret_cast<char*>(&nN), sizeof(nN));
+				for(uint iN=0; iN<nN; iN++)
+				{
+					neuron &n = (lay.get_neurons())[iN];					// Numero di sinapsi del neurone
+					uint nS = n.get_n_syn();
+					fs.write(reinterpret_cast<char*>(&nN), sizeof(nN));
+				}
 			}
+
+			// Salva i dati della rete 
+			fs.write(reinterpret_cast<char*>(&_learn_const), sizeof(_learn_const));
 			/*for (uint i = 0; i < _nLays; i++)
 			{
 				_layers[i].write(fs);

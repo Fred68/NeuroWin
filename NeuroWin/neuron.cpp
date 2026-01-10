@@ -16,11 +16,8 @@ namespace neuro
 
     neuron::neuron(network &netwrk) : net{netwrk}
     {
-        x = y = 0;
-		ei = 0;
-        set_fact(fact_default());
-        active = true;
-        input = false;
+		reset();
+
         #if _DEBUG_NEURO_DET
         cout << "neuron()\n";
         #endif
@@ -71,7 +68,7 @@ namespace neuro
 		for(uint i=0; i<other.syns.size(); i++)
 		{
 			//syns[i] = other.syns[i];
-			#error AGGIORNARE IL RIFERIMENTO DELLA SINAPSI ALLA NUOVA RETE
+			// TODO I riferimenti delle sinapsi vanno aggiornate ai nodi della nuova rete
 			syns.push_back(synapse(other.syns[i]));
 		}
 	}
@@ -106,7 +103,7 @@ namespace neuro
 		for (uint i = 0; i < other.syns.size(); i++)
 		{
 			//syns[i] = other.syns[i];
-			#error AGGIORNARE IL RIFERIMENTO DELLA SINAPSI ALLA NUOVA RETE
+			// TODO I riferimenti delle sinapsi vanno aggiornate ai nodi della nuova rete
 			syns.push_back(synapse(other.syns[i]));
 		}
 		return *this;
@@ -178,6 +175,20 @@ namespace neuro
         #endif
     }
     
+	void neuron::reset()
+	{
+		x = y = 0;
+		ei = 0;
+		set_fact(fact_default());
+		active = true;
+		input = false;
+		for(uint i=0; i<syns.size(); i++)
+		{
+			syns[i].reset();
+		}
+		syns.clear();
+	}
+
     std::string neuron::to_string()
     {
         std::string statStr = "";

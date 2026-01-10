@@ -69,8 +69,7 @@ namespace neuro
 			/// <param name="lay">rif. al livello precedente</param>
 			inline layer(uint num, network &net, layer &lay) : _neurons(num, { net, lay.get_neurons()}), _net(net) {};
 
-
-
+			void reset();
 
 			inline neuron &operator[](uint i) { return _neurons[i]; }
 			inline std::vector<neuron> &get_neurons() { return _neurons; }

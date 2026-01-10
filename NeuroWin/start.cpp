@@ -80,7 +80,7 @@ int main()
 	std::shared_ptr<learn_data> ld;
 	try
 	{
-		net = make_unique<network>(ini);
+		net = make_unique<network>(ini);		// Crea la rete, chiamado il ctor
 		ld = make_unique<learn_data>(net);
 		network::neuro_exception tmp = net->create_exception(network::neuro_exception::pippo, false, "warning...");
 		throw net->create_exception(network::neuro_exception::pluto, true, "error...");
@@ -195,8 +195,6 @@ int main()
 	cout << "Salvataggio file..." << endl;
 	net->save("pippo.bin");
 	//net = nullptr;
-
-	// TODO ::: APRIRE QUI UN FILE per SALVARE e RICARICARE prima i singoli componenti (synapse, neuron, layer...) !!!
 
 	#if false
 	std::ofstream fs("test.bin", std::ios::binary);

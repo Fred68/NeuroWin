@@ -6,6 +6,15 @@ namespace neuro
 {
 	class network;
 
+	void layer::reset()
+	{
+		for(uint i=0; i<_neurons.size(); i++)
+		{
+			_neurons[i].reset();
+		}
+		_neurons.clear();
+	}
+
 	#if _COPY_CTORS_
 	layer::layer(const layer& other) : _neurons(other._neurons.size(), { other._net, true }), _net{ other._net }, _recalc_w{ other._recalc_w }
 	{
@@ -19,11 +28,11 @@ namespace neuro
 		_net = other._net;
 		_recalc_w = other._recalc_w;
 		_neurons.clear();
-		_neurons.resize(other._neurons.size(), { _net, false });
+		//_neurons.resize(other._neurons.size(), { _net, false });
 		for (uint i = 0; i < other._neurons.size(); i++)
 		{
-			// _neurons.push_back(other._neurons[i]);
-			_neurons[i] = other._neurons[i];
+			_neurons.push_back(other._neurons[i]);
+			//_neurons[i] = other._neurons[i];
 		}
 		return *this;
 	}

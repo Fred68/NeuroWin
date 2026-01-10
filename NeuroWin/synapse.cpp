@@ -15,9 +15,7 @@ namespace neuro
 
     neuron::synapse::synapse()
     {
-        _pn = std::shared_ptr<neuron>(nullptr);  // Non usa _pn=std::make_shared<neuron>() perché allocherebbe un nuovo oggetto
-		_in = UINT_ERROR;
-        w = (act) 1;
+		reset();
         #if _DEBUG_NEURO_DET
         cout << "synapse()\n";
         #endif
@@ -38,6 +36,13 @@ namespace neuro
         getchar();
         #endif
     }
+
+	void neuron::synapse::reset()
+	{
+		_pn = std::shared_ptr<neuron>(nullptr);  // Non usa _pn=std::make_shared<neuron>() perché allocherebbe un nuovo oggetto
+		_in = UINT_ERROR;
+		w = (act)1;
+	}
 
 	#if _COPY_CTORS_
 	neuron::synapse::synapse(const synapse& other) : _in{other._in}, _pn{other._pn}, w{other.w}
