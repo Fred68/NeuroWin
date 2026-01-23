@@ -66,8 +66,8 @@ namespace neuro
 			/// </summary>
 			/// <param name="num">numero di neuroni</param>
 			/// <param name="net">rif. alla rete</param>
-			/// <param name="lay">rif. al livello precedente</param>
-			inline layer(uint num, network &net, layer &lay) : _neurons(num, { net, lay.get_neurons()}), _net(net) {};
+			/// <param name="prev">rif. al livello precedente</param>
+			inline layer(uint num, network &net, layer &prev) : _neurons(num, { net, prev.get_neurons()}), _net(net) {};
 
 			void reset();
 
@@ -76,8 +76,8 @@ namespace neuro
 			inline bool get_recalc_w() { return _recalc_w; }
 			inline void set_recalc_w(bool recalc) { _recalc_w = recalc; }
 
-			inline constexpr size_t size() { return _neurons.size(); }
-			inline constexpr void push_back(const neuron& n) { _neurons.push_back(n); }
+			inline const size_t size() { return _neurons.size(); }
+			inline const void push_back(const neuron& n) { _neurons.push_back(n); }
 
 			inline Iterator begin() { return Iterator(_neurons.begin()); }
 			inline Iterator end() { return Iterator(_neurons.end()); }

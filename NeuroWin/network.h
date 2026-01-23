@@ -9,15 +9,17 @@
 #include "neuro_def.h"
 #include "neuro_exc_static.h"
 
+#include "toponet.h"
 #include "neuron.h"
 #include "init_data.h"
 #include "layer.h"
 #include "learn_data.h"
 
+
 #include <string>			// std::format
 #include <vector>
 #include <memory>
-#include <format>
+#include <format>			// std::format
 #include <cmath>
 #include <tuple>
 #include <execution>        // std::execution::par
@@ -33,6 +35,7 @@ namespace neuro
 {
 	class learn_data;
 	class neuro_exception;
+	class toponet;
 
     /*******************************************/
 	/*                                         */
@@ -41,7 +44,8 @@ namespace neuro
     /*******************************************/
 
 	
-	// TODO Creare: funzioni di reset (cancella tutti i dati), costruttori vuoi, funzioni set (per impostare i valori)
+	// TODO Creare: funzioni di reset (cancella tutti i dati), costruttori vari, funzioni set (per impostare i valori)
+	// TODO Aggiungere classe con la topologia della rete (per i/O e per init data)
 	// TODO Aggiungere salvataggio e caricamento di una rete (con i pesi), per eseguire l'addestramento in più fasi
 
 	// I dati di sinapsi, neuroni e livelli sono legati a puntatori e reference a rete, neuroni e livelli.
@@ -126,9 +130,10 @@ namespace neuro
             uint _nLays = 0;
 			uint _nInputs = 0;
 			uint _nOutputs = 0;
-			
+			toponet _topo;
+
 			act _learn_const = Default_learn_const;
-			learn_const_func _learn_const_pf;				// Puntatore alla funzione che restituisce la costante di apprendimento	
+			learn_const_func _learn_const_pf;			// Puntatore alla funzione che restituisce la costante di apprendimento	
 
 			std::vector<neuro_exception> _exceptions;
 			bool _isSet = false;
@@ -143,6 +148,10 @@ namespace neuro
 
 			void reset(bool clear_errors = true);
 			bool set(init_data &ini_data);
+			bool set(toponet &topo);		// TODO: da scrivere
+			/// <summary>
+			/// Aggiorna i dati interni (numero di livelli, di nodi di input ecc...).
+			/// </summary>
 			void calc_numbers();
 
             /// <summary>
@@ -305,10 +314,15 @@ namespace neuro
 			/// <returns></returns>
 			std::string get_exceptions_string(bool show_warnings = false);
 				
-
 			inline uint get_n_layers() const {return _nLays;}
 			inline uint get_input_layer_size() const { return _nInputs; }
 			inline uint get_output_layer_size() const { return _nOutputs; }
+			/// <summary>
+			/// Ricalcola e restituisce copia della topologia
+			/// </summary>
+			/// <returns></returns>
+			toponet get_topo();
+			
 
 			inline act get_learn_const() const {return _learn_const;}
 			inline void set_learn_const(act lrn_c) {_learn_const = lrn_c;}
@@ -317,6 +331,13 @@ namespace neuro
 			inline learn_const_func get_f_learn() const { return _learn_const_pf; };
 			inline void set_f_learn(learn_const_func lrn_f) { _learn_const_pf = lrn_f; };
 			
+			/// <summary>
+			/// Riferimento al livello 'lay' 
+			/// </summary>
+			/// <param name="lay"></param>
+			/// <returns></returns>
+			layer &get_layer(uint lay);
+
             /// <summary>
             /// Riferimento al neurone del livello 'lay' e con indice 'num'
 			/// Se indici errati: eccezione.

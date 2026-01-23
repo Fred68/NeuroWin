@@ -200,7 +200,7 @@ int main()
 	std::ofstream fs("test.bin", std::ios::binary);
 
 	neuron x(*net);
-	x.set_index(10);
+	x.set_node_index(10);
 	x.set_active(true);
 	x.set_fact(neuro::FACT::relu);
 	//x.write(fs);

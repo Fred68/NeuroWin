@@ -26,6 +26,7 @@
     <ClCompile Include="neuron.cpp" />
     <ClCompile Include="start.cpp" />
     <ClCompile Include="synapse.cpp" />
+    <ClCompile Include="toponet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="init_data.h">
@@ -40,6 +41,7 @@
     <ClInclude Include="neuro_exc_static.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="toponet.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Note.txt" />

@@ -49,7 +49,15 @@ namespace neuro
 				void read(std::ifstream &fs);
 
 			public:
+				/// <summary>
+				/// default ctor
+				/// </summary>
 				synapse();							// default ctor
+				/// <summary>
+				/// ctor
+				/// </summary>
+				/// <param name="p_n">Reference al neurone, viene trasformato in shared_ptr<neuron></param>
+				/// <param name="ws">peso</param>
 				synapse(neuron &p_n, act ws);		// ctor
 				~synapse();							// dtor
 				void reset();
@@ -60,9 +68,20 @@ namespace neuro
 				#if _MOVE_CTORS_
 				synapse(synapse&& other);
 				synapse& operator=(synapse&& other);
-				#endif
 				// Necessari costruttore di copia e assegnazione di copia standard (copia bit per bit).
 				// synapse(const synapse&)=delete e synapse& operator=(const synapse&)=delete generano errore di compilazione.
+				#endif
+				/// <summary>
+				/// Imposta l'indice del nodo della sinapsi
+				/// </summary>
+				/// <returns></returns>
+				bool set_node_index();
+				/// <summary>
+				/// Restituisce l'indice del nodo della sinapsi
+				/// UINT_ERROR se non impostato
+				/// </summary>
+				/// <returns></returns>
+				inline uint get_node_index() {return _in;}
 		};
         
         typedef act (*act_func) (neuron*);							// Puntatore a funzione di attivazione
@@ -102,7 +121,7 @@ namespace neuro
 				act beta;							/// beta (primo calcolo), poi...
 				act ei;								/// ...EI = beta * F' (secondo calcolo)
 			};
-            std::vector<synapse> syns;              /// Sinapsi
+            std::vector<synapse> _syns;              /// Sinapsi
             act_func f_act;                         /// Funzione di attivazione (puntatore)
             act_func f_act_der;                     /// Derivata della funzione di attivazione (puntatore)
 			
@@ -116,9 +135,34 @@ namespace neuro
             #endif
 
         public:
+			/// <summary>
+			/// ctor, neurone vuoto
+			/// </summary>
+			/// <param name="netwrk">rete (riferimento)</param>
 			neuron(network &netwrk);
+			/// <summary>
+			/// ctor, neurone vuoto
+			/// </summary>
+			/// <param name="netwrk">rete (riferimento)</param>
+			/// <param name="isInput">neurone di input se true</param>
 			neuron(network &netwrk, bool isInput);
-			neuron(network &netwrk, std::vector<neuron> &prev, act std_w = w_ini_const, act bias_w = b_ini_const);
+			/// <summary>
+			/// ctor, crea sinapsi a tutti i neuroni del livello precedente
+			/// </summary>
+			/// <param name="netwrk">rete (riferimento)</param>
+			/// <param name="prev">neuroni del livello precedente</param>
+			/// <param name="neu_w">peso</param>
+			/// <param name="bias_w">bias</param>
+			neuron(network &netwrk, std::vector<neuron> &prev, act neu_w = w_ini_const, act bias_w = b_ini_const);
+			/// <summary>
+			/// ctor, crea sinapsi ai soli neuroni del livello precedente con gli indici richiesti
+			/// </summary>
+			/// <param name="netwrk">rete (riferimento)</param>
+			/// <param name="prev">neuroni del livello precedente</param>
+			/// <param name="indx">indici dei neuroni del livello precedente da collegare con sinapsi</param>
+			/// <param name="neu_w">peso</param>
+			/// <param name="bias_w">bias</param>
+			neuron(network &netwrk, std::vector<neuron> &prev, std::vector<uint> &indx, act neu_w = w_ini_const, act bias_w = b_ini_const);
 			#if _COPY_CTORS_
 			neuron(const neuron& other);
 			neuron& operator=(const neuron& other);
@@ -133,7 +177,7 @@ namespace neuro
 
             std::string to_string();
 
-			inline uint get_n_syn() const {return syns.size();}	// Numero di sinapsi
+			inline uint get_n_syn() const {return _syns.size();}	// Numero di sinapsi
 			inline bool get_active() const {return active;}		// Neurone attivo / disattivo		
             void set_active(bool stat);
 			
@@ -155,12 +199,14 @@ namespace neuro
 			/// </summary>
 			/// <returns></returns>
 			inline act get_x() { return x; }		// Ingresso complessivo				
+			
 			/// <summary>
 			/// Modifica l'ingresso x, solo se è un nodo di input
 			/// </summary>
 			/// <param name="x_in"></param>
 			/// <returns></returns>
 			bool set_x(act x_in);
+			
 			/// <summary>
 			/// Calcola l'ingresso x, solo se è attivo e non è di input
 			/// </summary>
@@ -181,10 +227,12 @@ namespace neuro
 			/// </summary>
 			/// <returns></returns>
 			uint get_index();
+			
 			/// <summary>
 			/// Imposta l'indice del neurone nel livello (per salvataggio)
 			/// </summary>
 			/// <param name="i"></param>
+			/// <returns></returns>
 			void set_index(uint i);
 			
 			/// <summary>
@@ -192,6 +240,7 @@ namespace neuro
 			/// </summary>
 			/// <returns></returns>
 			act get_beta();							// Derivata parziale beta dell'errore dE/dy
+
 			/// <summary>
 			/// Imposta la derivata dell'errore (beta, in unione con ei)
 			/// </summary>
@@ -203,11 +252,13 @@ namespace neuro
 			/// </summary>
 			/// <returns></returns>
 			act get_ei();							// Derivata parziale EI dell'errore dE/dx
+
 			/// <summary>
 			/// Imposta la derivata dell'errore (ei, in unione con beta)
 			/// </summary>
 			/// <param name="ei_in"></param>
 			void set_ei(act ei_in);
+			
 			/// <summary>
 			/// Calcola la derivata EI dell'errore con la formula [7].
 			/// Deve essere stata calcolata beta.
@@ -215,22 +266,32 @@ namespace neuro
 			void calc_ei();							// Calcola EI con la formula [7]
 
 			/// <summary>
-			/// Valore del peso della sinapsi i
+			/// Valore del peso della sinapsi 'i'
 			/// </summary>
 			/// <param name="i"></param>
 			/// <returns></returns>
 			act get_w(uint i);						// Peso della sinapsi i.
+			
+			/// <summary>
+			/// Indice del nodo della sinapsi 'i'
+			/// </summary>
+			/// <param name="i"></param>
+			/// <returns></returns>
+			uint get_neuron_index(uint i);			// Indice del nodo della sinapsi i.
+
 			/// <summary>
 			/// Imposta il peso della sinapsi i
 			/// </summary>
 			/// <param name="w"></param>
 			/// <param name="i"></param>
 			void set_w(act w, uint i);
+			
 			/// <summary>
 			/// Calcolo parziale delle EA = beta dei nodi del livello precedente
 			/// Formula [9], ma contributi del nodo j attuale alle beta dei nodi i precedenti
 			/// </summary>
 			void calc_parz_eai();					// Calcolo parziale delle EA = beta dei nodi del livello precedente
+			
 			/// <summary>
 			/// Ricalcola i pesi (riceve da network la costante di apprendimento)
 			/// </summary>

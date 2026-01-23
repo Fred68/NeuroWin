@@ -67,6 +67,21 @@ namespace neuro
 	}
 	#endif
 
+	bool neuron::synapse::set_node_index()
+	{
+		bool ok = false;
+		if(_pn != nullptr)
+		{
+			_in = _pn->get_index();
+			ok = true;
+		}
+		else
+		{
+			_in = UINT_ERROR;
+		}
+		return ok;
+	}
+
 	void neuron::synapse::write(std::ofstream &fs)
 	{
 		try

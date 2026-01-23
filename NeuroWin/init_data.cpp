@@ -30,7 +30,7 @@ namespace neuro
 		}
 		if (_layers.size() != _types.size())
 		{
-			err += "Layers and types sizes don't match";
+			err += "Layer and type vectors sizes don't match";
 			ok = false;
 		}
 

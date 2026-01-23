@@ -81,6 +81,7 @@ namespace neuro
 	void network::reset(bool clear_errors)
 	{
 		_isSet = false;
+		_topo.clear();
 		for (uint i = 0; i < _layers.size(); i++)
 		{
 			_layers[i].reset();
@@ -135,10 +136,7 @@ namespace neuro
 						}
 					}
 				}
-
-
-				
-
+				_topo.update_topo(*this);
 				_isSet = true;
 			}
 			else
@@ -155,7 +153,15 @@ namespace neuro
 		}
 		return _isSet;
     }
+	
+	bool network::set(toponet &topo)
+	{
+		reset(false);
 
+		// TODO bool network::set(toponet &topo) da scrivere !!!
+		return true;
+	}
+	
 	void network::calc_numbers()
 	{
 		_nLays = _layers.size();
@@ -258,6 +264,12 @@ namespace neuro
 		return ret;
 	}
 
+	toponet network::get_topo() 
+	{
+		_topo.update_topo(*this);
+		return _topo;				// copy ctor (anche dei valori). Copy elision se ottimizzato.
+	}		
+
 	std::string network::display_vector(std::vector<act> &v)
 	{
 		std::ostringstream ss;
@@ -270,6 +282,14 @@ namespace neuro
 		}
 		ss << "]";
 		return ss.str();
+	}
+
+	layer& network::get_layer(uint lay)
+	{
+		if (lay >= _nLays)
+			throw this->create_exception(neuro_exception::layer_out_of_range, true, "in get_layer()");
+		else
+			return _layers[lay];
 	}
 
     neuron& network::get_neuron(uint lay, uint num)
@@ -547,8 +567,6 @@ namespace neuro
 		return ok;
 	}
 
-
-
 	void network::calc_indexes()
 	{
 		for (uint i = 0; i < _nLays; i++)
@@ -630,17 +648,28 @@ namespace neuro
 		reset(true);
 		try
 		{
+			size_t nLays_tmp;
 			act l_tmp;
-			size_t sz_tmp;
-			fs.read(reinterpret_cast<char*>(&l_tmp), sizeof(l_tmp));
-			fs.read(reinterpret_cast<char*>(&sz_tmp), sizeof(sz_tmp));
-			std::vector<uint> iN(sz_tmp);
-			_learn_const = l_tmp;
-			for (uint i = 0; i < sz_tmp; i++)
+			
+			fs.read(reinterpret_cast<char*>(&nLays_tmp), sizeof(nLays_tmp));		// Numero di livelli
+			std::vector<std::vector<std::vector<uint>>> v_indx(nLays_tmp);
+			
+			for (uint iL = 0; iL < nLays_tmp; iL++)
 			{
-				fs.read(reinterpret_cast<char*>(&(iN[i])), sizeof(iN[i]));
+				uint nNeu_temp;
+				fs.read(reinterpret_cast<char*>(&nNeu_temp), sizeof(nNeu_temp));	// Numero di neuroni del livello
+				for(uint iN = 0; iN < nNeu_temp; iN++)
+				{
+					uint nsyns_tmp;
+					fs.read(reinterpret_cast<char*>(&nsyns_tmp), sizeof(nsyns_tmp));	// Numero di sinapsi del neurone
+					//v_indx[iL]
+				}
 			}
 
+
+
+			fs.read(reinterpret_cast<char*>(&l_tmp), sizeof(l_tmp));
+			_learn_const = l_tmp;
 			#if false
 			// TODO errore bad allocation !!!
 			//_layers.resize(sz_tmp, {*this});	// Ridimensiona, passando gli argomenti del costruttore di layer

@@ -30,12 +30,29 @@ namespace neuro
 			input = true;			// ...poi imposta input a true, che disabilita set_fact()
 		}
 	}
+
 	neuron::neuron(network &netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)
     {
 		for(uint i=0; i<prev.size(); i++)						// Imposta il vettore delle sinapsi (non è un neurone di input)
 		{														// con pesi e bias indicati
 			neuron &n = prev[i];
-			syns.push_back(synapse(n, (i == prev.size() - 1) ? bias_w : neu_w));
+			_syns.push_back(synapse(n, (i == prev.size() - 1) ? bias_w : neu_w));
+		}
+        #if _DEBUG_NEURO_DET
+        cout << "neuron(neuron &prev)\n";
+        #endif
+    }
+
+	neuron::neuron(network &netwrk, std::vector<neuron> &prev, std::vector<uint> &indx, act neu_w, act bias_w) : neuron(netwrk)
+    {
+		for (uint j = 0; j < indx.size(); j++)					// Percorre il vettore degli indici dei neuroni
+		{														
+			uint i = indx[j];
+			if(i < prev.size())
+			{
+				neuron &n = prev[i];
+				_syns.push_back(synapse(n, (i == prev.size() - 1) ? bias_w : neu_w));
+			}
 		}
         #if _DEBUG_NEURO_DET
         cout << "neuron(neuron &prev)\n";
@@ -48,7 +65,7 @@ namespace neuro
 											f_act{other.f_act}, f_act_der{other.f_act_der}, fact{other.fact},
 											active{other.active}, input{other.input},
 											_nstat{other._nstat}
-											//syns(other.syns.size())
+											//_syns(other._syns.size())
 	{
 		switch(other._nstat)
 		{
@@ -65,11 +82,11 @@ namespace neuro
 				// TODO aggiungere throw eccezione
 			break;
 		}
-		for(uint i=0; i<other.syns.size(); i++)
+		for(uint i=0; i<other._syns.size(); i++)
 		{
-			//syns[i] = other.syns[i];
+			//_syns[i] = other._syns[i];
 			// TODO I riferimenti delle sinapsi vanno aggiornate ai nodi della nuova rete
-			syns.push_back(synapse(other.syns[i]));
+			_syns.push_back(synapse(other._syns[i]));
 		}
 	}
 	neuron& neuron::operator=(const neuron& other)
@@ -98,13 +115,13 @@ namespace neuro
 			// TODO aggiungere throw eccezione
 			break;
 		}
-		syns.clear();
-		//syns.resize(other.syns.size());
-		for (uint i = 0; i < other.syns.size(); i++)
+		_syns.clear();
+		//_syns.resize(other._syns.size());
+		for (uint i = 0; i < other._syns.size(); i++)
 		{
-			//syns[i] = other.syns[i];
+			//_syns[i] = other._syns[i];
 			// TODO I riferimenti delle sinapsi vanno aggiornate ai nodi della nuova rete
-			syns.push_back(synapse(other.syns[i]));
+			_syns.push_back(synapse(other._syns[i]));
 		}
 		return *this;
 	}
@@ -131,8 +148,8 @@ namespace neuro
 			// TODO aggiungere throw eccezione
 			break;
 		}
-		syns.clear();
-		syns = std::move(other.syns);
+		_syns.clear();
+		_syns = std::move(other._syns);
 	}
 	neuron& neuron::operator=(neuron&& other)
 	{
@@ -160,8 +177,8 @@ namespace neuro
 			// TODO aggiungere throw eccezione
 			break;
 		}
-		syns.clear();
-		syns = std::move(other.syns);
+		_syns.clear();
+		_syns = std::move(other._syns);
 		return *this;
 	}
 	#endif
@@ -182,11 +199,11 @@ namespace neuro
 		set_fact(fact_default());
 		active = true;
 		input = false;
-		for(uint i=0; i<syns.size(); i++)
+		for(uint i=0; i<_syns.size(); i++)
 		{
-			syns[i].reset();
+			_syns[i].reset();
 		}
-		syns.clear();
+		_syns.clear();
 	}
 
     std::string neuron::to_string()
@@ -224,7 +241,7 @@ namespace neuro
 
         if(active)
         {
-            for(synapse s : syns)
+            for(synapse s : _syns)
             {
                 if(s._pn != nullptr)			// if (std::get<ptN>(s._pn) != nullptr)
                 {
@@ -305,6 +322,10 @@ namespace neuro
 	void neuron::set_index(uint i)
 	{
 		index_in_layer = i;
+		for(uint i=0; i<_syns.size(); i++)
+		{
+			_syns[i].set_node_index();
+		}
 		_nstat = stat::_index;
 	}
 
@@ -330,12 +351,18 @@ namespace neuro
 
 	act neuron::get_w(uint i)
 	{
-		return (i < syns.size()) ? syns[i].w : 0;
+		return (i < _syns.size()) ? _syns[i].w : 0;
 	}
+
+	uint neuron::get_neuron_index(uint i)
+	{
+		return (i < _syns.size()) ? _syns[i]._in : UINT_ERROR;
+	}
+
 	void neuron::set_w(act w, uint i)
 	{
-		if(i < syns.size())
-			syns[i].w = w;
+		if(i < _syns.size())
+			_syns[i].w = w;
 	}
 
     void neuron::calc_x()
@@ -352,7 +379,7 @@ namespace neuro
             // ...per il peso w della sinapsi. Il risultato è il segnale di ingresso x del nodo.        
             auto func_add = [&](const synapse &s) {sum.fetch_add(s._pn->y * s.w);};
 			//auto func_add = [&](const synapse &s) {sum.fetch_add(std::get<ptN>(s._pn)->y * s.w); };
-            std::for_each(net.get_exe_pol(EXE_POL::neuron), syns.begin(), syns.end(), func_add);
+            std::for_each(net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_add);
 			x = sum;
         }
     }
@@ -380,7 +407,7 @@ namespace neuro
 		{
 			auto func_ea = [&](const synapse &s) {s._pn->set_beta(s.w * get_ei());};
 			//auto func_ea = [&](const synapse &s) {std::get<ptN>(s._pn)->set_beta(s.w * get_ei()); };
-			std::for_each(net.get_exe_pol(EXE_POL::neuron), syns.begin(), syns.end(), func_ea);
+			std::for_each(net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_ea);
 		}
 	}
 	void neuron::calc_w(act learn_const)
@@ -394,7 +421,7 @@ namespace neuro
 				//s.w -=  learn_const * ei * std::get<ptN>(s._pn)->y;
 				s.w -= learn_const * ei * s._pn->y;
 			};
-			std::for_each(net.get_exe_pol(EXE_POL::neuron), syns.begin(), syns.end(), func_updw);
+			std::for_each(net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_updw);
 		}
 	}
 
@@ -481,7 +508,7 @@ namespace neuro
 		{
 			if (_nstat == stat::_index)
 			{
-				size_t ssz = syns.size();
+				size_t ssz = _syns.size();
 				fs.write(reinterpret_cast<char*>(&index_in_layer),sizeof(index_in_layer));
 				fs.write(reinterpret_cast<char*>(&fact), sizeof(fact));
 				fs.write(reinterpret_cast<char*>(&active), sizeof(active));
@@ -489,7 +516,7 @@ namespace neuro
 				fs.write(reinterpret_cast<char*>(&ssz), sizeof(ssz));
 				for(uint i=0; i<ssz; i++)
 				{
-					syns[i].write(fs);
+					_syns[i].write(fs);
 				}
 			}
 			else
@@ -529,14 +556,14 @@ namespace neuro
 			active = active_tmp;
 			input = input_tmp;
 
-			syns.clear();
-			syns.resize(sz_tmp);
+			_syns.clear();
+			_syns.resize(sz_tmp);
 			for (uint i = 0; i < sz_tmp; i++)
 			{
 				//synapse s;
 				//s.read(fs);
-				syns[i].read(fs);
-				//syns.push_back(s);
+				_syns[i].read(fs);
+				//_syns.push_back(s);
 			}
 
 		}
@@ -557,7 +584,7 @@ namespace neuro
 		{
 			for(uint iS = 0; iS<get_n_syn(); iS++)
 			{
-				synapse &s = syns[iS];
+				synapse &s = _syns[iS];
 				s._pn = std::shared_ptr<neuron>(&(net.get_neuron(ilay-1,s._in)));
 			}
 		}
