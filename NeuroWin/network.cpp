@@ -146,6 +146,7 @@ namespace neuro
 
 			calc_numbers();
 			set_exe_pol();
+			// TODO: Aggiungere calcolo degli indici delle sinapsi
 		}
 		else
 		{
@@ -156,24 +157,29 @@ namespace neuro
 	
 	bool network::set(toponet &topo)
 	{
+		bool ok = true;
 		reset(false);
-		for(uint il=0; il < topo.get_layers_num(); il++)
+		// TODO: Aggiungere eccezioni
+		for(uint il = 0; il < topo.get_layers_num(); il++)
 		{
 			layer *ln = new layer(*this);
-			for(uint in = 0; in < topo.get_neurons_num(il); in++)
+			for(uint in = 0; in < topo.get_neurons_num(il,ok); in++)
 			{
 				neuron *n = new neuron(*this);	
-				for(uint is=0; is < topo.get_synapses_num(il,in); is++)
+				for(uint is=0; is < topo.get_synapses_num(il,in,ok); is++)
 				{
-					// TODO: aggiungere funzione public neuron::add_synapse(uint n_indx), indice del neurone del liv. precedente
-					//neuron::synapse *s = new neuron::synapse();
+					uint indx_neu = topo.get_neuron_index_of_synapse(il,in,is,ok);
+					n->add_synapse(indx_neu);
 				}
-				ln->push_back(*n);			// Inserisce copia
+				ln->push_back(*n);					// Inserisce copia
 			}
-			_layers.push_back(*ln);			// Inserisce copia
+			_layers.push_back(*ln);					// Inserisce copia
 		}
-		// TODO bool network::set(toponet &topo) da scrivere !!!
-		return true;
+
+		calc_numbers();
+		set_exe_pol();
+		// TODO: Aggiungere calcolo dei puntatori delle sinapsi
+		return ok;
 	}
 	
 	void network::calc_numbers()
