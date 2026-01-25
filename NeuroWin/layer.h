@@ -38,9 +38,10 @@ namespace neuro
 		public:
 			/// <summary>
 			/// Ctor (semplice)
+			/// Usa il ctor di vector<neuron> con numero di elementi (zero) e la lista degli argomenti del ctor di neuron
 			/// </summary>
 			/// <param name="net"></param>
-			inline layer(network &net) : _neurons(0, {net, true}), _net(net) {};
+			inline layer(network &net) : _neurons(0, {net, false}), _net(net) {};
 
 			#if _COPY_CTORS_
 			layer(const layer& other);

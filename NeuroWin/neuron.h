@@ -41,8 +41,8 @@ namespace neuro
 			friend class neuron;
 
 			private:
-				uint _in;			// Indice del nodo collegato
-				ptN _pn;			// Puntatore al nodo (era std::variant<ptN,uint> _pn)
+				uint _in;			// Indice del neurone collegato
+				ptN _pn;			// Puntatore al neurone (era std::variant<ptN,uint> _pn)
 				act w;
 		
 				void write(std::ofstream &fs);
@@ -72,12 +72,18 @@ namespace neuro
 				// synapse(const synapse&)=delete e synapse& operator=(const synapse&)=delete generano errore di compilazione.
 				#endif
 				/// <summary>
-				/// Imposta l'indice del nodo della sinapsi
+				/// Aggiorna l'indice del neurone a cui fa riferimento la sinapsi
 				/// </summary>
 				/// <returns></returns>
-				bool set_node_index();
+				bool update_node_index();
 				/// <summary>
-				/// Restituisce l'indice del nodo della sinapsi
+				/// Imposta l'indice del neurone a cui fa riferimento la sinapsi, senza alcun controllo,
+				/// Azzera il puntatore al neurone
+				/// </summary>
+				/// <param name="i"></param>
+				void set_node_index(uint i);
+				/// <summary>
+				/// Restituisce l'indice del neurone della sinapsi
 				/// UINT_ERROR se non impostato
 				/// </summary>
 				/// <returns></returns>
@@ -94,7 +100,7 @@ namespace neuro
         static act hyptangent_der(neuron *n);
         static act relu(neuron *n);
         static act relu_der(neuron *n);
-        static act one(neuron *n);                  // bias modellato come peso di un nodo di uscita unitaria
+        static act one(neuron *n);                  // bias modellato come peso di un neurone di uscita unitaria
         static act zero(neuron *n);                 // zero (derivata di costante)
         static act id(neuron *n);                   // identità
         inline static FACT fact_default() {return FACT::tanh;}
@@ -127,7 +133,7 @@ namespace neuro
 			
 			FACT fact;                              /// Tipo di funzione di attivazione
             bool active = true;                     /// Se false, non calcola né x dai pesi né y.
-            bool input = false;                     /// Se true: nodo di input, non calcola la x, solo la y, e abilita set_input
+            bool input = false;                     /// Se true: neurone di input, non calcola la x, solo la y, e abilita set_input
 			stat _nstat = stat::_beta;				/// beta, EI o index (for I/O)
 
 			#if TXT_INFO
@@ -186,22 +192,30 @@ namespace neuro
 			
 			inline FACT get_fact() {return fact;}				// Funzione di attivazione
 			std::string get_fact_name();						// Nome della funzione di attivazione
-			void set_fact(FACT f);								// Cambia la funzione di attivazione, solo se non è un nodo di input
+			void set_fact(FACT f);								// Cambia la funzione di attivazione, solo se non è un neurone di input
 			
 			#if TXT_INFO
 			inline std::string get_name() { return name; }
 			inline void set_name(std::string s) { name = s; }
             #endif
 
-			
+			/// <summary>
+			/// Aggiunge una sinapsi con indice l'indice del nodo a cui fa riferimento,
+			/// senza alcun controllo.
+			/// </summary>
+			/// <param name="in"></param>
+			// TODO: funzione da controllare
+			void add_synapse(uint in);
+
 			/// <summary>
 			/// Valore dell'ingresso complessivo x
 			/// </summary>
 			/// <returns></returns>
-			inline act get_x() { return x; }		// Ingresso complessivo				
-			
+			/// 
+			inline act get_x() { return x; }
+
 			/// <summary>
-			/// Modifica l'ingresso x, solo se è un nodo di input
+			/// Modifica l'ingresso x, solo se è un neurone di input
 			/// </summary>
 			/// <param name="x_in"></param>
 			/// <returns></returns>
@@ -217,6 +231,7 @@ namespace neuro
 			/// </summary>
 			/// <returns></returns>
 			inline act get_y() { return y; }		// Uscita
+
 			/// <summary>
 			/// Calcola l'uscita y, solo se è attivo
 			/// </summary>
@@ -233,7 +248,7 @@ namespace neuro
 			/// </summary>
 			/// <param name="i"></param>
 			/// <returns></returns>
-			void set_index(uint i);
+			void set_index(uint indx);
 			
 			/// <summary>
 			/// Valore della derivata dell'errore (ei, in unione con beta)
@@ -273,11 +288,11 @@ namespace neuro
 			act get_w(uint i);						// Peso della sinapsi i.
 			
 			/// <summary>
-			/// Indice del nodo della sinapsi 'i'
+			/// Indice del neurone della sinapsi 'i'
 			/// </summary>
 			/// <param name="i"></param>
 			/// <returns></returns>
-			uint get_neuron_index(uint i);			// Indice del nodo della sinapsi i.
+			uint get_neuron_index(uint i);			// Indice del neurone della sinapsi i.
 
 			/// <summary>
 			/// Imposta il peso della sinapsi i
@@ -288,7 +303,7 @@ namespace neuro
 			
 			/// <summary>
 			/// Calcolo parziale delle EA = beta dei nodi del livello precedente
-			/// Formula [9], ma contributi del nodo j attuale alle beta dei nodi i precedenti
+			/// Formula [9], ma contributi del neurone j attuale alle beta dei nodi i precedenti
 			/// </summary>
 			void calc_parz_eai();					// Calcolo parziale delle EA = beta dei nodi del livello precedente
 			

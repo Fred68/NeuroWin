@@ -56,7 +56,7 @@ namespace neuro
 	// ...poi aggiornare tutti i puntatori e riferimenti.
 
 	// Quindi, della rete, si salvano prima i dati fissi e le dimensioni.
-	// Numero di livelli, numero di nodi per livello, numero di sinapsi per nodo.
+	// Numero di livelli, numero di nodi per livello, numero di sinapsi per neurone.
 	 
 
 
@@ -238,14 +238,14 @@ namespace neuro
 
 			/// <summary>
 			/// Calcola la rete con forward propagation, partendo dai valori del vettore di input.
-			/// Per ogni nodo (dal primo all'ultimo livello)...
+			/// Per ogni neurone (dal primo all'ultimo livello)...
 			/// ...calcola lingresso totale (x) e attività di uscita (y), azzera EI.</summary>
 			/// <param name="inp_lay"></param>
 			/// <returns></returns>
 			bool prop_fw(const std::vector<act> &inp_lay);		// Calcola singola forward propagation	
 			/// <summary>
 			/// Calcola singola back propagation.
-			/// Per ogni nodo(dall'ultimo al primo livello)...
+			/// Per ogni neurone (dall'ultimo al primo livello)...
 			/// ...calcola le EI.
 			/// </summary>
 			/// <param name="out_lay"></param>

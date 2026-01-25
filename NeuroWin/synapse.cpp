@@ -67,7 +67,7 @@ namespace neuro
 	}
 	#endif
 
-	bool neuron::synapse::set_node_index()
+	bool neuron::synapse::update_node_index()
 	{
 		bool ok = false;
 		if(_pn != nullptr)
@@ -80,6 +80,12 @@ namespace neuro
 			_in = UINT_ERROR;
 		}
 		return ok;
+	}
+
+	void neuron::synapse::set_node_index(uint i)
+	{
+		_in = i;
+		_pn = nullptr;
 	}
 
 	void neuron::synapse::write(std::ofstream &fs)

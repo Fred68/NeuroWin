@@ -82,7 +82,7 @@ namespace neuro
 						{
 							for(uint is = 0; ok && (is < ns); is++)
 							{
-								uint nindx = v_indx[il][in][is];		// Indice del nodo del livello precedente
+								uint nindx = v_indx[il][in][is];		// Indice del neurone del livello precedente
 								if(il > 0)  
 								{
 									if(!(nindx < get_neurons_num(il-1)))	// Se l'indice è maggiore del numero di nodi

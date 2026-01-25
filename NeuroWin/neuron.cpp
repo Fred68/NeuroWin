@@ -319,12 +319,12 @@ namespace neuro
 		beta = beta_in;
 		_nstat = stat::_beta;
 	}
-	void neuron::set_index(uint i)
+	void neuron::set_index(uint indx)
 	{
-		index_in_layer = i;
+		index_in_layer = indx;					// Indice del neurone nel livello
 		for(uint i=0; i<_syns.size(); i++)
 		{
-			_syns[i].set_node_index();
+			_syns[i].update_node_index();			// Indici dei nodi delle sinapsi
 		}
 		_nstat = stat::_index;
 	}
@@ -365,6 +365,13 @@ namespace neuro
 			_syns[i].w = w;
 	}
 
+	void neuron::add_synapse(uint in)
+	{
+		synapse *s = new synapse();
+		s->set_node_index(in);
+		_syns.push_back(*s);
+	}
+
     void neuron::calc_x()
     {
         if(active && !input)
@@ -375,8 +382,8 @@ namespace neuro
 				std::atomic<act> sum = 0.0f;
             #endif
         
-            // Calcola, su tutte le sinapsi del nodo, la somma delle uscite y dei nodi collegati, moltiplicate...
-            // ...per il peso w della sinapsi. Il risultato è il segnale di ingresso x del nodo.        
+            // Calcola, su tutte le sinapsi del neurone, la somma delle uscite y dei nodi collegati, moltiplicate...
+            // ...per il peso w della sinapsi. Il risultato è il segnale di ingresso x del neurone.        
             auto func_add = [&](const synapse &s) {sum.fetch_add(s._pn->y * s.w);};
 			//auto func_add = [&](const synapse &s) {sum.fetch_add(std::get<ptN>(s._pn)->y * s.w); };
             std::for_each(net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_add);
@@ -416,8 +423,8 @@ namespace neuro
 		{
 			auto func_updw = [&](synapse &s)
 			{	
-				// Corregge il peso wi della sinapsi tra in nodo j attuale e il nodo i precedente
-				// con le formule [8] e [10], usando il prodotto tra ei (del nodo j) e y (del nodo i).
+				// Corregge il peso wi della sinapsi tra in neurone j attuale e il neurone i precedente
+				// con le formule [8] e [10], usando il prodotto tra ei (del neurone j) e y (del neurone i).
 				//s.w -=  learn_const * ei * std::get<ptN>(s._pn)->y;
 				s.w -= learn_const * ei * s._pn->y;
 			};

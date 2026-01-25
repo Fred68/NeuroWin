@@ -107,7 +107,7 @@ namespace neuro
 			
 			if (_nLays > 1)
 			{
-				for (uint i = 0; i < _nLays; i++)		// Crea i livelli, ognuno con un nodo in più (uscita 1, disattivo, per i bias)
+				for (uint i = 0; i < _nLays; i++)		// Crea i livelli, ognuno con un neurone in più (uscita 1, disattivo, per i bias)
 				{
 					layer *ln;
 
@@ -119,7 +119,7 @@ namespace neuro
 					{										// Per gli altri livelli, usa neuron()   
 						ln = new layer(ini_data.get_layers()[i] + 1, *this, _layers[i - 1]);
 					}
-					_layers.push_back(*ln);
+					_layers.push_back(*ln);					// Inserisce una copia (layer ln sullo stack viene eliminato).
 
 					uint jmax = (uint)_layers.back().size();
 					for (uint j = 0; j < jmax; j++)
@@ -157,7 +157,21 @@ namespace neuro
 	bool network::set(toponet &topo)
 	{
 		reset(false);
-
+		for(uint il=0; il < topo.get_layers_num(); il++)
+		{
+			layer *ln = new layer(*this);
+			for(uint in = 0; in < topo.get_neurons_num(il); in++)
+			{
+				neuron *n = new neuron(*this);	
+				for(uint is=0; is < topo.get_synapses_num(il,in); is++)
+				{
+					// TODO: aggiungere funzione public neuron::add_synapse(uint n_indx), indice del neurone del liv. precedente
+					//neuron::synapse *s = new neuron::synapse();
+				}
+				ln->push_back(*n);			// Inserisce copia
+			}
+			_layers.push_back(*ln);			// Inserisce copia
+		}
 		// TODO bool network::set(toponet &topo) da scrivere !!!
 		return true;
 	}
@@ -366,7 +380,7 @@ namespace neuro
 				neuron n = get_at(il,in);						// Reference al neurone
 				for(uint is = 0; is < n.get_n_syn(); is++)
 				{
-					bool is_bias = (is == (n.get_n_syn() - 1));	// Ultima sinapsi connessa a nodo One disattivo: il peso è il bias.
+					bool is_bias = (is == (n.get_n_syn() - 1));	// Ultima sinapsi connessa a neurone One disattivo: il peso è il bias.
 					n.set_w(wf(il, in, is, is_bias), is);		// Usa il puntatore a funzione
 				}
 			}
@@ -424,7 +438,7 @@ namespace neuro
 			auto v = std::ranges::iota_view((uint)0, (uint)lay.size());
 			auto func_calc_w = [&](uint i) {lay[i].calc_w(get_f_learn()(*this,nlay,i));};
 			// Nota: calc_w(...) usa std::execution::par sui pesi, possibile 'race condition' ?
-			// No, le sinapsi di un nodo (verso i precedenti) sono indipendenti da quelle di un altro nodo
+			// No, le sinapsi di un neurone (verso i precedenti) sono indipendenti da quelle di un altro neurone
 			std::for_each(get_exe_pol(EXE_POL::layer), v.begin(), v.end(), func_calc_w);
 		}
 	}
