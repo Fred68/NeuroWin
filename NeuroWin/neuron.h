@@ -89,7 +89,7 @@ namespace neuro
 				/// <returns></returns>
 				inline uint get_node_index() {return _in;}
 		};
-        
+
         typedef act (*act_func) (neuron*);							// Puntatore a funzione di attivazione
 
         /// Funzioni di attivazione (non usano dati d'istanza)
@@ -313,7 +313,7 @@ namespace neuro
 			/// <param name="learn_const"></param>
 			void calc_w(act learn_const);			// Ricalcolo dei pesi (riceve da network la costante di apprendimento)
 
-			void update_ptr(uint in, uint ilay);	// Aggiorna i puntatori delle sinapsi
+			void update_ptr(uint ilay);				// Aggiorna i puntatori delle sinapsi
 
 			void write(std::ofstream &fs);
 			void read(std::ifstream &fs);

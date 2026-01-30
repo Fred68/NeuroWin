@@ -585,7 +585,7 @@ namespace neuro
 		}
 	}
 
-	void neuron::update_ptr(uint in, uint ilay)
+	void neuron::update_ptr(uint ilay)
 	{
 		if(!input)		// Se è un neurone di input, non ha sinapsi in ingresso
 		{

@@ -146,7 +146,7 @@ namespace neuro
 
 			calc_numbers();
 			set_exe_pol();
-			// TODO: Aggiungere calcolo degli indici delle sinapsi
+			// TODO! Aggiungere calcolo degli indici delle sinapsi
 		}
 		else
 		{
@@ -178,7 +178,7 @@ namespace neuro
 
 		calc_numbers();
 		set_exe_pol();
-		// TODO: Aggiungere calcolo dei puntatori delle sinapsi
+		// TODO! Aggiungere calcolo dei puntatori delle sinapsi
 		return ok;
 	}
 	
@@ -610,7 +610,7 @@ namespace neuro
 					try
 					{
 						neuron &n = get_neuron(iL,iN);
-						n.update_ptr(iN,iL);
+						n.update_ptr(iL);
 					}
 					catch(neuro_exception &nex)
 					{
