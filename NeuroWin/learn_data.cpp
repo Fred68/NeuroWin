@@ -17,8 +17,8 @@ namespace neuro
 	std::string learn_data::to_string()
 	{
 		std::string txt;
-		txt += std::format("Vector lengths (input/output): {0}/{1}\n", _inp_sz, _out_sz);
-		txt += std::format("Vector numbers (input/output): {0}/{1}\n", _vinp.size(), _vout.size());
+		txt += std::format("Vector lengths (_input/output): {0}/{1}\n", _inp_sz, _out_sz);
+		txt += std::format("Vector numbers (_input/output): {0}/{1}\n", _vinp.size(), _vout.size());
 		txt += std::format("Data pairs number: {0}", _vinp.size(), _ldata.size());
 
 		return txt;

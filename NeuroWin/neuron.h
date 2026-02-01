@@ -42,7 +42,7 @@ namespace neuro
 
 			private:
 				uint _in;			// Indice del neurone collegato
-				ptN _pn;			// Puntatore al neurone (era std::variant<ptN,uint> _pn)
+				ptN _pn;			// Puntatore al neurone collegato (era std::variant<ptN,uint> _pn)
 				act w;
 		
 				void write(std::ofstream &fs);
@@ -71,17 +71,27 @@ namespace neuro
 				// Necessari costruttore di copia e assegnazione di copia standard (copia bit per bit).
 				// synapse(const synapse&)=delete e synapse& operator=(const synapse&)=delete generano errore di compilazione.
 				#endif
+
 				/// <summary>
 				/// Aggiorna l'indice del neurone a cui fa riferimento la sinapsi
 				/// </summary>
 				/// <returns></returns>
 				bool update_node_index();
+
 				/// <summary>
-				/// Imposta l'indice del neurone a cui fa riferimento la sinapsi, senza alcun controllo,
+				/// Imposta l'indice del neurone a cui fa riferimento la sinapsi, senza alcun controllo.
 				/// Azzera il puntatore al neurone
 				/// </summary>
 				/// <param name="i"></param>
 				void set_node_index(uint i);
+
+				/// <summary>
+				/// Imposta il puntatore al neurone a cui fa riferimento la sinapsi, senza alcun controllo.
+				/// Non modifica l'indice.
+				/// </summary>
+				inline void set_node_ptr(ptN ptn) { _pn = ptn;}
+
+
 				/// <summary>
 				/// Restituisce l'indice del neurone della sinapsi
 				/// UINT_ERROR se non impostato
@@ -118,7 +128,7 @@ namespace neuro
 			static constexpr act b_ini_mean = 0.001;
 
         private:
-			network &net;							/// Riferimento alla rete di appartenenza
+			network &_net;							/// Riferimento alla rete di appartenenza
             act x;                                  /// Segnale in ingresso
             act y;                                  /// Attività in uscita
 			union
@@ -131,9 +141,9 @@ namespace neuro
             act_func f_act;                         /// Funzione di attivazione (puntatore)
             act_func f_act_der;                     /// Derivata della funzione di attivazione (puntatore)
 			
-			FACT fact;                              /// Tipo di funzione di attivazione
-            bool active = true;                     /// Se false, non calcola né x dai pesi né y.
-            bool input = false;                     /// Se true: neurone di input, non calcola la x, solo la y, e abilita set_input
+			FACT _fact;                              /// Tipo di funzione di attivazione
+            bool _active = true;                     /// Se false, non calcola né x dai pesi né y.
+            bool _input = false;                     /// Se true: neurone di _input, non calcola la x, solo la y, e abilita set_input
 			stat _nstat = stat::_beta;				/// beta, EI o index (for I/O)
 
 			#if TXT_INFO
@@ -150,7 +160,7 @@ namespace neuro
 			/// ctor, neurone vuoto
 			/// </summary>
 			/// <param name="netwrk">rete (riferimento)</param>
-			/// <param name="isInput">neurone di input se true</param>
+			/// <param name="isInput">neurone di _input se true</param>
 			neuron(network &netwrk, bool isInput);
 			/// <summary>
 			/// ctor, crea sinapsi a tutti i neuroni del livello precedente
@@ -184,13 +194,13 @@ namespace neuro
             std::string to_string();
 
 			inline uint get_n_syn() const {return _syns.size();}	// Numero di sinapsi
-			inline bool get_active() const {return active;}		// Neurone attivo / disattivo		
+			inline bool get_active() const {return _active;}		// Neurone attivo / disattivo		
             void set_active(bool stat);
 			
-			inline bool get_input() const { return input;}		// Neurone di input o standard
+			inline bool get_input() const { return _input;}		// Neurone di _input o standard
 			void set_input(bool inp);							// Non modifica il vettore delle sinapsi
 			
-			inline FACT get_fact() {return fact;}				// Funzione di attivazione
+			inline FACT get_fact() {return _fact;}				// Funzione di attivazione
 			std::string get_fact_name();						// Nome della funzione di attivazione
 			void set_fact(FACT f);								// Cambia la funzione di attivazione, solo se non è un neurone di input
 			
@@ -244,7 +254,7 @@ namespace neuro
 			uint get_index();
 			
 			/// <summary>
-			/// Imposta l'indice del neurone nel livello (per salvataggio)
+			/// Imposta l'indice del neurone nel livello e delle sue sinapsi (per salvataggio)
 			/// </summary>
 			/// <param name="i"></param>
 			/// <returns></returns>
@@ -313,7 +323,11 @@ namespace neuro
 			/// <param name="learn_const"></param>
 			void calc_w(act learn_const);			// Ricalcolo dei pesi (riceve da network la costante di apprendimento)
 
-			void update_ptr(uint ilay);				// Aggiorna i puntatori delle sinapsi
+			/// <summary>
+			/// Aggiorna, nelle sinapsi, i puntatori ai neuroni, in base agli indici
+			/// </summary>
+			/// <param name="ilay"></param>
+			void update_syn_pointers(uint ilay);	// Aggiorna, nelle sinapsi, i puntatori ai neuroni
 
 			void write(std::ofstream &fs);
 			void read(std::ifstream &fs);

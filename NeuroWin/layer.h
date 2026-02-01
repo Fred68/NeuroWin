@@ -40,7 +40,7 @@ namespace neuro
 			/// Ctor (semplice)
 			/// Usa il ctor di vector<neuron> con numero di elementi (zero) e la lista degli argomenti del ctor di neuron
 			/// </summary>
-			/// <param name="net"></param>
+			/// <param name="_net"></param>
 			inline layer(network &net) : _neurons(0, {net, false}), _net(net) {};
 
 			#if _COPY_CTORS_
@@ -57,8 +57,8 @@ namespace neuro
 			/// Chiama il costruttore di vector<neuron> passando il numero di elementi e gli argomenti per il ctor di neuron
 			/// </summary>
 			/// <param name="num">numero di neuroni</param>
-			/// <param name="net">rif. alla rete</param>
-			/// <param name="b">livello di input?</param>
+			/// <param name="_net">rif. alla rete</param>
+			/// <param name="b">livello di _input?</param>
 			inline layer(uint num, network &net, bool b) : _neurons(num, { net, b}), _net(net) {};
 
 			/// <summary>
@@ -66,7 +66,7 @@ namespace neuro
 			/// Chiama il costruttore di vector<neuron> passando il numero di elementi e gli argomenti per il ctor di neuron
 			/// </summary>
 			/// <param name="num">numero di neuroni</param>
-			/// <param name="net">rif. alla rete</param>
+			/// <param name="_net">rif. alla rete</param>
 			/// <param name="prev">rif. al livello precedente</param>
 			inline layer(uint num, network &net, layer &prev) : _neurons(num, { net, prev.get_neurons()}), _net(net) {};
 

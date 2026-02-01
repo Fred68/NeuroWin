@@ -150,9 +150,9 @@ namespace neuro
 			bool set(init_data &ini_data);
 			bool set(toponet &topo);		// TODO: da scrivere
 			/// <summary>
-			/// Aggiorna i dati interni (numero di livelli, di nodi di input ecc...).
+			/// Calcola i numeri di nodi dei livelli di input e output
 			/// </summary>
-			void calc_numbers();
+			void calc_io_lay_numbers();
 
             /// <summary>
             /// Neurone del livello 'lay' e con indice 'num'.
@@ -237,7 +237,7 @@ namespace neuro
 			void calc_index_lay(uint nlay);				// Assegna gli indici ai neuroni del livello (per salvataggio successivo)
 
 			/// <summary>
-			/// Calcola la rete con forward propagation, partendo dai valori del vettore di input.
+			/// Calcola la rete con forward propagation, partendo dai valori del vettore di _input.
 			/// Per ogni neurone (dal primo all'ultimo livello)...
 			/// ...calcola lingresso totale (x) e attività di uscita (y), azzera EI.</summary>
 			/// <param name="inp_lay"></param>

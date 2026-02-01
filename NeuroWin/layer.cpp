@@ -66,12 +66,12 @@ namespace neuro
 		catch(std::exception &ex)
 		{
 			std::cerr << "Eccezione exception in layer::write(...): " << ex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 		catch(network::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in layer::write(...): " << nex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 	}
 
@@ -98,11 +98,11 @@ namespace neuro
 		catch (std::exception &ex)
 		{
 			std::cerr << "Eccezione exception in layer::read(...): " << ex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		} catch (network::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in layer::read(...): " << nex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 
 

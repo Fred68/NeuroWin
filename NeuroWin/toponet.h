@@ -22,9 +22,9 @@ namespace neuro
 			~toponet();
 
 			/// <summary>
-			/// Cancella e rigerena la topologia, leggendola da 'net'
+			/// Cancella e rigerena la topologia, leggendola da '_net'
 			/// </summary>
-			/// <param name="net"></param>
+			/// <param name="_net"></param>
 			/// <returns></returns>
 			void update_topo(network &net);
 			

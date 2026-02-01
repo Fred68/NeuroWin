@@ -111,7 +111,7 @@ namespace neuro
 				{
 					layer *ln;
 
-					if (i == 0)								// Per il primo livello, crea neuroni di input, usando come ctor:
+					if (i == 0)								// Per il primo livello, crea neuroni di _input, usando come ctor:
 					{										// ...neuron(bool true) 
 						ln = new layer(ini_data.get_layers()[i] + 1, *this, true);
 					}
@@ -136,7 +136,7 @@ namespace neuro
 						}
 					}
 				}
-				_topo.update_topo(*this);
+				// _topo.update_topo(*this); Per non sprecare spazio, aggiorna la topologia dopo, solo quando serve.
 				_isSet = true;
 			}
 			else
@@ -144,9 +144,9 @@ namespace neuro
 				this->create_exception(neuro_exception::layer_number, true, "minimum two layers required in network ctor");
 			}
 
-			calc_numbers();
-			set_exe_pol();
-			// TODO! Aggiungere calcolo degli indici delle sinapsi
+			calc_io_lay_numbers();		// Calcola i numeri di nodi dei livelli di input e output
+			set_exe_pol();				// Imposta l'esecuzione dei cicli (parallelo, sequenziale)
+			calc_indexes();				// Calcola gli indici di nodi e sinapsi
 		}
 		else
 		{
@@ -165,7 +165,8 @@ namespace neuro
 			layer *ln = new layer(*this);
 			for(uint in = 0; in < topo.get_neurons_num(il,ok); in++)
 			{
-				neuron *n = new neuron(*this);	
+				neuron *n = new neuron(*this, il==0);	// Se layer zero, il neurone è di input
+
 				for(uint is=0; is < topo.get_synapses_num(il,in,ok); is++)
 				{
 					uint indx_neu = topo.get_neuron_index_of_synapse(il,in,is,ok);
@@ -176,13 +177,14 @@ namespace neuro
 			_layers.push_back(*ln);					// Inserisce copia
 		}
 
-		calc_numbers();
-		set_exe_pol();
-		// TODO! Aggiungere calcolo dei puntatori delle sinapsi
+		calc_io_lay_numbers();		// Calcola i numeri di nodi dei livelli di input e output
+		set_exe_pol();				// Imposta l'esecuzione dei cicli (parallelo, sequenziale)
+		calc_pointers();			// Calcola i puntatori ai nodi, in base agli indici.
+
 		return ok;
 	}
 	
-	void network::calc_numbers()
+	void network::calc_io_lay_numbers()
 	{
 		_nLays = _layers.size();
 		if(_nLays > 0)
@@ -345,7 +347,7 @@ namespace neuro
 			ret = ok;
 		}
 		else
-			throw this->create_exception(neuro_exception::size_mismatch, true, "input vector and first layer sizes are different in set_inputs()");
+			throw this->create_exception(neuro_exception::size_mismatch, true, "_input vector and first layer sizes are different in set_inputs()");
 		return ret;
 	}
 
@@ -610,7 +612,7 @@ namespace neuro
 					try
 					{
 						neuron &n = get_neuron(iL,iN);
-						n.update_ptr(iL);
+						n.update_syn_pointers(iL);
 					}
 					catch(neuro_exception &nex)
 					{
@@ -654,12 +656,12 @@ namespace neuro
 		catch (std::exception &ex)
 		{
 			std::cerr << "Eccezione exception in network::write(...): " << ex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 		catch (network::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in network::write(...): " << nex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 	}
 
@@ -717,12 +719,12 @@ namespace neuro
 		catch (std::exception &ex)
 		{
 			std::cerr << "Eccezione exception in network::read(...): " << ex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 		catch (network::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in network::read(...): " << nex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 
 		return;
@@ -730,6 +732,9 @@ namespace neuro
 
 	void network::save(const std::string &fname)
 	{
+		std::cout << "save() disabilitato per test" << std::endl;
+		// TODO!: save() disabilitato per test
+		return;
 		std::ofstream fs;
 		try
 		{
@@ -748,12 +753,12 @@ namespace neuro
 		catch (std::exception &ex)
 		{
 			std::cerr << "Eccezione exception in network::save(...): " << ex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 		catch (network::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in network::save(...): " << nex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 		if(fs.is_open())	fs.close();
 
@@ -762,6 +767,9 @@ namespace neuro
 
 	void network::load(const std::string &fname)
 	{
+		std::cout << "load() disabilitato per test" << std::endl;
+		return;
+		// TODO!: load() disabilitato per test
 		std::ifstream fs;
 		try
 		{
@@ -780,17 +788,17 @@ namespace neuro
 		catch (std::exception &ex)
 		{
 			std::cerr << "Eccezione exception in network::load(...): " << ex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 		catch (network::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in network::load(...): " << nex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 		if (fs.is_open())	fs.close();
 		/*if(calc_pointers())
 		{
-			calc_numbers();
+			calc_io_lay_numbers();
 			_isSet = true;
 		}*/
 

@@ -18,9 +18,9 @@ namespace neuro
 
 		private:
 			const std::shared_ptr<network> _pnet;			/// Puntatore alla rete
-			const uint _inp_sz,_out_sz;						/// Lunghezze dei vettori di input e output richiesti dalla rete
+			const uint _inp_sz,_out_sz;						/// Lunghezze dei vettori di _input e output richiesti dalla rete
 
-			std::vector<std::vector<act>> _vinp;			/// Vettori di input
+			std::vector<std::vector<act>> _vinp;			/// Vettori di _input
 			std::vector<std::vector<act>> _vout;			/// Vettori di output
 			std::vector<std::tuple<uint,uint>> _ldata;		/// Vettori dei valori per l'apprendimento
 		

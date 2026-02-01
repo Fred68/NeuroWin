@@ -75,7 +75,7 @@ int main()
 	init_data ini(lays,facts,0.05);
     std::cout << "init_data:\n" << ini.to_string() << std::endl;
 	
-	// net
+	// _net
 	std::shared_ptr<network> net;
 	std::shared_ptr<learn_data> ld;
 	try
@@ -96,7 +96,7 @@ int main()
 
 	/*try
 	{
-		net->get_neuron(1, 0).set_fact(neuro::FACT::test_error);
+		_net->get_neuron(1, 0).set_fact(neuro::FACT::test_error);
 	}
 	catch (network::neuro_exception const &nex)
 	{
@@ -106,7 +106,7 @@ int main()
 	
 
 	std::string ntok((net->isOk()) ? "ok" : "not ok");
-	cout << "net is "<< ntok << std::endl;
+	cout << "_net is "<< ntok << std::endl;
 	if(!net->isOk())
 	{
 		cout << net->get_exceptions_string(false) << endl;
@@ -188,13 +188,24 @@ int main()
 		cout << "vres (using): " << network::display_vector(vres) << endl;
 	}
 
+	getchar();
+	cout << "\n\nNet prima del calcolo di indici e topologia\n" << net->to_string() << endl;
+	getchar();
 	
 	net->calc_indexes();
+	net->get_topo();
+	cout << "\n\nNet dopo il calcolo di indici e topologia\n" << net->to_string() << endl;
+	getchar();
+
+
+
+
+
 	cout << "\n\nSave neuron indexes:\n" << net->to_string() << endl;
 
 	cout << "Salvataggio file..." << endl;
 	net->save("pippo.bin");
-	//net = nullptr;
+	//_net = nullptr;
 
 	#if false
 	std::ofstream fs("test.bin", std::ios::binary);

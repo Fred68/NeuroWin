@@ -14,7 +14,7 @@ namespace neuro
 	// TODO : Prevedere cancellazione e creazione di sinapsi (alcuni livelli potrebbero avere solo poche sinapsi al livello precedente).
 	// TODO : Vedere se e quando disabilitare dei nodi (se funzione relu < 0), ma probabilmente è meglio di no.
 
-    neuron::neuron(network &netwrk) : net{netwrk}
+    neuron::neuron(network &netwrk) : _net{netwrk}
     {
 		reset();
 
@@ -24,16 +24,16 @@ namespace neuro
     }
 	neuron::neuron(network &netwrk, bool isInput) : neuron{netwrk}
 	{
-		if(isInput)					// Se è un neurone di input, imposta la funzione di attivazion identità  (ed il flag)
+		if(isInput)					// Se è un neurone di _input, imposta la funzione di attivazion identità  (ed il flag)
 		{
 			set_fact(FACT::id);		// Prima imposta FACT...
-			input = true;			// ...poi imposta input a true, che disabilita set_fact()
+			_input = true;			// ...poi imposta _input a true, che disabilita set_fact()
 		}
 	}
 
 	neuron::neuron(network &netwrk, std::vector<neuron> &prev, act neu_w, act bias_w) : neuron(netwrk)
     {
-		for(uint i=0; i<prev.size(); i++)						// Imposta il vettore delle sinapsi (non è un neurone di input)
+		for(uint i=0; i<prev.size(); i++)						// Imposta il vettore delle sinapsi (non è un neurone di _input)
 		{														// con pesi e bias indicati
 			neuron &n = prev[i];
 			_syns.push_back(synapse(n, (i == prev.size() - 1) ? bias_w : neu_w));
@@ -197,8 +197,8 @@ namespace neuro
 		x = y = 0;
 		ei = 0;
 		set_fact(fact_default());
-		active = true;
-		input = false;
+		_active = true;
+		_input = false;
 		for(uint i=0; i<_syns.size(); i++)
 		{
 			_syns[i].reset();
@@ -210,8 +210,8 @@ namespace neuro
     {
         std::string statStr = "";
 		std::string type_stat = "?";
-        if(!active) statStr = "X";
-		if(input)  statStr += "I";
+        if(!_active) statStr = "X";
+		if(_input)  statStr += "I";
 	
 		switch(_nstat)
 		{
@@ -239,7 +239,7 @@ namespace neuro
 			txt = std::format(to_string_frm_n, x, y, get_fact_name(), statStr, ei, type_stat);
 		}
 
-        if(active)
+        if(_active)
         {
             for(synapse s : _syns)
             {
@@ -259,12 +259,12 @@ namespace neuro
         return txt;
     }    
  
-	void neuron::set_active(bool stat)	{ active = stat; }
-	void neuron::set_input(bool inp)	{ input = inp; }
+	void neuron::set_active(bool stat)	{ _active = stat; }
+	void neuron::set_input(bool inp)	{ _input = inp; }
 
 	void neuron::set_fact(FACT f)
 	{
-		if(!input)			// Se è un neurone di input, la funzione di attivazione è quella definita nel costrutture
+		if(!_input)			// Se è un neurone di _input, la funzione di attivazione è quella definita nel costrutture
 		{
 			switch (f)
 			{
@@ -289,20 +289,20 @@ namespace neuro
 				f_act_der = &one;
 				break;
 			default:
-				throw net.create_exception(network::neuro_exception::type::activation_function, true, "in neuron::set_fact()");
+				throw _net.create_exception(network::neuro_exception::type::activation_function, true, "in neuron::set_fact()");
 				
 			}
-			fact = f;
+			_fact = f;
 		}
 	}
 	std::string neuron::get_fact_name()
 	{
-		return fact2string(fact);
+		return fact2string(_fact);
 	}
 	
     bool neuron::set_x(act x_in)
     {
-        if(input)
+        if(_input)
         {
             x = x_in;
             return true;
@@ -324,6 +324,7 @@ namespace neuro
 		index_in_layer = indx;					// Indice del neurone nel livello
 		for(uint i=0; i<_syns.size(); i++)
 		{
+			// TODO!: AGGIUNGERE ECCEZIONE SE update_node_index() RESTIRUISCE FALSE
 			_syns[i].update_node_index();			// Indici dei nodi delle sinapsi
 		}
 		_nstat = stat::_index;
@@ -332,20 +333,20 @@ namespace neuro
 	act neuron::get_ei()
 	{	
 		if(_nstat!=stat::_ei)
-			throw net.create_exception(network::neuro_exception::type::EI_mismatch, true, "failed neuron::get_ei(), EI is not");
+			throw _net.create_exception(network::neuro_exception::type::EI_mismatch, true, "failed neuron::get_ei(), EI is not");
 		return ei;
 		
 	}
 	act neuron::get_beta()
 	{
 		if (_nstat != stat::_beta)
-			throw net.create_exception(network::neuro_exception::type::beta_mismatch, true, "failed neuron::get_beta(), beta is not set");
+			throw _net.create_exception(network::neuro_exception::type::beta_mismatch, true, "failed neuron::get_beta(), beta is not set");
 		return beta;
 	}
 	uint neuron::get_index()
 	{
 		if (_nstat != stat::_index)
-			throw net.create_exception(network::neuro_exception::type::beta_mismatch, true, "failed neuron::get_index(), index is not set");
+			throw _net.create_exception(network::neuro_exception::type::beta_mismatch, true, "failed neuron::get_index(), index is not set");
 		return index_in_layer;
 	}
 
@@ -374,7 +375,7 @@ namespace neuro
 
     void neuron::calc_x()
     {
-        if(active && !input)
+        if(_active && !_input)
         {
             #ifdef ACT_DBL
 				std::atomic<act> sum = 0.0;
@@ -386,21 +387,21 @@ namespace neuro
             // ...per il peso w della sinapsi. Il risultato è il segnale di ingresso x del neurone.        
             auto func_add = [&](const synapse &s) {sum.fetch_add(s._pn->y * s.w);};
 			//auto func_add = [&](const synapse &s) {sum.fetch_add(std::get<ptN>(s._pn)->y * s.w); };
-            std::for_each(net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_add);
+            std::for_each(_net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_add);
 			x = sum;
         }
     }
     void neuron::calc_y()
     {   
-        if(active)
+        if(_active)
             y = f_act(this);
     }
 	void neuron::calc_ei()
 	{
-		if(active)
+		if(_active)
 		{
 			if (_nstat != stat::_beta)
-				throw net.create_exception(network::neuro_exception::type::beta_mismatch, true, "failed neuron::calc_ei(), beta is not set");
+				throw _net.create_exception(network::neuro_exception::type::beta_mismatch, true, "failed neuron::calc_ei(), beta is not set");
 			set_ei(get_beta() * f_act_der(this));
 		}
 		else
@@ -410,16 +411,16 @@ namespace neuro
 	}
 	void neuron::calc_parz_eai()
 	{
-		if (active && !input)
+		if (_active && !_input)
 		{
 			auto func_ea = [&](const synapse &s) {s._pn->set_beta(s.w * get_ei());};
 			//auto func_ea = [&](const synapse &s) {std::get<ptN>(s._pn)->set_beta(s.w * get_ei()); };
-			std::for_each(net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_ea);
+			std::for_each(_net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_ea);
 		}
 	}
 	void neuron::calc_w(act learn_const)
 	{
-		if (active && !input)
+		if (_active && !_input)
 		{
 			auto func_updw = [&](synapse &s)
 			{	
@@ -428,7 +429,7 @@ namespace neuro
 				//s.w -=  learn_const * ei * std::get<ptN>(s._pn)->y;
 				s.w -= learn_const * ei * s._pn->y;
 			};
-			std::for_each(net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_updw);
+			std::for_each(_net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_updw);
 		}
 	}
 
@@ -517,9 +518,9 @@ namespace neuro
 			{
 				size_t ssz = _syns.size();
 				fs.write(reinterpret_cast<char*>(&index_in_layer),sizeof(index_in_layer));
-				fs.write(reinterpret_cast<char*>(&fact), sizeof(fact));
-				fs.write(reinterpret_cast<char*>(&active), sizeof(active));
-				fs.write(reinterpret_cast<char*>(&input), sizeof(input));
+				fs.write(reinterpret_cast<char*>(&_fact), sizeof(_fact));
+				fs.write(reinterpret_cast<char*>(&_active), sizeof(_active));
+				fs.write(reinterpret_cast<char*>(&_input), sizeof(_input));
 				fs.write(reinterpret_cast<char*>(&ssz), sizeof(ssz));
 				for(uint i=0; i<ssz; i++)
 				{
@@ -528,18 +529,18 @@ namespace neuro
 			}
 			else
 			{
-				throw net.create_exception(network::neuro_exception::type::index_mismatch, true, "Neuron index is not set");
+				throw _net.create_exception(network::neuro_exception::type::index_mismatch, true, "Neuron index is not set");
 			}
 		}
 		catch(std::exception &ex)
 		{
 			std::cerr << "Eccezione exception in neuron::write(...): " << ex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 		catch (network::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in neuron::write(...): " << nex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 	}
 
@@ -559,9 +560,9 @@ namespace neuro
 			fs.read(reinterpret_cast<char*>(&sz_tmp), sizeof(sz_tmp));
 
 			index_in_layer = i_tmp;
-			fact = f_tmp;
-			active = active_tmp;
-			input = input_tmp;
+			_fact = f_tmp;
+			_active = active_tmp;
+			_input = input_tmp;
 
 			_syns.clear();
 			_syns.resize(sz_tmp);
@@ -577,22 +578,25 @@ namespace neuro
 		catch (std::exception &ex)
 		{
 			std::cerr << "Eccezione exception in neuron::read(...): " << ex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		} catch (network::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in neuron::read(...): " << nex.what() << std::endl;
-			// TODO poi aggiungere (con o senza throw) net.create_exception...
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 	}
 
-	void neuron::update_ptr(uint ilay)
+	void neuron::update_syn_pointers(uint ilay)
 	{
-		if(!input)		// Se è un neurone di input, non ha sinapsi in ingresso
+		// Dopo set() i neuroni del livello 0 hanno _input a true
+		if(!_input)		// Se è un neurone di _input, non ha sinapsi in ingresso
 		{
 			for(uint iS = 0; iS<get_n_syn(); iS++)
 			{
 				synapse &s = _syns[iS];
-				s._pn = std::shared_ptr<neuron>(&(net.get_neuron(ilay-1,s._in)));
+				//s._pn = std::shared_ptr<neuron>(&(_net.get_neuron(ilay-1,s._in)));
+				s.set_node_ptr(std::shared_ptr<neuron>(&(_net.get_neuron(ilay - 1, s._in))));
+				
 			}
 		}
 	}
