@@ -209,7 +209,7 @@ namespace neuro
 		catch (std::exception &ex)
 		{
 			ok = false;
-			std::cerr << "Eccezione exception in neuron::read(...): " << ex.what() << std::endl;
+			std::cerr << "Eccezione exception in toponet::read(...): " << ex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 		//catch (network::neuro_exception &nex)

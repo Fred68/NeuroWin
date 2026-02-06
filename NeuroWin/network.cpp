@@ -78,10 +78,10 @@ namespace neuro
         #endif
     }
 
-	void network::reset(bool clear_errors)
+	void network::reset(bool clear_errors, bool clear_topo)
 	{
 		_isSet = false;
-		_topo.clear();
+		if(clear_topo)	{_topo.clear();}
 		for (uint i = 0; i < _layers.size(); i++)
 		{
 			_layers[i].reset();
@@ -158,7 +158,7 @@ namespace neuro
 	bool network::set(toponet &topo)
 	{
 		bool ok = true;
-		reset(false);
+		reset(false,false);				// Non cancella la topopogia
 		// TODO: Aggiungere eccezioni
 		for(uint il = 0; il < topo.get_layers_num(); il++)
 		{
@@ -630,9 +630,9 @@ namespace neuro
 		// TODO! Rifare tutto. Prima crea toponet e lo salva. Poi, in coda, salva i dati dei neuroni
 		try
 		{
-			
-			get_topo();			// Aggiorna topologia e indici, al suo interno chiama calc_indexes()
-			_topo.write(fs);	// TODO!!!!! Vedere come salvare un jagged vector...
+			get_topo();				// Aggiorna topologia (richiama calc_indexes() al suo interno)
+			_topo.write(fs);		// Scrive la topologia
+
 			/********************/
 
 			// TODO! Salvare la topologia. poi salvare i dati della rete
@@ -679,11 +679,12 @@ namespace neuro
 	void network::read(std::ifstream &fs)
 	{
 		reset(true);
-
-		// TODO! Caricare la topologia, poi generare la rete, infine caricarne i dati
-
 		try
 		{
+			_topo.read(fs);				// Legge la topologia
+			set(_topo);					// Rigenera network
+
+			#if false
 			size_t nLays_tmp;
 			act l_tmp;
 			
@@ -706,7 +707,7 @@ namespace neuro
 
 			fs.read(reinterpret_cast<char*>(&l_tmp), sizeof(l_tmp));
 			_learn_const = l_tmp;
-			#if false
+			
 			// TODO errore bad allocation !!!
 			//_layers.resize(sz_tmp, {*this});	// Ridimensiona, passando gli argomenti del costruttore di layer
 			_layers.clear();
@@ -728,7 +729,6 @@ namespace neuro
 			}
 			#endif
 
-			int x = 1;
 		}
 		catch (std::exception &ex)
 		{
@@ -746,7 +746,6 @@ namespace neuro
 
 	void network::save(const std::string &fname)
 	{
-		std::cout << "save() disabilitato per test" << std::endl;
 		std::ofstream fs;
 		try
 		{
@@ -779,9 +778,6 @@ namespace neuro
 
 	void network::load(const std::string &fname)
 	{
-		std::cout << "load() disabilitato per test" << std::endl;
-		return;
-		// TODO!: load() disabilitato per test
 		std::ifstream fs;
 		try
 		{
@@ -789,7 +785,8 @@ namespace neuro
 			if (fs)
 			{
 				read(fs);
-			} else
+			}
+			else
 			{
 				std::cerr << "Errore nell'apertura del file: " << fname << "in network::load(...): " << std::endl;
 				return;

@@ -227,6 +227,7 @@ int main()
 
 	getchar();
 	getchar();
+
 	network net2;
 
 	cout << "Caricamento file..." << endl;

@@ -146,9 +146,8 @@ namespace neuro
 			// In ogni caso un mutex introduce un overhead. Se l'operazione è semplice, meglio usare dati atomici
 			std::execution::parallel_policy exe_pol[3] = {std::execution::par, std::execution::par, std::execution::par};
 
-			void reset(bool clear_errors = true);
+			void reset(bool clear_errors = true, bool clear_topo = true);
 			bool set(init_data &ini_data);
-			
 			bool set(toponet &topo);		// TODO! da controllare dopo write() e read()
 
 			/// <summary>
