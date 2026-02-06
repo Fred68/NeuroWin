@@ -18,6 +18,7 @@
 				layer_out_of_range,\
 				node_out_of_range,\
 				size_mismatch,\
+				null_pointer_synapse,\
 				pippo,\
 				pluto,\
 				none\
@@ -39,6 +40,7 @@
 				"layer number is out of range",\
 				"node number is out of range",\
 				"size mismatch",\
+				"null pointer in synapse",\
 				"PIPPO",\
 				"PLUTO",\
 			};

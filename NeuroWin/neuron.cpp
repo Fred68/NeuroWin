@@ -324,8 +324,8 @@ namespace neuro
 		index_in_layer = indx;					// Indice del neurone nel livello
 		for(uint i=0; i<_syns.size(); i++)
 		{
-			// TODO!: AGGIUNGERE ECCEZIONE SE update_node_index() RESTIRUISCE FALSE
-			_syns[i].update_node_index();			// Indici dei nodi delle sinapsi
+			if(!_syns[i].update_node_index())			// Indici dei nodi delle sinapsi
+				throw _net.create_exception(network::neuro_exception::type::null_pointer_synapse, true, "failed neuron::set_index(), synapse pointer to node not set");
 		}
 		_nstat = stat::_index;
 	}

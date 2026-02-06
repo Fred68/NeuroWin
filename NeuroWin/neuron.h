@@ -75,7 +75,7 @@ namespace neuro
 				/// <summary>
 				/// Aggiorna l'indice del neurone a cui fa riferimento la sinapsi
 				/// </summary>
-				/// <returns></returns>
+				/// <returns>false se errore</returns>
 				bool update_node_index();
 
 				/// <summary>

@@ -16,7 +16,6 @@ namespace neuro
 
 	void toponet::update_topo(network &net)
 	{
-		bool ok = false;
 		net.calc_indexes();									// Calcola gli indici di neuroni e sinapsi, prima del salvataggio
 		v_indx.clear();
 		v_indx.resize(net.get_n_layers());					// Vettore con i livelli
@@ -144,6 +143,144 @@ namespace neuro
 		return ok;
 	}
 
+	void toponet::write(std::ofstream &fs)
+	{
+		try
+		{
+			uint nLays, nNodes, nSyns;
+			bool ok = true;
+			nLays = get_layers_num();
+			fs.write(reinterpret_cast<char*>(&nLays), sizeof(uint));				// Numero di livelli
+			for(uint il=0; (il<nLays) && ok; il++)
+			{
+				nNodes = get_neurons_num(il,ok);									// Numero di neuroni del livello
+				fs.write(reinterpret_cast<char*>(&nNodes), sizeof(uint));
+				for(uint in=0; (in<nNodes) && ok; in++)
+				{
+					nSyns = get_synapses_num(il,in,ok);
+					fs.write(reinterpret_cast<char*>(&nSyns), sizeof(uint));		// Numero di sinapsi per neurone
+					for(uint is=0; (is < nSyns) && ok; is++)
+					{
+						uint indxn = get_neuron_index_of_synapse(il, in, is, ok);	// Indice del neurone...
+						fs.write(reinterpret_cast<char*>(&indxn), sizeof(uint));	// ...a cui e connessa la sinapsi.
+					}
+				}
+			}
+		}
+		catch (std::exception &ex)
+		{
+			std::cerr << "Eccezione exception in toponet::write(...): " << ex.what() << std::endl;
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
+		}
+		//catch (network::neuro_exception &nex)
+		//{
+		//	std::cerr << "Eccezione neuro_exception in neuron::write(...): " << nex.what() << std::endl;
+		//	// TODO poi aggiungere (con o senza throw) _net.create_exception...
+		//}
+	}
+
+
+	void toponet::read(std::ifstream &fs)
+	{
+		uint nLays, nNodes, nSyns;
+		uint iTmp;
+		bool ok = true;
+		v_indx.clear();			// Azzera tutto
+		try
+		{
+			fs.read(reinterpret_cast<char*>(&nLays), sizeof(uint));				// Numero di livelli
+			v_indx.resize(nLays);
+			for(uint il=0; (il<nLays)&&ok; il++)
+			{
+				fs.read(reinterpret_cast<char*>(&nNodes), sizeof(uint));		// Numero di nodi
+				v_indx[il].resize(nNodes);
+				for(uint in=0; (in<nNodes) && ok; in++)
+				{
+					fs.read(reinterpret_cast<char*>(&nSyns), sizeof(uint));		// Numero di sinapsi
+					v_indx[il][in].resize(nSyns);
+					for (uint is = 0; (is<nSyns) && ok; is++)
+					{
+						fs.read(reinterpret_cast<char*>(&iTmp), sizeof(uint));
+						v_indx[il][in][is] = iTmp;
+					}
+				}
+			}
+		}
+		catch (std::exception &ex)
+		{
+			ok = false;
+			std::cerr << "Eccezione exception in neuron::read(...): " << ex.what() << std::endl;
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
+		}
+		//catch (network::neuro_exception &nex)
+		//{
+		//	std::cerr << "Eccezione neuro_exception in neuron::read(...): " << nex.what() << std::endl;
+		//	// TODO poi aggiungere (con o senza throw) _net.create_exception...
+		//}
+	}
+
+	#if false
+	void toponet::update_topo(network &net)
+	{
+		bool ok = false;
+		net.calc_indexes();									// Calcola gli indici di neuroni e sinapsi, prima del salvataggio
+		v_indx.clear();
+		v_indx.resize(net.get_n_layers());					// Vettore con i livelli
+		for (uint iL = 0; iL < net.get_n_layers(); iL++)		// Percorre i livelli
+		{
+			layer &lay = net.get_layer(iL);
+			v_indx[iL].resize(lay.size());					// Vettore con i nodi (un vettore per livello)
+			for (uint iN = 0; iN < lay.size(); iN++)			// Percorre i nodi del livello
+			{
+				neuron &neu = net.get_neuron(iL, iN);
+				v_indx[iL][iN].resize(neu.get_n_syn());		// Vettore con gli indici dei nodi (liv. prec.) delle sinapsi
+				for (uint iS = 0; iS < neu.get_n_syn(); iS++)
+				{
+					v_indx[iL][iN][iS] = neu.get_neuron_index(iS);
+				}
+			}
+		}
+	}
+
+
+	try
+	{
+		uint i_tmp;
+		FACT f_tmp;
+		bool active_tmp, input_tmp;
+		size_t sz_tmp;
+
+		fs.read(reinterpret_cast<char*>(&i_tmp), sizeof(i_tmp));
+		fs.read(reinterpret_cast<char*>(&f_tmp), sizeof(f_tmp));
+		fs.read(reinterpret_cast<char*>(&active_tmp), sizeof(active_tmp));
+		fs.read(reinterpret_cast<char*>(&input_tmp), sizeof(input_tmp));
+		fs.read(reinterpret_cast<char*>(&sz_tmp), sizeof(sz_tmp));
+
+		index_in_layer = i_tmp;
+		_fact = f_tmp;
+		_active = active_tmp;
+		_input = input_tmp;
+
+		_syns.clear();
+		_syns.resize(sz_tmp);
+		for (uint i = 0; i < sz_tmp; i++)
+		{
+			//synapse s;
+			//s.read(fs);
+			_syns[i].read(fs);
+			//_syns.push_back(s);
+		}
+
+	} catch (std::exception &ex)
+	{
+		std::cerr << "Eccezione exception in neuron::read(...): " << ex.what() << std::endl;
+		// TODO poi aggiungere (con o senza throw) _net.create_exception...
+	} catch (network::neuro_exception &nex)
+	{
+		std::cerr << "Eccezione neuro_exception in neuron::read(...): " << nex.what() << std::endl;
+		// TODO poi aggiungere (con o senza throw) _net.create_exception...
+	}
+	#endif
 
 
 

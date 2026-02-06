@@ -627,10 +627,17 @@ namespace neuro
 
 	void network::write(std::ofstream &fs)
 	{
+		// TODO! Rifare tutto. Prima crea toponet e lo salva. Poi, in coda, salva i dati dei neuroni
 		try
 		{
-			calc_indexes();
 			
+			get_topo();			// Aggiorna topologia e indici, al suo interno chiama calc_indexes()
+			_topo.write(fs);	// TODO!!!!! Vedere come salvare un jagged vector...
+			/********************/
+
+			// TODO! Salvare la topologia. poi salvare i dati della rete
+
+			#if false
 			// Salva le dimensioni
 			fs.write(reinterpret_cast<char*>(&_nLays), sizeof(_nLays));		// Numero di livelli
 			for (uint iL = 0; iL < _nLays; iL++)
@@ -645,13 +652,17 @@ namespace neuro
 					fs.write(reinterpret_cast<char*>(&nN), sizeof(nN));
 				}
 			}
+			#endif
+			/********************/
 
+			#if false
 			// Salva i dati della rete 
 			fs.write(reinterpret_cast<char*>(&_learn_const), sizeof(_learn_const));
-			/*for (uint i = 0; i < _nLays; i++)
+			for (uint i = 0; i < _nLays; i++)
 			{
 				_layers[i].write(fs);
-			}*/
+			}
+			#endif
 		}
 		catch (std::exception &ex)
 		{
@@ -668,6 +679,9 @@ namespace neuro
 	void network::read(std::ifstream &fs)
 	{
 		reset(true);
+
+		// TODO! Caricare la topologia, poi generare la rete, infine caricarne i dati
+
 		try
 		{
 			size_t nLays_tmp;
@@ -733,8 +747,6 @@ namespace neuro
 	void network::save(const std::string &fname)
 	{
 		std::cout << "save() disabilitato per test" << std::endl;
-		// TODO!: save() disabilitato per test
-		return;
 		std::ofstream fs;
 		try
 		{

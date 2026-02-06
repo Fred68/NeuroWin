@@ -148,7 +148,9 @@ namespace neuro
 
 			void reset(bool clear_errors = true);
 			bool set(init_data &ini_data);
-			bool set(toponet &topo);		// TODO: da scrivere
+			
+			bool set(toponet &topo);		// TODO! da controllare dopo write() e read()
+
 			/// <summary>
 			/// Calcola i numeri di nodi dei livelli di input e output
 			/// </summary>
