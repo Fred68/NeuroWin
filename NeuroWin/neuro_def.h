@@ -22,7 +22,7 @@
 #define TXT_FLOAT_FRM	".4f"
 
 #if _DEBUG	
-	#define _DEBUG_NEURO_DET false
+	#define _DEBUG_NEURO_DET false	// Debug con dettagli
 #endif
 
 #define _COPY_CTORS_ false

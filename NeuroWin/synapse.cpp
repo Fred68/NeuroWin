@@ -17,7 +17,7 @@ namespace neuro
     {
 		reset();
         #if _DEBUG_NEURO_DET
-        cout << "synapse()\n";
+        std::cout << "synapse()\n";
         #endif
     }
 	neuron::synapse::synapse(neuron &p_n, act ws)
@@ -26,14 +26,13 @@ namespace neuro
 		_in = UINT_ERROR;
         w = ws;
         #if _DEBUG_NEURO_DET
-        cout << "synapse(p_n)\n";
+		std::cout << "synapse(p_n)\n";
         #endif
     }
 	neuron::synapse::~synapse()
     {
         #if _DEBUG_NEURO_DET
-        cout << "~synapse()\n";
-        getchar();
+		std::cout << "~synapse()\n";
         #endif
     }
 

@@ -19,7 +19,7 @@ namespace neuro
 		reset();
 
         #if _DEBUG_NEURO_DET
-        cout << "neuron()\n";
+		std::cout << "neuron()\n";
         #endif
     }
 	neuron::neuron(network &netwrk, bool isInput) : neuron{netwrk}
@@ -39,7 +39,7 @@ namespace neuro
 			_syns.push_back(synapse(n, (i == prev.size() - 1) ? bias_w : neu_w));
 		}
         #if _DEBUG_NEURO_DET
-        cout << "neuron(neuron &prev)\n";
+		std::cout << "neuron(neuron &prev)\n";
         #endif
     }
 
@@ -55,7 +55,7 @@ namespace neuro
 			}
 		}
         #if _DEBUG_NEURO_DET
-        cout << "neuron(neuron &prev)\n";
+		std::cout << "neuron(neuron &prev)\n";
         #endif
     }
 
@@ -187,7 +187,7 @@ namespace neuro
     {
 		// vector<synapse> non ha bisogno di dtor.
         #if _DEBUG_NEURO_DET
-        cout << "~neuron()\n";
+		std::cout << "~neuron()\n";
         getchar();
         #endif
     }
@@ -241,7 +241,7 @@ namespace neuro
 
         if(_active)
         {
-            for(synapse s : _syns)
+            for(synapse &s : _syns)				// Ciclo su reference, se no chiama il copy ctor.
             {
                 if(s._pn != nullptr)			// if (std::get<ptN>(s._pn) != nullptr)
                 {

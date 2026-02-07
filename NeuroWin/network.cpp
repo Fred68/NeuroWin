@@ -47,6 +47,7 @@ namespace neuro
     /* network                                 */
     /*                                         */
     /*******************************************/
+
 	network::network()
 	{
 		reset(true);
@@ -71,17 +72,24 @@ namespace neuro
 
     network::~network()
     {
-        _nLays = 0;
+		// reset(); Probabilmente non se necessario. Ma non genera errore nel dtor.
         #if _DEBUG
         std::cout << "~network()\n";
-        int x = getchar();
+        getchar();
         #endif
     }
 
 	void network::reset(bool clear_errors, bool clear_topo)
 	{
+		#if _DEBUG_NEURO_DET
+		std::cout << "network::reset()...\n";
+		getchar();
+		#endif
 		_isSet = false;
-		if(clear_topo)	{_topo.clear();}
+		if(clear_topo)
+		{
+			_topo.clear();
+		}
 		for (uint i = 0; i < _layers.size(); i++)
 		{
 			_layers[i].reset();
@@ -94,10 +102,15 @@ namespace neuro
 		{
 			clear_exceptions();
 		}
+
 	}
 
 	bool network::set(init_data &ini_data)
     {
+		#if _DEBUG_NEURO_DET
+		std::cout << "network::set()...\n";
+		getchar();
+		#endif
 		reset(false);
         if(ini_data.is_ok())
 		{
@@ -157,8 +170,19 @@ namespace neuro
 	
 	bool network::set(toponet &topo)
 	{
+		#if _DEBUG_NEURO_DET
+		std::cout << "network::set()...\n";
+		getchar();
+		#endif
 		bool ok = true;
-		reset(false,false);				// Non cancella la topopogia
+		
+		// TODO!!! La chiamata a questa funzione genera errore del dtor. Possibile deallocazione errata... 
+		// TODO!!! Verificare le chiamate a reset(), errore alla fine con distruttore
+
+		reset(false,false);					// Mantiene errori e topologia
+		
+		
+		
 		// TODO: Aggiungere eccezioni
 		for(uint il = 0; il < topo.get_layers_num(); il++)
 		{
@@ -205,6 +229,10 @@ namespace neuro
 
     std::string network::to_string()
     {
+		#if _DEBUG_NEURO_DET
+		std::cout << "network::to_string()\n";
+		getchar();
+		#endif
         std::string txt;
         txt += std::format("Layers: {0}\n", _nLays);
 		txt += std::format("Learn const: {0}\n", get_learn_const());
@@ -213,7 +241,9 @@ namespace neuro
         for (uint i=0; i < _nLays; i++)
         {
             txt += std::format("Layer: {0}\n", i);
-            for(neuron n : _layers[i])
+			
+			
+			for(neuron &n : _layers[i])		// Ciclo con reference, se no chiama il copy ctor
             {
                 txt += format("{0}\n", n.to_string());
             }
@@ -414,8 +444,6 @@ namespace neuro
 
 	}
 
-
-
 	bool network::calc_y_lay(uint nlay)
 	{
 		bool ret = true;
@@ -499,8 +527,6 @@ namespace neuro
 		auto func_calc_lay = [&](uint i) {calc_w_lay(i);};
 		std::for_each(get_exe_pol(EXE_POL::network),v.begin(),v.end(),func_calc_lay);
 	}
-
-
 
 	bool network::forward_propagate(const std::vector<act> &inp_lay, std::vector<act> &out_lay)
 	{
@@ -627,7 +653,6 @@ namespace neuro
 
 	void network::write(std::ofstream &fs)
 	{
-		// TODO! Rifare tutto. Prima crea toponet e lo salva. Poi, in coda, salva i dati dei neuroni
 		try
 		{
 			get_topo();				// Aggiorna topologia (richiama calc_indexes() al suo interno)
@@ -678,11 +703,17 @@ namespace neuro
 
 	void network::read(std::ifstream &fs)
 	{
-		reset(true);
+		reset();
 		try
 		{
-			_topo.read(fs);				// Legge la topologia
-			set(_topo);					// Rigenera network
+			toponet topo;
+			topo.read(fs);				// Legge la topologia
+			//_topo.read(fs);
+			//set(_topo);					// Rigenera network
+			// 
+			// TODO!!! Errore nel distruttore generato in set_topo()
+			
+			set(topo);					// Rigenera network
 
 			#if false
 			size_t nLays_tmp;
@@ -771,7 +802,8 @@ namespace neuro
 			std::cerr << "Eccezione neuro_exception in network::save(...): " << nex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
-		if(fs.is_open())	fs.close();
+		if(fs.is_open())
+			fs.close();
 
 
 	}
@@ -804,7 +836,8 @@ namespace neuro
 			std::cerr << "Eccezione neuro_exception in network::load(...): " << nex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
-		if (fs.is_open())	fs.close();
+		if (fs.is_open())
+			fs.close();
 		/*if(calc_pointers())
 		{
 			calc_io_lay_numbers();

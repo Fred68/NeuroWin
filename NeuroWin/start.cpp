@@ -1,6 +1,7 @@
 
 #define INI_TEST false
-
+#define SAVE_TEST true
+#define LOAD_TEST true
 
 #include <iostream>
 
@@ -75,6 +76,29 @@ int main()
 	init_data ini(lays,facts,0.05);
     std::cout << "init_data:\n" << ini.to_string() << std::endl;
 	
+
+	{
+		std::cout << "Inizio blocco...." << endl;
+		std::shared_ptr<network> netx;
+		std::shared_ptr<learn_data> ldx;
+		try
+		{
+			netx = make_unique<network>(ini);		// Crea la rete, chiamado il ctor
+			ldx = make_unique<learn_data>(netx);
+		}
+		catch (std::exception const &ex)
+		{
+			cerr << "Catturata std::exception:\n" << ex.what() << std::endl;
+		}
+		catch (network::neuro_exception const &nex)
+		{
+			cerr << "Catturata neuro::neuro_exception:\n" << nex.what() << std::endl;
+		}
+		std::cout << "Fine blocco...." << endl;
+		// I normali dtor non sembrano generare eccezioni.
+	}
+
+
 	// _net
 	std::shared_ptr<network> net;
 	std::shared_ptr<learn_data> ld;
@@ -171,7 +195,7 @@ int main()
 	net->backward_propagate(ld, cicli, subcicli, errmed, msec_elap);
 	cout << "Tempo: " << msec_elap << '\n';
 	cout << "Err med (quadratico): " << errmed << '\n';
-	getchar(),getchar();
+	getchar();
 
 	cout << "\nnet after learning:\n" << net->to_string() << endl;
 
@@ -197,19 +221,17 @@ int main()
 	cout << "\n\nNet dopo il calcolo di indici e topologia\n" << net->to_string() << endl;
 	getchar();
 
+	
 
-
-
-
+	#if SAVE_TEST
 	cout << "\n\nSave neuron indexes:\n" << net->to_string() << endl;
-
 	cout << "Salvataggio file..." << endl;
 	net->save("pippo.bin");
 	//_net = nullptr;
+	#endif
 
 	#if false
 	std::ofstream fs("test.bin", std::ios::binary);
-
 	neuron x(*net);
 	x.set_node_index(10);
 	x.set_active(true);
@@ -226,14 +248,16 @@ int main()
 	#endif
 
 	getchar();
-	getchar();
 
+	#if LOAD_TEST
 	network net2;
-
 	cout << "Caricamento file..." << endl;
 	net2.load("pippo.bin");
-
 	cout << "\nnet2 dopo caricamento:\n" << net2.to_string() << endl;
+	#endif
+
+	//net2.~network();		// Prova dtor
+	//net->~network();
 
 	std::cout << "\n-----------------------------------------------\n";
 	std::cout << "end of test" << std::endl;
@@ -242,8 +266,11 @@ int main()
 
 	//cout << learn_data::UINT_ERROR << endl;
 	//cout << (uint) -1 << endl;
-	getchar();
-	getchar();
+	getchar(), getchar();
+
+	// TODO!!!! ERRORE DOPO ~network()
+	
+	//net = nullptr;
 
     return 0;
     
