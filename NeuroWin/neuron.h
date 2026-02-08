@@ -59,7 +59,11 @@ namespace neuro
 				/// <param name="p_n">Reference al neurone, viene trasformato in shared_ptr<neuron></param>
 				/// <param name="ws">peso</param>
 				synapse(neuron &p_n, act ws);		// ctor
-				~synapse();							// dtor
+				
+				#if _DEBUG_DTOR
+				~synapse() noexcept;				// dtor
+				#endif
+
 				void reset();
 				#if _COPY_CTORS_
 				synapse(const synapse& other);
@@ -89,6 +93,7 @@ namespace neuro
 				/// Imposta il puntatore al neurone a cui fa riferimento la sinapsi, senza alcun controllo.
 				/// Non modifica l'indice.
 				/// </summary>
+				
 				inline void set_node_ptr(ptN ptn) { _pn = ptn;}
 
 
@@ -179,6 +184,7 @@ namespace neuro
 			/// <param name="neu_w">peso</param>
 			/// <param name="bias_w">bias</param>
 			neuron(network &netwrk, std::vector<neuron> &prev, std::vector<uint> &indx, act neu_w = w_ini_const, act bias_w = b_ini_const);
+			
 			#if _COPY_CTORS_
 			neuron(const neuron& other);
 			neuron& operator=(const neuron& other);
@@ -187,7 +193,10 @@ namespace neuro
 			neuron(neuron&& other);
 			neuron& operator=(neuron&& other);
 			#endif
-            ~neuron();
+
+			#if _DEBUG_DTOR
+			~neuron() noexcept;
+			#endif
 
 			void reset();
 

@@ -15,6 +15,14 @@ namespace neuro
 		_neurons.clear();
 	}
 
+	#if _DEBUG_DTOR_LAY
+	layer::~layer()
+	{
+		//reset();
+		std::cout << "~layer()\n";
+	}
+	#endif
+
 	#if _COPY_CTORS_
 	layer::layer(const layer& other) : _neurons(other._neurons.size(), { other._net, true }), _net{ other._net }, _recalc_w{ other._recalc_w }
 	{

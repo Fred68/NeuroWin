@@ -127,6 +127,7 @@ namespace neuro
 			
 			
 			std::vector<layer> _layers;
+
             uint _nLays = 0;
 			uint _nInputs = 0;
 			uint _nOutputs = 0;
@@ -137,6 +138,7 @@ namespace neuro
 
 			std::vector<neuro_exception> _exceptions;
 			bool _isSet = false;
+			
 
 			// std::execution::seq = sequenziale, singolo thread. Nessun 'data race'
 			// std::execution::par = parallelo su più thread. Evitare 'data race' con mutex o atomic. 
@@ -148,7 +150,7 @@ namespace neuro
 
 			void reset(bool clear_errors = true, bool clear_topo = true);
 			bool set(init_data &ini_data);
-			bool set(toponet &topo);		// TODO! da controllare dopo write() e read()
+			bool set(toponet &topo);
 
 			/// <summary>
 			/// Calcola i numeri di nodi dei livelli di input e output
@@ -277,10 +279,14 @@ namespace neuro
             /// </summary>
             /// <param name="ini_data"></param>
             network(init_data &ini_data);
-            /// <summary>
+            
+			#if _DEBUG_DTOR
+			/// <summary>
             /// dtor
-            /// </summary>
-            ~network();
+            /// </summary>			
+			~network() noexcept;
+			#endif
+
             /// <summary>
             /// to_string
             /// </summary>

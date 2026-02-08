@@ -50,11 +50,12 @@ namespace neuro
 
 	network::network()
 	{
-		reset(true);
+		reset();
 	}
 
     network::network(init_data &ini_data)
     {
+		reset();
 		if(!set(ini_data))
 		{
 			throw this->create_exception(neuro_exception::init_data,true,"in network ctor");
@@ -70,14 +71,17 @@ namespace neuro
 
     }
 
+	#if _DEBUG_DTOR
     network::~network()
     {
 		// reset(); Probabilmente non se necessario. Ma non genera errore nel dtor.
+		reset();
         #if _DEBUG
-        std::cout << "~network()\n";
-        getchar();
+        std::cout << "~network(" << _layers.size() << ")\n";
+        //getchar();
         #endif
     }
+	#endif
 
 	void network::reset(bool clear_errors, bool clear_topo)
 	{
@@ -111,7 +115,7 @@ namespace neuro
 		std::cout << "network::set()...\n";
 		getchar();
 		#endif
-		reset(false);
+		reset(false);			// Non cancella gli errori
         if(ini_data.is_ok())
 		{
 			_nLays = ini_data.get_layers_num();
@@ -176,34 +180,37 @@ namespace neuro
 		#endif
 		bool ok = true;
 		
-		// TODO!!! La chiamata a questa funzione genera errore del dtor. Possibile deallocazione errata... 
-		// TODO!!! Verificare le chiamate a reset(), errore alla fine con distruttore
+		reset(false,false);							// Mantiene errori e topologia
 
-		reset(false,false);					// Mantiene errori e topologia
-		
-		
+		#if true
 		
 		// TODO: Aggiungere eccezioni
 		for(uint il = 0; il < topo.get_layers_num(); il++)
 		{
-			layer *ln = new layer(*this);
+			
+			_layers.push_back(layer(*this));		// Inserisce copia dell'oggetto layer(...) appena creato
+			layer &ln = _layers.back();				// Riferimento al layer
+
 			for(uint in = 0; in < topo.get_neurons_num(il,ok); in++)
 			{
 				neuron *n = new neuron(*this, il==0);	// Se layer zero, il neurone è di input
-
+				ln.push_back(*n);			// Inserisce prima una copia nel vettore
 				for(uint is=0; is < topo.get_synapses_num(il,in,ok); is++)
 				{
 					uint indx_neu = topo.get_neuron_index_of_synapse(il,in,is,ok);
-					n->add_synapse(indx_neu);
+
+					ln.back().add_synapse(indx_neu);
 				}
-				ln->push_back(*n);					// Inserisce copia
 			}
-			_layers.push_back(*ln);					// Inserisce copia
 		}
 
 		calc_io_lay_numbers();		// Calcola i numeri di nodi dei livelli di input e output
 		set_exe_pol();				// Imposta l'esecuzione dei cicli (parallelo, sequenziale)
+
 		calc_pointers();			// Calcola i puntatori ai nodi, in base agli indici.
+
+
+		#endif
 
 		return ok;
 	}
@@ -628,9 +635,9 @@ namespace neuro
 		bool ok = false;
 		uint iL,iN;
 		if(_nLays > 1)
-			{
+		{
 			ok = true;
-			for (iL = 1; iL < _nLays; iL++) // Ciclo
+			for (iL = 1; iL < _nLays; iL++)				// Ciclo, parte dal secondo livello
 			{
 				layer &lay = _layers[iL];
 				for(iN=0; iN < lay.size(); iN++)
@@ -660,24 +667,9 @@ namespace neuro
 
 			/********************/
 
-			// TODO! Salvare la topologia. poi salvare i dati della rete
+			// TODO! Salvare i dati di livelli, neuroni e altro
 
-			#if false
-			// Salva le dimensioni
-			fs.write(reinterpret_cast<char*>(&_nLays), sizeof(_nLays));		// Numero di livelli
-			for (uint iL = 0; iL < _nLays; iL++)
-			{
-				layer &lay = _layers[iL];
-				uint nN = _layers[iL].size();								// Numero di neuroni del livello
-				fs.write(reinterpret_cast<char*>(&nN), sizeof(nN));
-				for(uint iN=0; iN<nN; iN++)
-				{
-					neuron &n = (lay.get_neurons())[iN];					// Numero di sinapsi del neurone
-					uint nS = n.get_n_syn();
-					fs.write(reinterpret_cast<char*>(&nN), sizeof(nN));
-				}
-			}
-			#endif
+			
 			/********************/
 
 			#if false
@@ -706,15 +698,9 @@ namespace neuro
 		reset();
 		try
 		{
-			toponet topo;
-			topo.read(fs);				// Legge la topologia
-			//_topo.read(fs);
-			//set(_topo);					// Rigenera network
-			// 
-			// TODO!!! Errore nel distruttore generato in set_topo()
+			_topo.read(fs);
+			set(_topo);					// Rigenera network
 			
-			set(topo);					// Rigenera network
-
 			#if false
 			size_t nLays_tmp;
 			act l_tmp;

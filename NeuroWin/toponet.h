@@ -19,7 +19,10 @@ namespace neuro
 
 		public:
 			toponet();
-			~toponet();
+
+			#if _DEBUG_DTOR
+			~toponet() noexcept;
+			#endif
 
 			/// <summary>
 			/// Cancella e rigerena la topologia, leggendola da '_net'

@@ -60,10 +60,10 @@ namespace neuro
     }
 
 	#if _COPY_CTORS_
-	neuron::neuron(const neuron& other) :	net{other.net},
+	neuron::neuron(const neuron& other) :	_net{other._net},
 											x{other.x}, y{other.y},
-											f_act{other.f_act}, f_act_der{other.f_act_der}, fact{other.fact},
-											active{other.active}, input{other.input},
+											f_act{other.f_act}, f_act_der{other.f_act_der}, _fact{other._fact},
+											_active{other._active}, _input{other._input},
 											_nstat{other._nstat}
 											//_syns(other._syns.size())
 	{
@@ -91,14 +91,14 @@ namespace neuro
 	}
 	neuron& neuron::operator=(const neuron& other)
 	{
-		net = other.net;
+		_net = other._net;
 		x = other.x;
 		y = other.y;
 		f_act = other.f_act;
 		f_act_der = other.f_act_der;
-		fact = other.fact;
-		active = other.active;
-		input = other.input;
+		_fact = other._fact;
+		_active = other._active;
+		_input = other._input;
 		_nstat = other._nstat;
 		switch (other._nstat)
 		{
@@ -127,10 +127,10 @@ namespace neuro
 	}
 	#endif
 	#if _MOVE_CTORS_
-	neuron::neuron(neuron&& other) :	net{ other.net },
+	neuron::neuron(neuron&& other) :	_net{ other._net },
 										x{ other.x }, y{ other.y },
-										f_act{ other.f_act }, f_act_der{ other.f_act_der }, fact{ other.fact },
-										active{ other.active }, input{ other.input },
+										f_act{ other.f_act }, f_act_der{ other.f_act_der }, _fact{ other._fact },
+										_active{ other._active }, _input{ other._input },
 										_nstat{ other._nstat }
 	{
 		switch (other._nstat)
@@ -153,14 +153,14 @@ namespace neuro
 	}
 	neuron& neuron::operator=(neuron&& other)
 	{
-		net = other.net;
+		_net = other._net;
 		x = other.x;
 		y = other.y;
 		f_act = other.f_act;
 		f_act_der = other.f_act_der;
-		fact = other.fact;
-		active = other.active;
-		input = other.input;
+		_fact = other._fact;
+		_active = other._active;
+		_input = other._input;
 		_nstat = other._nstat;
 		switch (other._nstat)
 		{
@@ -183,15 +183,23 @@ namespace neuro
 	}
 	#endif
 
+	#if _DEBUG_DTOR
     neuron::~neuron()
     {
 		// vector<synapse> non ha bisogno di dtor.
+		// TODO Prova azzeramento puntatori...
+		/*for(uint i=0; i<_syns.size(); i++)
+		{
+			_syns[i].set_node_ptr(nullptr);
+		}*/
+		// No: usare sgared_ptr<T>.reset();
+		reset();
         #if _DEBUG_NEURO_DET
 		std::cout << "~neuron()\n";
         getchar();
         #endif
     }
-    
+	#endif   
 	void neuron::reset()
 	{
 		x = y = 0;
@@ -243,7 +251,7 @@ namespace neuro
         {
             for(synapse &s : _syns)				// Ciclo su reference, se no chiama il copy ctor.
             {
-                if(s._pn != nullptr)			// if (std::get<ptN>(s._pn) != nullptr)
+                if(s._pn.get() != nullptr)			// if (std::get<ptN>(s._pn) != nullptr)
                 {
                     std::string nn = "";
                     #if TXT_INFO
@@ -368,9 +376,11 @@ namespace neuro
 
 	void neuron::add_synapse(uint in)
 	{
-		synapse *s = new synapse();
-		s->set_node_index(in);
-		_syns.push_back(*s);
+		//synapse *s = new synapse();
+		//s->set_node_index(in);
+		//_syns.push_back(*s);
+		_syns.push_back(synapse());
+		_syns.back().set_node_index(in);
 	}
 
     void neuron::calc_x()
@@ -594,9 +604,9 @@ namespace neuro
 			for(uint iS = 0; iS<get_n_syn(); iS++)
 			{
 				synapse &s = _syns[iS];
-				//s._pn = std::shared_ptr<neuron>(&(_net.get_neuron(ilay-1,s._in)));
-				s.set_node_ptr(std::shared_ptr<neuron>(&(_net.get_neuron(ilay - 1, s._in))));
 				
+				s.set_node_ptr(std::make_shared<neuron>(_net.get_neuron(ilay - 1, s._in)));
+				int x=1;
 			}
 		}
 	}

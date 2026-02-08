@@ -14,7 +14,7 @@ namespace neuro
 	{
 
 		network &_net;
-		std::vector<neuron> _neurons;	/// Vettore con i neuroni. Classe derivata: più complessa da scrivere.
+		std::vector<neuron> _neurons;	/// Vettore con i neuroni. Una classe derivata sarebbe più complessa da scrivere.
 		bool _recalc_w = true;			/// Ricalcola i pesi con back propagation. Se false: bloccati
 		
 		struct Iterator
@@ -70,6 +70,10 @@ namespace neuro
 			/// <param name="prev">rif. al livello precedente</param>
 			inline layer(uint num, network &net, layer &prev) : _neurons(num, { net, prev.get_neurons()}), _net(net) {};
 
+			#if _DEBUG_DTOR_LAY
+			~layer() noexcept;
+			#endif
+
 			void reset();
 
 			inline neuron &operator[](uint i) { return _neurons[i]; }
@@ -78,7 +82,8 @@ namespace neuro
 			inline void set_recalc_w(bool recalc) { _recalc_w = recalc; }
 
 			inline const size_t size() { return _neurons.size(); }
-			inline const void push_back(const neuron& n) { _neurons.push_back(n); }
+			inline const void push_back(const neuron& n) { _neurons.push_back(n);}
+			inline neuron &back() {return _neurons.back();}
 
 			inline Iterator begin() { return Iterator(_neurons.begin()); }
 			inline Iterator end() { return Iterator(_neurons.end()); }

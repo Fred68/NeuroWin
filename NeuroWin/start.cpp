@@ -76,36 +76,25 @@ int main()
 	init_data ini(lays,facts,0.05);
     std::cout << "init_data:\n" << ini.to_string() << std::endl;
 	
-
+	#if true
 	{
-		std::cout << "Inizio blocco...." << endl;
-		std::shared_ptr<network> netx;
-		std::shared_ptr<learn_data> ldx;
-		try
-		{
-			netx = make_unique<network>(ini);		// Crea la rete, chiamado il ctor
-			ldx = make_unique<learn_data>(netx);
-		}
-		catch (std::exception const &ex)
-		{
-			cerr << "Catturata std::exception:\n" << ex.what() << std::endl;
-		}
-		catch (network::neuro_exception const &nex)
-		{
-			cerr << "Catturata neuro::neuro_exception:\n" << nex.what() << std::endl;
-		}
-		std::cout << "Fine blocco...." << endl;
-		// I normali dtor non sembrano generare eccezioni.
+		std::cout << "Inizio blocco..." << endl;
+		std::cout << "netx..." << endl;
+		std::shared_ptr<network> netx = make_shared<network>(ini);
+		std::cout << "...netx" << endl;
+		std::cout << "ldx..." << endl;
+		std::shared_ptr<learn_data> ldx = make_shared<learn_data>(netx);
+		std::cout << "...ldx" << endl;
+		std::cout << "...Fine blocco" << endl;
 	}
+	#endif
 
 
 	// _net
-	std::shared_ptr<network> net;
-	std::shared_ptr<learn_data> ld;
+	std::shared_ptr<network> net = make_shared<network>(ini);		// Crea la rete, chiamando il ctor;
+	std::shared_ptr<learn_data> ld = make_shared<learn_data>(net);;
 	try
 	{
-		net = make_unique<network>(ini);		// Crea la rete, chiamado il ctor
-		ld = make_unique<learn_data>(net);
 		network::neuro_exception tmp = net->create_exception(network::neuro_exception::pippo, false, "warning...");
 		throw net->create_exception(network::neuro_exception::pluto, true, "error...");
 	}
@@ -251,6 +240,7 @@ int main()
 
 	#if LOAD_TEST
 	network net2;
+	cout << "\nnet2 prima del caricamento:\n" << net2.to_string() << endl;
 	cout << "Caricamento file..." << endl;
 	net2.load("pippo.bin");
 	cout << "\nnet2 dopo caricamento:\n" << net2.to_string() << endl;
@@ -268,10 +258,7 @@ int main()
 	//cout << (uint) -1 << endl;
 	getchar(), getchar();
 
-	// TODO!!!! ERRORE DOPO ~network()
 	
-	//net = nullptr;
-
     return 0;
     
 }

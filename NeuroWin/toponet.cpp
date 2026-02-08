@@ -9,10 +9,12 @@ namespace neuro
 		v_indx.clear();
 	}
 
+	#if _DEBUG_DTOR
 	toponet::~toponet()
 	{
 		v_indx.clear();
 	}
+	#endif
 
 	void toponet::update_topo(network &net)
 	{
@@ -172,11 +174,11 @@ namespace neuro
 			std::cerr << "Eccezione exception in toponet::write(...): " << ex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
-		//catch (network::neuro_exception &nex)
-		//{
-		//	std::cerr << "Eccezione neuro_exception in neuron::write(...): " << nex.what() << std::endl;
-		//	// TODO poi aggiungere (con o senza throw) _net.create_exception...
-		//}
+		catch (network::neuro_exception &nex)
+		{
+			std::cerr << "Eccezione neuro_exception in neuron::write(...): " << nex.what() << std::endl;
+			// TODO poi aggiungere (con o senza throw) _net.create_exception...
+		}
 	}
 
 
