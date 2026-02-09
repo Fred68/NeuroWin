@@ -64,9 +64,7 @@ namespace neuro
 		try
 		{
 			fs.write(reinterpret_cast<char*>(&_recalc_w), sizeof(_recalc_w));
-			size_t ssz = _neurons.size();
-			fs.write(reinterpret_cast<char*>(&ssz), sizeof(ssz));
-			for (uint i = 0; i < ssz; i++)
+			for (uint i = 0; i < _neurons.size(); i++)
 			{
 				_neurons[i].write(fs);
 			}
@@ -88,20 +86,13 @@ namespace neuro
 		try
 		{
 			bool r_tmp;
-			size_t sz_tmp;
 			fs.read(reinterpret_cast<char*>(&r_tmp), sizeof(r_tmp));
-			fs.read(reinterpret_cast<char*>(&sz_tmp), sizeof(sz_tmp));
-
 			_recalc_w = r_tmp;
-			_neurons.clear();
-			_neurons.resize(sz_tmp, { _net, true });	// Ridimensiona, passando gli argomenti del costruttore di neuron
 
-			for (uint i = 0; i < sz_tmp; i++)
+			for (uint i = 0; i < _neurons.size(); i++)
 			{
-				fs.read(reinterpret_cast<char*>(&_neurons[i]), sizeof(neuron));
+				_neurons[i].read(fs);
 			}
-
-
 		}
 		catch (std::exception &ex)
 		{

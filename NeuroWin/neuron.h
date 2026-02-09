@@ -64,6 +64,11 @@ namespace neuro
 				~synapse() noexcept;				// dtor
 				#endif
 
+				//inline void clear_ptrs()
+				//{
+				//	_pn.reset();
+				//}
+
 				void reset();
 				#if _COPY_CTORS_
 				synapse(const synapse& other);
@@ -197,6 +202,14 @@ namespace neuro
 			#if _DEBUG_DTOR
 			~neuron() noexcept;
 			#endif
+
+			//inline void clear_ptrs()
+			//{
+			//	for(uint i=0; i<_syns.size(); i++)
+			//	{
+			//		_syns[i].clear_ptrs();
+			//	}
+			//}
 
 			void reset();
 

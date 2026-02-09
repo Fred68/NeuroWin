@@ -89,17 +89,17 @@ namespace neuro
 	void neuron::synapse::set_node_index(uint i)
 	{
 		_in = i;
-		/*_pn = nullptr;*/
-		_pn.reset();
+		_pn.reset();	// Non usare _pn = nullptr;
 	}
 
 	void neuron::synapse::write(std::ofstream &fs)
 	{
 		try
 		{
-			_in = _pn->get_index();		// Era uint neuron_indx = std::get<ptN>(_pn)->get_index();
-			fs.write(reinterpret_cast<char*>(&_in), sizeof(_in));
-			fs.write(reinterpret_cast<char*>(&w), sizeof(w));
+			// Non scrive l'indice: già nella tolopogia
+			// _in = _pn->get_index();
+			// fs.write(reinterpret_cast<char*>(&_in), sizeof(_in));
+			fs.write(reinterpret_cast<char*>(&w), sizeof(w));			// Scrive il peso
 		}
 		catch (std::exception &ex)
 		{
@@ -111,13 +111,14 @@ namespace neuro
 	{
 		try
 		{
-			uint i_tmp;
+			// Non scrive l'indice: rete già creata con la tolopogia
+			//uint i_tmp;
+			//fs.read(reinterpret_cast<char*>(&i_tmp), sizeof(i_tmp));
+			//_in = i_tmp;
+			//_pn.reset();
+
 			act w_tmp;
-			fs.read(reinterpret_cast<char*>(&i_tmp), sizeof(i_tmp));
-			fs.read(reinterpret_cast<char*>(&w_tmp), sizeof(w_tmp));
-			_in = i_tmp;
-			/*_pn = ptN(nullptr);*/
-			_pn.reset();
+			fs.read(reinterpret_cast<char*>(&w_tmp), sizeof(w_tmp));	// Legge il peso
 			w = w_tmp;
 		}
 		catch (std::exception &ex)

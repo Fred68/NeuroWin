@@ -23,8 +23,8 @@
 
 #if _DEBUG	
 	#define _DEBUG_NEURO_DET false	// Debug con dettagli
-	#define _DEBUG_DTOR true		// Definisce dtor
-	#define _DEBUG_DTOR_LAY true	// Definisce dtor per class layer
+	#define _DEBUG_DTOR false		// Definisce dtor
+	#define _DEBUG_DTOR_LAY false	// Definisce dtor per class layer
 #endif
 
 #define _COPY_CTORS_ false

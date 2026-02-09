@@ -75,7 +75,9 @@ namespace neuro
     network::~network()
     {
 		// reset(); Probabilmente non se necessario. Ma non genera errore nel dtor.
-		reset();
+		// clear_ptrs(); Anche questo non fa cambiare nulla.
+		// Non definire i dtor, lasciare quelli di default
+
         #if _DEBUG
         std::cout << "~network(" << _layers.size() << ")\n";
         //getchar();
@@ -665,21 +667,14 @@ namespace neuro
 			get_topo();				// Aggiorna topologia (richiama calc_indexes() al suo interno)
 			_topo.write(fs);		// Scrive la topologia
 
-			/********************/
 
-			// TODO! Salvare i dati di livelli, neuroni e altro
+			fs.write(reinterpret_cast<char*>(&_learn_const), sizeof(_learn_const));		// Learn constant
 
-			
-			/********************/
-
-			#if false
-			// Salva i dati della rete 
-			fs.write(reinterpret_cast<char*>(&_learn_const), sizeof(_learn_const));
 			for (uint i = 0; i < _nLays; i++)
 			{
 				_layers[i].write(fs);
 			}
-			#endif
+			
 		}
 		catch (std::exception &ex)
 		{
@@ -698,53 +693,19 @@ namespace neuro
 		reset();
 		try
 		{
-			_topo.read(fs);
+			_topo.read(fs);				// Legge la topologia
 			set(_topo);					// Rigenera network
 			
-			#if false
-			size_t nLays_tmp;
 			act l_tmp;
-			
-			fs.read(reinterpret_cast<char*>(&nLays_tmp), sizeof(nLays_tmp));		// Numero di livelli
-			std::vector<std::vector<std::vector<uint>>> v_indx(nLays_tmp);
-			
-			for (uint iL = 0; iL < nLays_tmp; iL++)
-			{
-				uint nNeu_temp;
-				fs.read(reinterpret_cast<char*>(&nNeu_temp), sizeof(nNeu_temp));	// Numero di neuroni del livello
-				for(uint iN = 0; iN < nNeu_temp; iN++)
-				{
-					uint nsyns_tmp;
-					fs.read(reinterpret_cast<char*>(&nsyns_tmp), sizeof(nsyns_tmp));	// Numero di sinapsi del neurone
-					//v_indx[iL]
-				}
-			}
-
-
-
-			fs.read(reinterpret_cast<char*>(&l_tmp), sizeof(l_tmp));
+			fs.read(reinterpret_cast<char*>(&l_tmp), sizeof(l_tmp));		// Learn constant
 			_learn_const = l_tmp;
+
+			for (uint i = 0; i < _nLays; i++)
+			{
+				_layers[i].read(fs);
+			}
+
 			
-			// TODO errore bad allocation !!!
-			//_layers.resize(sz_tmp, {*this});	// Ridimensiona, passando gli argomenti del costruttore di layer
-			_layers.clear();
-			_layers.resize(sz_tmp, *this);	// Ridimensiona, passando gli argomenti del costruttore di layer
-
-			for (uint i = 0; i < sz_tmp; i++)
-			{
-				layer *tmp = new layer(*this);
-				tmp->read(fs);
-				_layers.push_back(*tmp);
-				//_layers[i].read(fs);
-				//fs.read(reinterpret_cast<char*>(&_layers[i]), sizeof(layer));
-			}
-
-			if(calc_pointers())
-			{
-				calc_numbers();
-				_isSet = true;
-			}
-			#endif
 
 		}
 		catch (std::exception &ex)

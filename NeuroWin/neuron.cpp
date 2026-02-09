@@ -526,13 +526,10 @@ namespace neuro
 		{
 			if (_nstat == stat::_index)
 			{
-				size_t ssz = _syns.size();
-				fs.write(reinterpret_cast<char*>(&index_in_layer),sizeof(index_in_layer));
 				fs.write(reinterpret_cast<char*>(&_fact), sizeof(_fact));
 				fs.write(reinterpret_cast<char*>(&_active), sizeof(_active));
 				fs.write(reinterpret_cast<char*>(&_input), sizeof(_input));
-				fs.write(reinterpret_cast<char*>(&ssz), sizeof(ssz));
-				for(uint i=0; i<ssz; i++)
+				for(uint i=0; i< _syns.size(); i++)
 				{
 					_syns[i].write(fs);
 				}
@@ -558,30 +555,20 @@ namespace neuro
 	{
 		try
 		{
-			uint i_tmp;
 			FACT f_tmp;
 			bool active_tmp, input_tmp;
-			size_t sz_tmp;
 
-			fs.read(reinterpret_cast<char*>(&i_tmp), sizeof(i_tmp));
 			fs.read(reinterpret_cast<char*>(&f_tmp), sizeof(f_tmp));
 			fs.read(reinterpret_cast<char*>(&active_tmp), sizeof(active_tmp));
 			fs.read(reinterpret_cast<char*>(&input_tmp), sizeof(input_tmp));
-			fs.read(reinterpret_cast<char*>(&sz_tmp), sizeof(sz_tmp));
 
-			index_in_layer = i_tmp;
 			_fact = f_tmp;
 			_active = active_tmp;
 			_input = input_tmp;
 
-			_syns.clear();
-			_syns.resize(sz_tmp);
-			for (uint i = 0; i < sz_tmp; i++)
+			for (uint i = 0; i < _syns.size(); i++)
 			{
-				//synapse s;
-				//s.read(fs);
 				_syns[i].read(fs);
-				//_syns.push_back(s);
 			}
 
 		}

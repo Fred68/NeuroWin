@@ -189,8 +189,11 @@ int main()
 	cout << "\nnet after learning:\n" << net->to_string() << endl;
 
 	vector<act> vres(2);
-	cout << "Forward-propagation:" << endl;
 
+	cout << endl;
+	cout << "--------------------------------------------------\n";
+	cout << "Output della rete 'net' con forward-propagation\n";
+	cout << "--------------------------------------------------\n";
 	for (auto it = ld->begin(); it != ld->end(); it++)
 	{
 		auto vinp = it.get_input_v();
@@ -245,6 +248,22 @@ int main()
 	net2.load("pippo.bin");
 	cout << "\nnet2 dopo caricamento:\n" << net2.to_string() << endl;
 	#endif
+
+	cout << endl;
+	cout << "--------------------------------------------------\n";
+	cout << "Output della rete 'net2' con forward-propagation\n";
+	cout << "--------------------------------------------------\n";
+	for (auto it = ld->begin(); it != ld->end(); it++)
+	{
+		auto vinp = it.get_input_v();
+		auto vout = it.get_output_v();
+		cout << ((net2.forward_propagate(vinp, vres)) ? "ok" : "err") << endl;
+		cout << "vinp (using): " << network::display_vector(vinp) << '\n';
+		cout << "vout (obj.) : " << network::display_vector(vout) << '\n';
+		cout << "vres (using): " << network::display_vector(vres) << endl;
+	}
+
+
 
 	//net2.~network();		// Prova dtor
 	//net->~network();

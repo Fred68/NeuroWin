@@ -292,11 +292,13 @@ namespace neuro
             /// </summary>
             /// <returns></returns>
             std::string to_string();
+
 			/// <summary>
 			/// Reference a *this
 			/// </summary>
 			/// <returns></returns>
 			inline network &get_reference() {return *this;}
+
 			/// <summary>
 			/// Crea un'eccezione (e la aggiunge all'elenco), non esegue alcun throw
 			/// </summary>
@@ -305,15 +307,18 @@ namespace neuro
 			/// <param name="desc"></param>
 			/// <returns></returns>
 			constexpr neuro_exception &create_exception(const neuro_exception::type type = neuro_exception::type::none, bool is_error = true, std::string desc = "");
+
 			/// <summary>
 			/// Svuota l'elenco delle eccezioni
 			/// </summary>
 			void clear_exceptions();
+
 			/// <summary>
 			/// Controlla se, nella lista delle eccezioni, ci sono errori (o soltanto avvertimenti)
 			/// </summary>
 			/// <returns></returns>
 			bool isOk();
+
 			/// <summary>
 			/// Stringa con l'elenco delle eccezioni
 			/// </summary>
@@ -324,6 +329,7 @@ namespace neuro
 			inline uint get_n_layers() const {return _nLays;}
 			inline uint get_input_layer_size() const { return _nInputs; }
 			inline uint get_output_layer_size() const { return _nOutputs; }
+
 			/// <summary>
 			/// Ricalcola e restituisce copia della topologia
 			/// </summary>
@@ -383,6 +389,13 @@ namespace neuro
 			/// <returns></returns>
 			bool backward_propagate(std::shared_ptr<learn_data> pldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap);
 			
+			//inline void clear_ptrs()
+			//{
+			//	for(uint i=0; i<_layers.size(); i++)
+			//	{
+			//		_layers[i].clear_ptrs();
+			//	}
+			//}
 			
 			/// <summary>
 			/// Calcola gli indici dei neuroni (per salvataggio successivo)
