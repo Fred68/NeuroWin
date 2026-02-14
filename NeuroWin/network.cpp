@@ -117,7 +117,7 @@ namespace neuro
 		std::cout << "network::set()...\n";
 		getchar();
 		#endif
-		reset(false);			// Non cancella gli errori
+		reset(false);			// Non cancella gli errori. _isSet <- false
         if(ini_data.is_ok())
 		{
 			_nLays = ini_data.get_layers_num();
@@ -182,10 +182,8 @@ namespace neuro
 		#endif
 		bool ok = true;
 		
-		reset(false,false);							// Mantiene errori e topologia
+		reset(false,false);							// Mantiene errori e topologia. _isSet <- false
 
-		#if true
-		
 		// TODO: Aggiungere eccezioni
 		for(uint il = 0; il < topo.get_layers_num(); il++)
 		{
@@ -209,10 +207,12 @@ namespace neuro
 		calc_io_lay_numbers();		// Calcola i numeri di nodi dei livelli di input e output
 		set_exe_pol();				// Imposta l'esecuzione dei cicli (parallelo, sequenziale)
 
-		calc_pointers();			// Calcola i puntatori ai nodi, in base agli indici.
-
-
-		#endif
+		//if(!calc_pointers())		// Calcola i puntatori ai nodi, in base agli indici.
+		//{
+		//	ok = false;
+		//}
+		
+		_isSet = calc_pointers();	// Calcola i puntatori ai nodi, in base agli indici. Imposta _isSet.
 
 		return ok;
 	}
@@ -694,19 +694,21 @@ namespace neuro
 		try
 		{
 			_topo.read(fs);				// Legge la topologia
-			set(_topo);					// Rigenera network
-			
-			act l_tmp;
-			fs.read(reinterpret_cast<char*>(&l_tmp), sizeof(l_tmp));		// Learn constant
-			_learn_const = l_tmp;
-
-			for (uint i = 0; i < _nLays; i++)
+			if(set(_topo))				// Rigenera network
 			{
-				_layers[i].read(fs);
+				act l_tmp;
+				fs.read(reinterpret_cast<char*>(&l_tmp), sizeof(l_tmp));		// Learn constant
+				_learn_const = l_tmp;
+
+				for (uint i = 0; i < _nLays; i++)
+				{
+					_layers[i].read(fs);
+				}
 			}
-
-			
-
+			else
+			{
+				throw this->create_exception(neuro_exception::error_topo, true, "in network::read()");
+			}
 		}
 		catch (std::exception &ex)
 		{

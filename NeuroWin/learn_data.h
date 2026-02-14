@@ -17,7 +17,8 @@ namespace neuro
 		//	static const uint UINT_ERROR = UINT_MAX;		/// Errorw per uint, equivalente a (uint) -1;
 
 		private:
-			const std::shared_ptr<network> _pnet;			/// Puntatore alla rete
+			// TODO!!!! Togliere riferimento a network: serve in pochi casi (passarla per reference come argomento)
+			const std::shared_ptr<network> _pnet;			/// Puntatore alla rete: superfluo
 			const uint _inp_sz,_out_sz;						/// Lunghezze dei vettori di _input e output richiesti dalla rete
 
 			std::vector<std::vector<act>> _vinp;			/// Vettori di _input

@@ -19,6 +19,7 @@
 				node_out_of_range,\
 				size_mismatch,\
 				null_pointer_synapse,\
+				error_topo,\
 				pippo,\
 				pluto,\
 				none\
@@ -41,6 +42,7 @@
 				"node number is out of range",\
 				"size mismatch",\
 				"null pointer in synapse",\
+				"error setting topology",\
 				"PIPPO",\
 				"PLUTO",\
 			};
