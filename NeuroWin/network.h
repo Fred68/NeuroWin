@@ -71,6 +71,7 @@ namespace neuro
 			// neuro_exception
 			/*******************************************/
 
+			#if true
 			class neuro_exception
 			{
 				friend class network;
@@ -109,6 +110,7 @@ namespace neuro
 					const std::string what() const noexcept;		// Nessun override di virtual const char* what() const noexcept
 
 			};  // class neuro_exception
+			#endif
 
 		public:
 			#ifdef ACT_DBL

@@ -24,6 +24,9 @@
     <ClCompile Include="learn_data.cpp" />
     <ClCompile Include="network.cpp" />
     <ClCompile Include="neuron.cpp" />
+    <ClCompile Include="neuro_exc.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="start.cpp" />
     <ClCompile Include="synapse.cpp" />
     <ClCompile Include="toponet.cpp" />
@@ -38,6 +41,9 @@
     <ClInclude Include="neuron.h" />
     <ClInclude Include="network.h" />
     <ClInclude Include="neuro_def.h" />
+    <ClInclude Include="neuro_exc.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="neuro_exc_static.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>

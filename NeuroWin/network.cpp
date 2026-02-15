@@ -593,7 +593,7 @@ namespace neuro
 		bool ok = true;
 		std::vector<act> get_string_exceptions(pldata->get_data_size());	// Vettore con gli errori totali per tutti i casi
 
-		if( (pldata->check_data_size()) && (get_string_exceptions.size() > 0))
+		if( (pldata->check_data_size(*this)) && (get_string_exceptions.size() > 0))
 		{
 			for(uint ic=0; ic < cycles && ok; ic++)			// Ripete per il numero di cicli di apprendimento
 			{

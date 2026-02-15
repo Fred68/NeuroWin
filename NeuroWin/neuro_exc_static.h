@@ -5,7 +5,8 @@
 /*********************************************************/
 // Define per enumerare i tipi di errore
 /*********************************************************/
-#define _NEURO_EXC_ENUM \
+#ifndef _NEURO_EXC_ENUM
+	#define _NEURO_EXC_ENUM \
 			enum type : size_t\
 			{\
 				activation_function = 0,\
@@ -24,11 +25,13 @@
 				pluto,\
 				none\
 			};
+#endif
 
 /*********************************************************/
 // Define con le stringhe statiche delle descrizioni
 /*********************************************************/
-#define _NEURO_EXC_STR \
+#ifndef _NEURO_EXC_STR
+	#define _NEURO_EXC_STR \
 			inline static std::string _str[type::none] =\
 			{\
 				"activation function type not recognized",\
@@ -46,5 +49,5 @@
 				"PIPPO",\
 				"PLUTO",\
 			};
-
+#endif
 #endif

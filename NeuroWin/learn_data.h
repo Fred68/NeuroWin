@@ -17,9 +17,8 @@ namespace neuro
 		//	static const uint UINT_ERROR = UINT_MAX;		/// Errorw per uint, equivalente a (uint) -1;
 
 		private:
-			// TODO!!!! Togliere riferimento a network: serve in pochi casi (passarla per reference come argomento)
-			const std::shared_ptr<network> _pnet;			/// Puntatore alla rete: superfluo
-			const uint _inp_sz,_out_sz;						/// Lunghezze dei vettori di _input e output richiesti dalla rete
+			const uint _inp_sz;								/// Lunghezze dei vettori di _input...
+			const uint _out_sz;								/// ...e di output richiesti dalla rete
 
 			std::vector<std::vector<act>> _vinp;			/// Vettori di _input
 			std::vector<std::vector<act>> _vout;			/// Vettori di output
@@ -58,12 +57,13 @@ namespace neuro
 
 		public:
 
-			learn_data(std::shared_ptr<network> pnet);
+			inline learn_data(uint input_sz, uint output_sz) : _inp_sz(output_sz),_out_sz(output_sz) {};
+
 			std::string to_string();
 
 			uint add_input(std::vector<act> v);
 			uint add_output(std::vector<act> v);
-			void add_data(uint index_input, uint index_output);
+			void add_data(uint index_input, uint index_output, network &net);
 			inline void clear_data() {_ldata.clear();}
 			inline void clear_all() {clear_data(); _vinp.clear(); _vout.clear();}
 
@@ -71,7 +71,7 @@ namespace neuro
 			std::vector<act> &get_output(uint i);
 			std::tuple<std::vector<act>&, std::vector<act>&> get_data(uint i);
 			inline uint get_data_size() {return _ldata.size();}
-			bool check_data_size();
+			bool check_data_size(network &net);
 	};
 
 

@@ -70,11 +70,27 @@ int main()
 	std::cout << get_build_time() << endl;
 
 
-
 	std::cout << "-----------------------------------------------\n";
-	std::cout << "[S <enter>]\tleatn and Save\n[L <enter>]\tLoad and calc\n[X <enter>]\teXit" << std::endl;
+	std::cout << "inita data" << std::endl;
 	std::cout << "-----------------------------------------------\n";
 	
+	std::vector<int> lays = { 3, 5, 2 };
+	std::vector<FACT> facts = { FACT::sigmoid, FACT::sigmoid, FACT::sigmoid };
+
+	init_data ini(lays, facts, 0.05);
+	std::cout << "init_data:\n" << ini.to_string() << std::endl;
+
+	learn_data ld(lays[0],lays[lays.size()-1]);
+
+
+	std::cout << "-----------------------------------------------\n";
+	std::cout << "[S <enter>]\tlearn and Save\n[L <enter>]\tLoad and calc\n[X <enter>]\teXit" << std::endl;
+	std::cout << "-----------------------------------------------\n";
+	
+
+
+
+
 	char ch = '\0';
 	
 	{
@@ -128,17 +144,18 @@ int main()
     
 }
 
-void learn()
+void learn(init_data &ini)
 {
 	#if SAVE_TEST
 
 	// Ini
-	std::vector<int> lays = { 3, 5, 2 };
-	std::vector<FACT> facts = { FACT::sigmoid, FACT::sigmoid, FACT::sigmoid };
+	//std::vector<int> lays = { 3, 5, 2 };
+	//std::vector<FACT> facts = { FACT::sigmoid, FACT::sigmoid, FACT::sigmoid };
 
-	init_data ini(lays, facts, 0.05);
-	std::cout << "init_data:\n" << ini.to_string() << std::endl;
+	//init_data ini(lays, facts, 0.05);
+	//std::cout << "init_data:\n" << ini.to_string() << std::endl;
 
+	/*
 	{
 		std::cout << "Inizio blocco..." << endl;
 		std::cout << "netx..." << endl;
@@ -149,9 +166,10 @@ void learn()
 		std::cout << "...ldx" << endl;
 		std::cout << "...Fine blocco" << endl;
 	}
+	*/
 
 	std::shared_ptr<network> net = make_shared<network>(ini);		// Crea la rete, chiamando il ctor;
-	std::shared_ptr<learn_data> ld = make_shared<learn_data>(net);;
+	std::shared_ptr<learn_data> ld = make_shared<learn_data>(net->get_input_layer_size(),net->get_output_layer_size());
 	try
 	{
 		network::neuro_exception tmp = net->create_exception(network::neuro_exception::pippo, false, "warning...");
@@ -176,52 +194,52 @@ void learn()
 
 
 	std::string ntok((net->isOk()) ? "ok" : "not ok");
-	cout << "_net is " << ntok << std::endl;
+	std::cout << "_net is " << ntok << std::endl;
 	if (!net->isOk())
 	{
-		cout << net->get_exceptions_string(false) << endl;
+		std::cout << net->get_exceptions_string(false) << endl;
 	}
 	net->clear_exceptions();
 	net->create_exception(network::neuro_exception::pippo, false, "new warning...");
-	cout << net->get_exceptions_string(true) << endl;
+	std::cout << net->get_exceptions_string(true) << endl;
 
-	cout << "In: " << net->get_input_layer_size() << '\n' << "Out: " << net->get_output_layer_size() << endl;
+	std::cout << "In: " << net->get_input_layer_size() << '\n' << "Out: " << net->get_output_layer_size() << endl;
 
 	uint iInp, iOut;
 
 	iOut = ld->add_output(vector<act>({ 1, 0 }));
 	iInp = ld->add_input(vector<act>({ 0.1, 0.2, 0.9 }));
-	ld->add_data(iInp, iOut);
+	ld->add_data(iInp, iOut,*net);
 	iInp = ld->add_input(vector<act>({ 0.1, 0.1, 0.95 }));
-	ld->add_data(iInp, iOut);
+	ld->add_data(iInp, iOut,*net);
 	iInp = ld->add_input(vector<act>({ -0.1, 0.0, 0.8 }));
-	ld->add_data(iInp, iOut);
+	ld->add_data(iInp, iOut,*net);
 
 	iOut = ld->add_output(vector<act>({ 0, 1 }));
 	iInp = ld->add_input(vector<act>({ 0.9, 0.2, 0.1 }));
-	ld->add_data(iInp, iOut);
+	ld->add_data(iInp, iOut,*net);
 	iInp = ld->add_input(vector<act>({ 0.85, 0.1, 0.0 }));
-	ld->add_data(iInp, iOut);
+	ld->add_data(iInp, iOut, *net);
 	iInp = ld->add_input(vector<act>({ 0.99, 0., 0.2 }));
-	ld->add_data(iInp, iOut);
+	ld->add_data(iInp, iOut, *net);
 
-	cout << "learn_data iterator:\n";
+	std::cout << "learn_data iterator:\n";
 	for (auto it = ld->begin(); it != ld->end(); it++)		// for(auto it : ld){} non è implementato
 	{
-		cout << network::display_vector(it.get_input_v()) << " -> " << network::display_vector(it.get_output_v()) << endl;
+		std::cout << network::display_vector(it.get_input_v()) << " -> " << network::display_vector(it.get_output_v()) << endl;
 	}
 
-	cout << ((ld->check_data_size()) ? "learn data size ok" : "learn data size ok") << endl;
+	std::cout << ((ld->check_data_size(*net)) ? "learn data size ok" : "learn data size ok") << endl;
 
 	uint cicli = 1;
 	uint subcicli = 1;
 
-	cout << "Cicli: ";
+	std::cout << "Cicli: ";
 	cin >> cicli;
-	cout << "Sottocicli: ";
+	std::cout << "Sottocicli: ";
 	cin >> subcicli;
 
-	cout << "\nnet before learning:\n" << net->to_string() << endl;
+	std::cout << "\nnet before learning:\n" << net->to_string() << endl;
 
 	std::chrono::milliseconds msec_elap(0);
 
@@ -236,61 +254,63 @@ void learn()
 #endif
 
 
-	cout << "\n\nBack-propagation full data set learning..." << endl;
+	std::cout << "\n\nBack-propagation full data set learning..." << endl;
 
 	net->backward_propagate(ld, cicli, subcicli, errmed, msec_elap);
-	cout << "Tempo: " << msec_elap << '\n';
-	cout << "Err med (quadratico): " << errmed << '\n';
+	std::cout << "Tempo: " << msec_elap << '\n';
+	std::cout << "Err med (quadratico): " << errmed << '\n';
 	getchar();
 
-	cout << "\nnet after learning:\n" << net->to_string() << endl;
+	std::cout << "\nnet after learning:\n" << net->to_string() << endl;
 
 	vector<act> vres(2);
 
-	cout << endl;
-	cout << "--------------------------------------------------\n";
-	cout << "Output della rete 'net' con forward-propagation\n";
-	cout << "--------------------------------------------------\n";
-	for (auto it = ld->begin(); it != ld->end(); it++)
+	std::cout << endl;
+	std::cout << "--------------------------------------------------\n";
+	std::cout << "Output della rete 'net' con forward-propagation\n";
+	std::cout << "--------------------------------------------------\n";
+	for (auto it = ld.get()->begin(); it != ld->end(); it++)
 	{
 		auto vinp = it.get_input_v();
 		auto vout = it.get_output_v();
-		cout << "fw prop: " << ((net->forward_propagate(vinp, vres)) ? "ok" : "err") << endl;
-		cout << "vinp (using): " << network::display_vector(vinp) << '\n';
-		cout << "vout (obj.) : " << network::display_vector(vout) << '\n';
-		cout << "vres (using): " << network::display_vector(vres) << endl;
-		cout << "Net: " << net->to_string() << endl;
+		std::cout << "fw prop: " << ((net->forward_propagate(vinp, vres)) ? "ok" : "err") << endl;
+		std::cout << "vinp (using): " << network::display_vector(vinp) << '\n';
+		std::cout << "vout (obj.) : " << network::display_vector(vout) << '\n';
+		std::cout << "vres (using): " << network::display_vector(vres) << endl;
+		std::cout << "Net: " << net->to_string() << endl;
 	}
 
 	getchar();
-	cout << "\n\nNet prima del calcolo di indici e topologia\n" << net->to_string() << endl;
+	std::cout << "\n\nNet prima del calcolo di indici e topologia\n" << net->to_string() << endl;
 	getchar();
 
 	net->calc_indexes();
 	net->get_topo();
-	cout << "\n\nNet dopo il calcolo di indici e topologia\n" << net->to_string() << endl;
+	std::cout << "\n\nNet dopo il calcolo di indici e topologia\n" << net->to_string() << endl;
 	getchar();
 
 
-	cout << "\n\nSave neuron indexes:\n" << net->to_string() << endl;
-	cout << "Salvataggio file..." << endl;
+	std::cout << "\n\nSave neuron indexes:\n" << net->to_string() << endl;
+	std::cout << "Salvataggio file..." << endl;
 	net->save("pippo.bin");
 
 	#endif
 }
 
-void load()
+void load(init_data &ini)
 {
 	
 	// TODO!!! Identificare errore dopo load(). fw_prop non fa nulla. Reimpostare puntatori a funzioni di attivazione ?
 
 	#if LOAD_TEST
 
-	network net2;
-	cout << "\nnet2 prima del caricamento:\n" << net2.to_string() << endl;
+	network net;
+	cout << "\nnet2 prima del caricamento:\n" << net.to_string() << endl;
 	cout << "Caricamento file..." << endl;
-	net2.load("pippo.bin");
-	cout << "\nnet2 dopo caricamento:\n" << net2.to_string() << endl;
+	net.load("pippo.bin");
+	cout << "\nnet2 dopo caricamento:\n" << net.to_string() << endl;
+
+	std::shared_ptr<learn_data> ld = make_shared<learn_data>(net);
 
 	cout << endl;
 	cout << "--------------------------------------------------\n";
@@ -300,11 +320,11 @@ void load()
 	{
 		auto vinp = it.get_input_v();
 		auto vout = it.get_output_v();
-		cout << "fw prop: " << ((net2.forward_propagate(vinp, vres)) ? "ok" : "err") << endl;
+		cout << "fw prop: " << ((net.forward_propagate(vinp, vres)) ? "ok" : "err") << endl;
 		cout << "vinp (using): " << network::display_vector(vinp) << '\n';
 		cout << "vout (obj.) : " << network::display_vector(vout) << '\n';
 		cout << "vres (using): " << network::display_vector(vres) << endl;
-		cout << "Net2: " << net2.to_string() << endl;
+		cout << "Net2: " << net.to_string() << endl;
 	}
 
 	#endif

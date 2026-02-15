@@ -7,13 +7,6 @@
 namespace neuro
 {
 
-	learn_data::learn_data(std::shared_ptr<network> pnet) :
-		_pnet(pnet),
-		_inp_sz(pnet->get_input_layer_size()),
-		_out_sz(pnet->get_output_layer_size()
-		)
-	{}
-
 	std::string learn_data::to_string()
 	{
 		std::string txt;
@@ -46,7 +39,7 @@ namespace neuro
 		return indx;
 
 	}
-	void learn_data::add_data(uint index_input, uint index_output)
+	void learn_data::add_data(uint index_input, uint index_output, network &net)
 	{
 		if ((index_input != neuro::UINT_ERROR) && (index_output != neuro::UINT_ERROR))
 		{
@@ -54,7 +47,7 @@ namespace neuro
 		}
 		else
 		{
-			throw _pnet->create_exception(network::neuro_exception::learn_data_index,true,"in learn_data::add_data()");
+			throw net.create_exception(network::neuro_exception::learn_data_index,true,"in learn_data::add_data()");
 		}
 	}
 
@@ -102,14 +95,14 @@ namespace neuro
 		return _ld.get_output(std::get<1>(idat));
 	}
 
-	bool learn_data::check_data_size()
+	bool learn_data::check_data_size(network &net)
 	{
 		bool ok = true;
 		for (auto it = begin(); it != end(); it++)
 		{
 			uint visz = it.get_input_v().size();
 			uint vosz = it.get_output_v().size();
-			if ( (visz != _pnet->get_input_layer_size())||(vosz != _pnet->get_output_layer_size()) )
+			if ( (visz != net.get_input_layer_size())||(vosz != net.get_output_layer_size()) )
 			{
 				ok = false;
 				break;
