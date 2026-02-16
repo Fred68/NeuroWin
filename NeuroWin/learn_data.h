@@ -72,7 +72,6 @@ namespace neuro
 			std::vector<act> &get_output(uint i);
 			std::tuple<std::vector<act>&, std::vector<act>&> get_data(uint i);
 			inline uint get_data_size() {return _ldata.size();}
-			/// TODO!!! Controllare...
 			bool check_data_size(network &net);
 	};
 

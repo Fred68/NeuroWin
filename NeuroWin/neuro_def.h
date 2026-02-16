@@ -84,7 +84,7 @@ namespace neuro
 
 	static std::string get_build_time()
 	{
-		// TODO!!! Valore non sempre aggiornato...
+		// TODO Valore non sempre aggiornato...
 		return std::format("Compile timestamp: {0}",__TIMESTAMP__);
 	}
 }

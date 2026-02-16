@@ -1,7 +1,7 @@
 
 #define INI_TEST false
 #define SAVE_TEST true
-#define LOAD_TEST false
+#define LOAD_TEST true
 
 #include <iostream>
 
@@ -21,8 +21,8 @@ using namespace std;
 using namespace neuro;
 
 // Prototyping
-void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexs);
-void load(init_data &ini);
+void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexc);
+void load(learn_data &ld, neuro_exceptions &nexc);
 
 int main()
 {
@@ -119,14 +119,14 @@ int main()
 	#endif
 
 	std::cout << "-----------------------------------------------\n";
-	std::cout << "[S <enter>]\tlearn and Save\n[L <enter>]\tLoad and calc\n[X <enter>]\teXit" << std::endl;
+	std::cout << "[1 <enter>]\tLearn and save\n[2 <enter>]\tLoad and calc\n[0 <enter>]\tExit" << std::endl;
 	std::cout << "-----------------------------------------------\n";
 	
 
 	char ch = '\0';
 	
 	{
-		string chrs = "SLX";
+		string chrs = "120X";
 		while(chrs.find(ch)==std::string::npos)
 		{
 			ch = getchar();
@@ -135,21 +135,18 @@ int main()
 	
 	switch(ch)
 	{
-		case 'S':
+		case '1':
 		{
 			learn(ini,ld,excs);
 		}
 		break;
-		case 'L':
+		case '2':
 		{
-
+			load(ld,excs);
 		}
 		break;
 		default:
 		break;
-
-
-
 	}
 
 
@@ -158,39 +155,23 @@ int main()
 
 	std::cout << "\n-----------------------------------------------\n";
 	std::cout << "end of test" << std::endl;
-	std::cout << "-----------------------------------------------\n";
+	std::cout << "-----------------------------------------------" << std::endl;
 
 
 	//cout << learn_data::UINT_ERROR << endl;
 	//cout << (uint) -1 << endl;
-	getchar();
+	getchar(), getchar();
 
 	
     return 0;
     
 }
 
-void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexs)
+void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexc)
 {
 	#if SAVE_TEST
 
-
-	#if false
-	// Test DTOR
-	{
-		std::cout << "Inizio blocco..." << endl;
-		std::cout << "netx..." << endl;
-		std::shared_ptr<network> netx = make_shared<network>(ini);
-		std::cout << "...netx" << endl;
-		std::cout << "ldx..." << endl;
-		std::shared_ptr<learn_data> ldx = make_shared<learn_data>(netx);
-		std::cout << "...ldx" << endl;
-		std::cout << "...Fine blocco" << endl;
-	}
-	#endif
-
-
-	std::shared_ptr<network> net = make_shared<network>(ini, nexs);		// Crea la rete, chiamando il ctor;
+	std::shared_ptr<network> net = make_shared<network>(ini, nexc);		// Crea la rete, chiamando il ctor;
 	try
 	{
 		neuro_exceptions::neuro_exception tmp = net->get_exceptions().create_exception(neuro_exceptions::pippo, false, "warning...");
@@ -258,7 +239,7 @@ void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexs)
 
 	std::cout << "\nnet after learning:\n" << net->to_string() << endl;
 
-	vector<act> vres(2);
+	vector<act> vres(ini.get_output_size());
 
 	std::cout << endl;
 	std::cout << "--------------------------------------------------\n";
@@ -272,7 +253,7 @@ void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexs)
 		std::cout << "vinp (using): " << network::display_vector(vinp) << '\n';
 		std::cout << "vout (obj.) : " << network::display_vector(vout) << '\n';
 		std::cout << "vres (using): " << network::display_vector(vres) << endl;
-		std::cout << "Net: " << net->to_string() << endl;
+		//	std::cout << "Net: " << net->to_string() << endl;
 	}
 
 	getchar();
@@ -292,29 +273,33 @@ void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexs)
 	#endif
 }
 
-void load(init_data &ini)
+void load(learn_data &ld, neuro_exceptions &nexc)
 {
 	
 	// TODO!!! Identificare errore dopo load(). fw_prop non fa nulla. Reimpostare puntatori a funzioni di attivazione ?
 
 	#if LOAD_TEST
 
-	network net;
+	network net(nexc);
 	cout << "\nnet2 prima del caricamento:\n" << net.to_string() << endl;
 	cout << "Caricamento file..." << endl;
 	net.load("pippo.bin");
 	cout << "\nnet2 dopo caricamento:\n" << net.to_string() << endl;
 
-	std::shared_ptr<learn_data> ld = make_shared<learn_data>(net);
+	//std::shared_ptr<learn_data> ld = make_shared<learn_data>(net);
 
 	cout << endl;
 	cout << "--------------------------------------------------\n";
 	cout << "Output della rete 'net2' con forward-propagation\n";
 	cout << "--------------------------------------------------\n";
-	for (auto it = ld->begin(); it != ld->end(); it++)
+
+	
+
+	for (auto it = ld.begin(); it != ld.end(); it++)
 	{
 		auto vinp = it.get_input_v();
 		auto vout = it.get_output_v();
+		vector<act> vres;
 		cout << "fw prop: " << ((net.forward_propagate(vinp, vres)) ? "ok" : "err") << endl;
 		cout << "vinp (using): " << network::display_vector(vinp) << '\n';
 		cout << "vout (obj.) : " << network::display_vector(vout) << '\n';
