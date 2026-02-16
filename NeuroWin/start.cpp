@@ -81,7 +81,7 @@ int main()
 	std::cout << "init_data:\n" << ini.to_string() << std::endl;
 
 	learn_data ld(lays[0],lays[lays.size()-1]);
-
+	neuro_exceptions excs;
 
 	std::cout << "-----------------------------------------------\n";
 	std::cout << "[S <enter>]\tlearn and Save\n[L <enter>]\tLoad and calc\n[X <enter>]\teXit" << std::endl;
@@ -144,7 +144,7 @@ int main()
     
 }
 
-void learn(init_data &ini)
+void learn(init_data &ini, neuro_exceptions &nexs)
 {
 	#if SAVE_TEST
 
@@ -168,16 +168,16 @@ void learn(init_data &ini)
 	}
 	*/
 
-	std::shared_ptr<network> net = make_shared<network>(ini);		// Crea la rete, chiamando il ctor;
+	std::shared_ptr<network> net = make_shared<network>(ini, nexs);		// Crea la rete, chiamando il ctor;
 	std::shared_ptr<learn_data> ld = make_shared<learn_data>(net->get_input_layer_size(),net->get_output_layer_size());
 	try
 	{
-		network::neuro_exception tmp = net->create_exception(network::neuro_exception::pippo, false, "warning...");
-		throw net->create_exception(network::neuro_exception::pluto, true, "error...");
+		neuro_exceptions::neuro_exception tmp = net->get_exceptions().create_exception(neuro_exceptions::pippo, false, "warning...");
+		throw net->get_exceptions().create_exception(neuro_exceptions::pluto, true, "error...");
 	} catch (std::exception const &ex)
 	{
 		cerr << "Catturata std::exception:\n" << ex.what() << std::endl;
-	} catch (network::neuro_exception const &nex)
+	} catch (neuro_exceptions::neuro_exception const &nex)
 	{
 		cerr << "Catturata neuro::neuro_exception:\n" << nex.what() << std::endl;
 	}
@@ -197,11 +197,11 @@ void learn(init_data &ini)
 	std::cout << "_net is " << ntok << std::endl;
 	if (!net->isOk())
 	{
-		std::cout << net->get_exceptions_string(false) << endl;
+		std::cout << net->get_exceptions().get_exceptions_string(false) << endl;
 	}
 	net->clear_exceptions();
-	net->create_exception(network::neuro_exception::pippo, false, "new warning...");
-	std::cout << net->get_exceptions_string(true) << endl;
+	net->get_exceptions().create_exception(neuro_exceptions::pippo, false, "new warning...");
+	std::cout << net->get_exceptions().get_exceptions_string(true) << endl;
 
 	std::cout << "In: " << net->get_input_layer_size() << '\n' << "Out: " << net->get_output_layer_size() << endl;
 

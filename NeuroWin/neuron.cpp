@@ -297,7 +297,7 @@ namespace neuro
 				f_act_der = &one;
 				break;
 			default:
-				throw _net.create_exception(network::neuro_exception::type::activation_function, true, "in neuron::set_fact()");
+				throw _net.get_exceptions().create_exception(neuro_exceptions::type::activation_function, true, "in neuron::set_fact()");
 				
 			}
 			_fact = f;
@@ -333,7 +333,7 @@ namespace neuro
 		for(uint i=0; i<_syns.size(); i++)
 		{
 			if(!_syns[i].update_node_index())			// Indici dei nodi delle sinapsi
-				throw _net.create_exception(network::neuro_exception::type::null_pointer_synapse, true, "failed neuron::set_index(), synapse pointer to node not set");
+				throw _net.get_exceptions().create_exception(neuro_exceptions::type::null_pointer_synapse, true, "failed neuron::set_index(), synapse pointer to node not set");
 		}
 		_nstat = stat::_index;
 	}
@@ -341,20 +341,20 @@ namespace neuro
 	act neuron::get_ei()
 	{	
 		if(_nstat!=stat::_ei)
-			throw _net.create_exception(network::neuro_exception::type::EI_mismatch, true, "failed neuron::get_ei(), EI is not");
+			throw _net.get_exceptions().create_exception(neuro_exceptions::type::EI_mismatch, true, "failed neuron::get_ei(), EI is not");
 		return ei;
 		
 	}
 	act neuron::get_beta()
 	{
 		if (_nstat != stat::_beta)
-			throw _net.create_exception(network::neuro_exception::type::beta_mismatch, true, "failed neuron::get_beta(), beta is not set");
+			throw _net.get_exceptions().create_exception(neuro_exceptions::type::beta_mismatch, true, "failed neuron::get_beta(), beta is not set");
 		return beta;
 	}
 	uint neuron::get_index()
 	{
 		if (_nstat != stat::_index)
-			throw _net.create_exception(network::neuro_exception::type::beta_mismatch, true, "failed neuron::get_index(), index is not set");
+			throw _net.get_exceptions().create_exception(neuro_exceptions::type::beta_mismatch, true, "failed neuron::get_index(), index is not set");
 		return index_in_layer;
 	}
 
@@ -411,7 +411,7 @@ namespace neuro
 		if(_active)
 		{
 			if (_nstat != stat::_beta)
-				throw _net.create_exception(network::neuro_exception::type::beta_mismatch, true, "failed neuron::calc_ei(), beta is not set");
+				throw _net.get_exceptions().create_exception(neuro_exceptions::type::beta_mismatch, true, "failed neuron::calc_ei(), beta is not set");
 			set_ei(get_beta() * f_act_der(this));
 		}
 		else
@@ -536,7 +536,7 @@ namespace neuro
 			}
 			else
 			{
-				throw _net.create_exception(network::neuro_exception::type::index_mismatch, true, "Neuron index is not set");
+				throw _net.get_exceptions().create_exception(neuro_exceptions::type::index_mismatch, true, "Neuron index is not set");
 			}
 		}
 		catch(std::exception &ex)
@@ -544,7 +544,7 @@ namespace neuro
 			std::cerr << "Eccezione exception in neuron::write(...): " << ex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
-		catch (network::neuro_exception &nex)
+		catch (neuro_exceptions::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in neuron::write(...): " << nex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
@@ -576,7 +576,7 @@ namespace neuro
 		{
 			std::cerr << "Eccezione exception in neuron::read(...): " << ex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
-		} catch (network::neuro_exception &nex)
+		} catch (neuro_exceptions::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in neuron::read(...): " << nex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...

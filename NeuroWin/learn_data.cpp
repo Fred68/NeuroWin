@@ -47,7 +47,7 @@ namespace neuro
 		}
 		else
 		{
-			throw net.create_exception(network::neuro_exception::learn_data_index,true,"in learn_data::add_data()");
+			throw net.get_exceptions().create_exception(neuro_exceptions::learn_data_index,true,"in learn_data::add_data()");
 		}
 	}
 

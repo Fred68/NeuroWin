@@ -39,7 +39,7 @@
     <ClCompile Include="toponet.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="neuro_exc.cpp">
+    <ClCompile Include="neuro_exceptions.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,7 +68,7 @@
     <ClInclude Include="toponet.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="neuro_exc.h">
+    <ClInclude Include="neuro_exceptions.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

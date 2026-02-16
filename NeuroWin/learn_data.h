@@ -5,10 +5,11 @@
 
 #include "neuro_def.h"
 #include "network.h"
+#include "neuro_exceptions.h"
 
 namespace neuro
 {
-	class network;
+	//class network;
 
 	class learn_data
 	{

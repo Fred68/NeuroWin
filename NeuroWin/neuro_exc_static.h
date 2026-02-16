@@ -24,7 +24,7 @@
 				pippo,\
 				pluto,\
 				none\
-			};
+			}
 #endif
 
 /*********************************************************/
@@ -48,6 +48,6 @@
 				"error setting topology",\
 				"PIPPO",\
 				"PLUTO",\
-			};
+			}
 #endif
 #endif

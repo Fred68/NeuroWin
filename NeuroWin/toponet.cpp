@@ -174,7 +174,7 @@ namespace neuro
 			std::cerr << "Eccezione exception in toponet::write(...): " << ex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
-		catch (network::neuro_exception &nex)
+		catch (neuro_exceptions::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in neuron::write(...): " << nex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...

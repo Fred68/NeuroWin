@@ -1,6 +1,7 @@
 #ifndef NEURO_EXC_H
 #define NEURO_EXC_H
 
+#include "neuro_def.h"
 #include "neuro_exc_static.h"
 #include <string>			// std::format
 #include <chrono>			// high_resolution_clock
@@ -14,7 +15,7 @@ namespace neuro
 			_NEURO_EXC_ENUM;		// Usa la costante con l'enumerazione degli errori
 			_NEURO_EXC_STR;			// Usa la costante con le stringhe statiche
 
-		class neuro_exc
+		class neuro_exception
 		{
 			friend neuro_exceptions;
 
@@ -24,7 +25,7 @@ namespace neuro
 				bool _is_error;
 				std::string _desc;
 				std::chrono::system_clock::time_point _time;
-
+			
 				/// <summary>
 				/// CTOR privato
 				/// Visibile da neuro_exceptions
@@ -32,7 +33,7 @@ namespace neuro
 				/// <param name="type"></param>
 				/// <param name="is_error"></param>
 				/// <param name="desc"></param>
-				inline neuro_exc(const type type = type::none, bool is_error = true, std::string desc = "") noexcept :
+				inline neuro_exception(const type type = type::none, bool is_error = true, std::string desc = "") noexcept :
 					_type(type), _is_error(is_error), _desc(desc), _time(std::chrono::system_clock::now()) {
 				
 				}
@@ -43,7 +44,7 @@ namespace neuro
 				/// Copy CTOR
 				/// </summary>
 				/// <param name="other"></param>
-				inline neuro_exc(neuro_exc const &other)  noexcept :
+				inline neuro_exception(neuro_exception const &other)  noexcept :
 					_type(other._type), _is_error(other._is_error), _desc(other._desc), _time(other._time) {
 				}
 
@@ -52,16 +53,16 @@ namespace neuro
 				/// </summary>
 				/// <param name="other"></param>
 				/// <returns></returns>
-				neuro_exc& operator=(neuro_exc const &other) noexcept;
+				neuro_exception& operator=(neuro_exception const &other) noexcept;
 
-				inline static bool is_ex_error(neuro_exc &nex) { return nex._is_error; }
+				inline static bool is_ex_error(neuro_exception &nex) { return nex._is_error; }
 				inline bool is_error() { return _is_error; }
 				const std::string what() const noexcept;		// Nessun override di virtual const char* what() const noexcept
 
 		};  // class neuro_exception
 
 		private:
-			std::vector<neuro_exc>	_exceptions;
+			std::vector<neuro_exception>	_exceptions;
 
 		public:
 			inline neuro_exceptions()
@@ -71,7 +72,11 @@ namespace neuro
 			
 			inline void clear() {_exceptions.clear();}
 
-			constexpr neuro_exc &create_exception(const neuro_exceptions::type type = neuro_exceptions::type::none, bool is_error = true, std::string desc = "");
+			bool isOk();
+
+			std::string get_exceptions_string(bool show_warnings);
+
+			const neuro_exception &create_exception(const neuro_exceptions::type type = neuro_exceptions::type::none, bool is_error = true, std::string desc = "");
 
 
 	};

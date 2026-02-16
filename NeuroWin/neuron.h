@@ -28,7 +28,6 @@ namespace neuro
 	class neuron;
 	class network;
 	class synapse;	
-	class pippo;
 
 	typedef std::shared_ptr<neuron> ptN;
 

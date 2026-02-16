@@ -7,8 +7,7 @@
 #define NETWORK_H
 
 #include "neuro_def.h"
-#include "neuro_exc_static.h"
-
+#include "neuro_exceptions.h"
 #include "toponet.h"
 #include "neuron.h"
 #include "init_data.h"
@@ -34,7 +33,7 @@
 namespace neuro
 {
 	class learn_data;
-	class neuro_exception;
+	class neuro_exceptions;
 	class toponet;
 
     /*******************************************/
@@ -71,47 +70,6 @@ namespace neuro
 			// neuro_exception
 			/*******************************************/
 
-			#if true
-			class neuro_exception
-			{
-				friend class network;
-
-				public:
-					_NEURO_EXC_ENUM;		// Usa la costante con l'enumerazione degli errori
-					_NEURO_EXC_STR;			// Usa la costante con le stringhe statiche
-
-				private:
-					
-					// network *_net è usato solo da network, può essere eliminato.
-					// Scartato const network &_net perché mancano network(network &other) e network::operator=(...)
-					type _type;
-					bool _is_error;
-					std::string _desc;
-					std::chrono::system_clock::time_point _time;
-
-					/// <summary>
-					/// CTOR privato, usato solo da network::create_exception(...)
-					/// </summary>
-					/// <param name="type"></param>
-					/// <param name="is_error"></param>
-					/// <param name="desc"></param>
-					inline neuro_exception(const type type = type::none, bool is_error = true, std::string desc = "") noexcept :
-						_type(type), _is_error(is_error), _desc(desc), _time(std::chrono::system_clock::now()) {}
-
-				public:
-					inline neuro_exception(neuro_exception const &other)  noexcept :
-									_type(other._type), _is_error(other._is_error), _desc(other._desc), _time(other._time) {}
-					neuro_exception& operator=(neuro_exception const &other) noexcept;
-
-					inline static bool is_ex_error(neuro_exception &nex) { return nex._is_error; }
-					inline bool is_error() { return _is_error; }
-				
-				public:
-					const std::string what() const noexcept;		// Nessun override di virtual const char* what() const noexcept
-
-			};  // class neuro_exception
-			#endif
-
 		public:
 			#ifdef ACT_DBL
 				static constexpr act Default_learn_const = 0.01;
@@ -138,7 +96,8 @@ namespace neuro
 			act _learn_const = Default_learn_const;
 			learn_const_func _learn_const_pf;			// Puntatore alla funzione che restituisce la costante di apprendimento	
 
-			std::vector<neuro_exception> _exceptions;
+			neuro_exceptions &_exceptions_new;			// Eccezioni
+
 			bool _isSet = false;
 			
 
@@ -275,12 +234,12 @@ namespace neuro
 			/// <summary>
 			/// Ctor
 			/// </summary>
-			network();
+			network(neuro_exceptions &n_excs);
             /// <summary>
             /// Ctor con dati di inizializzazione
             /// </summary>
             /// <param name="ini_data"></param>
-            network(init_data &ini_data);
+            network(init_data &ini_data, neuro_exceptions &n_excs);
             
 			#if _DEBUG_DTOR
 			/// <summary>
@@ -308,7 +267,7 @@ namespace neuro
 			/// <param name="is_error"></param>
 			/// <param name="desc"></param>
 			/// <returns></returns>
-			constexpr neuro_exception &create_exception(const neuro_exception::type type = neuro_exception::type::none, bool is_error = true, std::string desc = "");
+			//constexpr neuro_exception &create_exception(const neuro_exception::type type = neuro_exception::type::none, bool is_error = true, std::string desc = "");
 
 			/// <summary>
 			/// Svuota l'elenco delle eccezioni
@@ -319,15 +278,15 @@ namespace neuro
 			/// Controlla se, nella lista delle eccezioni, ci sono errori (o soltanto avvertimenti)
 			/// </summary>
 			/// <returns></returns>
-			bool isOk();
+			inline bool isOk() { return (_exceptions_new.isOk() && _isSet); }
 
 			/// <summary>
 			/// Stringa con l'elenco delle eccezioni
 			/// </summary>
 			/// <param name="show_warnings">se true, include gli avvertimenti</param>
 			/// <returns></returns>
-			std::string get_exceptions_string(bool show_warnings = false);
-				
+			//std::string get_exceptions_string(bool show_warnings = false);
+			inline neuro_exceptions &get_exceptions() {return _exceptions_new;}
 			inline uint get_n_layers() const {return _nLays;}
 			inline uint get_input_layer_size() const { return _nInputs; }
 			inline uint get_output_layer_size() const { return _nOutputs; }

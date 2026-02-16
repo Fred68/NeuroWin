@@ -10,36 +10,6 @@
 
 namespace neuro
 {
-
-	/*******************************************/
-    /* neuro_exception                         */
-    /*******************************************/
-
-	const std::string network::neuro_exception::what() const noexcept		// Nessun override di virtual const char* what() const noexcept
-	{
-		std::string txt;
-		txt = "[";
-		std::string x = std::format("{0}", _time);
-		txt += x;
-		txt += "] ";
-		txt += _str[_type];
-		if (_desc.size() > 0)	txt += " : " + _desc;
-		return txt;
-	}
-
-	network::neuro_exception& network::neuro_exception::operator=(neuro_exception const &other) noexcept
-	{
-		if (this != &other)
-		{
-			_type = other._type;
-			_is_error = other._is_error;
-			_desc = other._desc;
-			_time = other._time;
-		}
-		return *this;
-
-	}
-
 	// TODO ATTENZIONE: vector<obj>::push_back(obj&) fa UNA COPIA dell'oggetto passato per reference !!!! Vd. std::move()
 
     /*******************************************/
@@ -48,17 +18,17 @@ namespace neuro
     /*                                         */
     /*******************************************/
 
-	network::network()
+	network::network(neuro_exceptions &n_excs) : _exceptions_new(n_excs)
 	{
 		reset();
 	}
 
-    network::network(init_data &ini_data)
+    network::network(init_data &ini_data, neuro_exceptions &n_excs) : _exceptions_new(n_excs)
     {
 		reset();
 		if(!set(ini_data))
 		{
-			throw this->create_exception(neuro_exception::init_data,true,"in network ctor");
+			throw this->get_exceptions().create_exception(neuro_exceptions::init_data,true,"in network ctor");
 			return;
 		}
 
@@ -160,7 +130,7 @@ namespace neuro
 			}
 			else
 			{
-				this->create_exception(neuro_exception::layer_number, true, "minimum two layers required in network ctor");
+				this->get_exceptions().create_exception(neuro_exceptions::layer_number, true, "minimum two layers required in network ctor");
 			}
 
 			calc_io_lay_numbers();		// Calcola i numeri di nodi dei livelli di input e output
@@ -169,7 +139,7 @@ namespace neuro
 		}
 		else
 		{
-			this->create_exception(neuro_exception::init_data,true,"in network::set(...)");
+			this->get_exceptions().create_exception(neuro_exceptions::init_data,true,"in network::set(...)");
 		}
 		return _isSet;
     }
@@ -260,71 +230,11 @@ namespace neuro
         return txt;
 	}
 
-	constexpr network::neuro_exception &network::create_exception(const network::neuro_exception::type type, bool is_error, std::string desc)
-	{
-		_exceptions.push_back(network::neuro_exception(type, is_error, desc));
-		return _exceptions.back();
-	}
-
 	void network::clear_exceptions()
 	{
-		_exceptions.clear();
+		_exceptions_new.clear();
 	}
 	
-	bool network::isOk()
-	{
-		uint count = std::count_if(_exceptions.begin(), _exceptions.end(), neuro_exception::is_ex_error);
-		return ((count == 0)&&_isSet);
-	}
-	
-	std::string network::get_exceptions_string(bool show_warnings)
-	{
-		std::string ret, txt, txt_err, txt_warn;
-		uint count, count_warn, count_err;
-		bool err, warn;
-
-		auto func_sel = [&](neuro_exception &ex)
-		{
-			if( (ex.is_error() && err) || (!ex.is_error() && warn))
-			{
-				txt += "\n" + ex.what();
-				count++;
-			}
-		};
-
-		count_err = count_warn = 0;
-
-		txt = "", err = true, warn = false, count = 0;
-		std::for_each(std::execution::seq, _exceptions.begin(), _exceptions.end(), func_sel);
-		if(count > 0)		txt_err = txt;
-		count_err = count;
-
-		if(show_warnings)
-		{
-			txt = "", err = false, warn = true, count = 0;
-			std::for_each(std::execution::seq, _exceptions.begin(), _exceptions.end(), func_sel);
-			if (count > 0)	txt_warn = txt;
-			count_warn = count;
-		}
-
-		if(count_err == 0)
-		{
-			ret += "network is ok";
-		}
-		else
-		{
-			ret += std::format("network has {0} errors:",count_err);
-			ret += txt_err;
-		}
-
-		if (count_warn > 0)
-		{
-			ret += std::format("\nnetwork has {0} warnings:", count_warn);
-			ret += txt_warn;
-		}
-		return ret;
-	}
-
 	toponet network::get_topo() 
 	{
 		_topo.update_topo(*this);
@@ -348,7 +258,7 @@ namespace neuro
 	layer& network::get_layer(uint lay)
 	{
 		if (lay >= _nLays)
-			throw this->create_exception(neuro_exception::layer_out_of_range, true, "in get_layer()");
+			throw this->get_exceptions().create_exception(neuro_exceptions::layer_out_of_range, true, "in get_layer()");
 		else
 			return _layers[lay];
 	}
@@ -356,9 +266,9 @@ namespace neuro
     neuron& network::get_neuron(uint lay, uint num)
     {
         if (lay >= _nLays)
-			throw this->create_exception(neuro_exception::layer_out_of_range, true, "in get_neuron()");
+			throw this->get_exceptions().create_exception(neuro_exceptions::layer_out_of_range, true, "in get_neuron()");
         else if (num >= _layers[lay].size())
-			throw this->create_exception(neuro_exception::node_out_of_range, true, "in get_neuron()");
+			throw this->get_exceptions().create_exception(neuro_exceptions::node_out_of_range, true, "in get_neuron()");
         else
             return get_at(lay, num);
     }
@@ -386,7 +296,7 @@ namespace neuro
 			ret = ok;
 		}
 		else
-			throw this->create_exception(neuro_exception::size_mismatch, true, "_input vector and first layer sizes are different in set_inputs()");
+			throw this->get_exceptions().create_exception(neuro_exceptions::size_mismatch, true, "_input vector and first layer sizes are different in set_inputs()");
 		return ret;
 	}
 
@@ -414,7 +324,7 @@ namespace neuro
 			ret = ok;
 		}
 		else
-			throw this->create_exception(neuro_exception::size_mismatch, true, "output vector and last layer sizes are different in set_outputs()");
+			throw this->get_exceptions().create_exception(neuro_exceptions::size_mismatch, true, "output vector and last layer sizes are different in set_outputs()");
 		return ret;
 	}
 
@@ -649,7 +559,7 @@ namespace neuro
 						neuron &n = get_neuron(iL,iN);
 						n.update_syn_pointers(iL);
 					}
-					catch(neuro_exception &nex)
+					catch(neuro_exceptions::neuro_exception &nex)
 					{
 						ok = false;
 						std::cerr << "Errore in network::calc_pointers()" << nex.what() << std::endl;
@@ -681,7 +591,7 @@ namespace neuro
 			std::cerr << "Eccezione exception in network::write(...): " << ex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
-		catch (network::neuro_exception &nex)
+		catch (neuro_exceptions::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in network::write(...): " << nex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
@@ -707,7 +617,7 @@ namespace neuro
 			}
 			else
 			{
-				throw this->create_exception(neuro_exception::error_topo, true, "in network::read()");
+				throw this->get_exceptions().create_exception(neuro_exceptions::error_topo, true, "in network::read()");
 			}
 		}
 		catch (std::exception &ex)
@@ -715,7 +625,7 @@ namespace neuro
 			std::cerr << "Eccezione exception in network::read(...): " << ex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
-		catch (network::neuro_exception &nex)
+		catch (neuro_exceptions::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in network::read(...): " << nex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
@@ -746,7 +656,7 @@ namespace neuro
 			std::cerr << "Eccezione exception in network::save(...): " << ex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
-		catch (network::neuro_exception &nex)
+		catch (neuro_exceptions::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in network::save(...): " << nex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
@@ -780,7 +690,7 @@ namespace neuro
 			std::cerr << "Eccezione exception in network::load(...): " << ex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
-		catch (network::neuro_exception &nex)
+		catch (neuro_exceptions::neuro_exception &nex)
 		{
 			std::cerr << "Eccezione neuro_exception in network::load(...): " << nex.what() << std::endl;
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
