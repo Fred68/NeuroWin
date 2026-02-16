@@ -7,13 +7,22 @@
 namespace neuro
 {
 
-	std::string learn_data::to_string()
+	std::string learn_data::to_string(bool view_pairs)
 	{
 		std::string txt;
-		txt += std::format("Vector lengths (_input/output): {0}/{1}\n", _inp_sz, _out_sz);
-		txt += std::format("Vector numbers (_input/output): {0}/{1}\n", _vinp.size(), _vout.size());
-		txt += std::format("Data pairs number: {0}", _vinp.size(), _ldata.size());
+		txt += std::format("Vector lengths (input/output): {0}/{1}\n", _inp_sz, _out_sz);
+		txt += std::format("Vector numbers (input/output): {0}/{1}\n", _vinp.size(), _vout.size());
+		txt += std::format("Data pairs number: {0}\n", _vinp.size(), _ldata.size());
 
+		if(view_pairs)
+		{
+			for (auto it = this->begin(); it != this->end(); it++)		// for(auto it : ld){} non è implementato
+			{
+
+				txt += std::format("{0} . {1}\n", network::display_vector(it.get_input_v()), network::display_vector(it.get_output_v()));
+				//std::cout << network::display_vector(it.get_input_v()) << " . " << network::display_vector(it.get_output_v()) << std::endl;
+			}
+		}
 		return txt;
 	}
 
@@ -39,7 +48,8 @@ namespace neuro
 		return indx;
 
 	}
-	void learn_data::add_data(uint index_input, uint index_output, network &net)
+
+	void neuro::learn_data::add_data(uint index_input, uint index_output, neuro_exceptions & nex)
 	{
 		if ((index_input != neuro::UINT_ERROR) && (index_output != neuro::UINT_ERROR))
 		{
@@ -47,7 +57,7 @@ namespace neuro
 		}
 		else
 		{
-			throw net.get_exceptions().create_exception(neuro_exceptions::learn_data_index,true,"in learn_data::add_data()");
+			throw nex.create_exception(neuro_exceptions::learn_data_index,true,"in learn_data::add_data()");
 		}
 	}
 

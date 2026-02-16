@@ -20,8 +20,13 @@
 using namespace std;
 using namespace neuro;
 
+// Prototyping
+void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexs);
+void load(init_data &ini);
+
 int main()
 {
+
 	#if INI_TEST
     int j = 0;
     auto func_x2 = [&](int &x) {x = x * 2; };
@@ -55,13 +60,6 @@ int main()
     std::for_each(std::execution::par, v.begin(), v.end(), func_atm);
     std::cout << "sum_atm (for_each on atomic<int>)" << sum_atm << std::endl;
 	#endif
-
-    //std::cout << "-----------------------------------------------\n";
-    //std::cout << "module test" << std::endl;
-    //std::cout << "-----------------------------------------------\n";
-    //
-    //pippo p(10);
-    //cout << p.to_string() << endl;
     
     std::cout << "-----------------------------------------------\n";
     std::cout << "neuro test" << std::endl;
@@ -74,35 +72,34 @@ int main()
 	std::cout << "inita data" << std::endl;
 	std::cout << "-----------------------------------------------\n";
 	
-	std::vector<int> lays = { 3, 5, 2 };
+	std::vector<uint> lays = { 3, 5, 2 };
 	std::vector<FACT> facts = { FACT::sigmoid, FACT::sigmoid, FACT::sigmoid };
 
-	init_data ini(lays, facts, 0.05);
+	init_data ini(lays, facts, 0.05);									// init_data
 	std::cout << "init_data:\n" << ini.to_string() << std::endl;
 
-	learn_data ld(lays[0],lays[lays.size()-1]);
-	neuro_exceptions excs;
-
-	std::cout << "-----------------------------------------------\n";
-	std::cout << "[S <enter>]\tlearn and Save\n[L <enter>]\tLoad and calc\n[X <enter>]\teXit" << std::endl;
-	std::cout << "-----------------------------------------------\n";
+	neuro_exceptions excs;												// neuro_exceptions
 	
+	learn_data ld(ini.get_input_size(), ini.get_output_size());			// learn_data
+	uint iInp, iOut;
+	iOut = ld.add_output(vector<act>({ 1, 0 }));
+	iInp = ld.add_input(vector<act>({ 0.1, 0.2, 0.9 }));
+	ld.add_data(iInp, iOut, excs);
+	iInp = ld.add_input(vector<act>({ 0.1, 0.1, 0.95 }));
+	ld.add_data(iInp, iOut, excs);
+	iInp = ld.add_input(vector<act>({ -0.1, 0.0, 0.8 }));
+	ld.add_data(iInp, iOut, excs);
 
+	iOut = ld.add_output(vector<act>({ 0, 1 }));
+	iInp = ld.add_input(vector<act>({ 0.9, 0.2, 0.1 }));
+	ld.add_data(iInp, iOut, excs);
+	iInp = ld.add_input(vector<act>({ 0.85, 0.1, 0.0 }));
+	ld.add_data(iInp, iOut, excs);
+	iInp = ld.add_input(vector<act>({ 0.99, 0., 0.2 }));
+	ld.add_data(iInp, iOut, excs);
 
-
-
-	char ch = '\0';
-	
-	{
-		string chrs = "SLX";
-		while(chrs.find(ch)==std::string::npos)
-		{
-			ch = getchar();
-		}
-	}
-
-	
-	
+	std::cout << "learn_data:\n" << ld.to_string(true) << std::endl;
+	//for (auto it = ld.begin(); it != ld.end(); it++){}		// for(auto it : ld){} non è implementato
 
 	#if false
 	std::ofstream fs("test.bin", std::ios::binary);
@@ -121,10 +118,39 @@ int main()
 	fsr.close();
 	#endif
 
-	getchar();
-
+	std::cout << "-----------------------------------------------\n";
+	std::cout << "[S <enter>]\tlearn and Save\n[L <enter>]\tLoad and calc\n[X <enter>]\teXit" << std::endl;
+	std::cout << "-----------------------------------------------\n";
 	
 
+	char ch = '\0';
+	
+	{
+		string chrs = "SLX";
+		while(chrs.find(ch)==std::string::npos)
+		{
+			ch = getchar();
+		}
+	}
+	
+	switch(ch)
+	{
+		case 'S':
+		{
+			learn(ini,ld,excs);
+		}
+		break;
+		case 'L':
+		{
+
+		}
+		break;
+		default:
+		break;
+
+
+
+	}
 
 
 	//net2.~network();		// Prova dtor
@@ -137,25 +163,20 @@ int main()
 
 	//cout << learn_data::UINT_ERROR << endl;
 	//cout << (uint) -1 << endl;
-	getchar(), getchar();
+	getchar();
 
 	
     return 0;
     
 }
 
-void learn(init_data &ini, neuro_exceptions &nexs)
+void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexs)
 {
 	#if SAVE_TEST
 
-	// Ini
-	//std::vector<int> lays = { 3, 5, 2 };
-	//std::vector<FACT> facts = { FACT::sigmoid, FACT::sigmoid, FACT::sigmoid };
 
-	//init_data ini(lays, facts, 0.05);
-	//std::cout << "init_data:\n" << ini.to_string() << std::endl;
-
-	/*
+	#if false
+	// Test DTOR
 	{
 		std::cout << "Inizio blocco..." << endl;
 		std::cout << "netx..." << endl;
@@ -166,10 +187,10 @@ void learn(init_data &ini, neuro_exceptions &nexs)
 		std::cout << "...ldx" << endl;
 		std::cout << "...Fine blocco" << endl;
 	}
-	*/
+	#endif
+
 
 	std::shared_ptr<network> net = make_shared<network>(ini, nexs);		// Crea la rete, chiamando il ctor;
-	std::shared_ptr<learn_data> ld = make_shared<learn_data>(net->get_input_layer_size(),net->get_output_layer_size());
 	try
 	{
 		neuro_exceptions::neuro_exception tmp = net->get_exceptions().create_exception(neuro_exceptions::pippo, false, "warning...");
@@ -191,8 +212,6 @@ void learn(init_data &ini, neuro_exceptions &nexs)
 		cerr << "Catturata neuro::neuro_exception:\n" << nex.what() << std::endl;
 	}*/
 
-
-
 	std::string ntok((net->isOk()) ? "ok" : "not ok");
 	std::cout << "_net is " << ntok << std::endl;
 	if (!net->isOk())
@@ -205,31 +224,7 @@ void learn(init_data &ini, neuro_exceptions &nexs)
 
 	std::cout << "In: " << net->get_input_layer_size() << '\n' << "Out: " << net->get_output_layer_size() << endl;
 
-	uint iInp, iOut;
-
-	iOut = ld->add_output(vector<act>({ 1, 0 }));
-	iInp = ld->add_input(vector<act>({ 0.1, 0.2, 0.9 }));
-	ld->add_data(iInp, iOut,*net);
-	iInp = ld->add_input(vector<act>({ 0.1, 0.1, 0.95 }));
-	ld->add_data(iInp, iOut,*net);
-	iInp = ld->add_input(vector<act>({ -0.1, 0.0, 0.8 }));
-	ld->add_data(iInp, iOut,*net);
-
-	iOut = ld->add_output(vector<act>({ 0, 1 }));
-	iInp = ld->add_input(vector<act>({ 0.9, 0.2, 0.1 }));
-	ld->add_data(iInp, iOut,*net);
-	iInp = ld->add_input(vector<act>({ 0.85, 0.1, 0.0 }));
-	ld->add_data(iInp, iOut, *net);
-	iInp = ld->add_input(vector<act>({ 0.99, 0., 0.2 }));
-	ld->add_data(iInp, iOut, *net);
-
-	std::cout << "learn_data iterator:\n";
-	for (auto it = ld->begin(); it != ld->end(); it++)		// for(auto it : ld){} non è implementato
-	{
-		std::cout << network::display_vector(it.get_input_v()) << " -> " << network::display_vector(it.get_output_v()) << endl;
-	}
-
-	std::cout << ((ld->check_data_size(*net)) ? "learn data size ok" : "learn data size ok") << endl;
+	std::cout << ((ld.check_data_size(*net)) ? "learn data size ok" : "learn data size ok") << endl;
 
 	uint cicli = 1;
 	uint subcicli = 1;
@@ -269,7 +264,7 @@ void learn(init_data &ini, neuro_exceptions &nexs)
 	std::cout << "--------------------------------------------------\n";
 	std::cout << "Output della rete 'net' con forward-propagation\n";
 	std::cout << "--------------------------------------------------\n";
-	for (auto it = ld.get()->begin(); it != ld->end(); it++)
+	for (auto it = ld.begin(); it != ld.end(); it++)
 	{
 		auto vinp = it.get_input_v();
 		auto vout = it.get_output_v();

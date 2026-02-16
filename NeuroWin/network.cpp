@@ -497,18 +497,18 @@ namespace neuro
 		return ok;
 	}
 
-	bool network::backward_propagate(std::shared_ptr<learn_data> pldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap)
+	bool network::backward_propagate(learn_data &ldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap)
 	{
 		auto inizio = std::chrono::high_resolution_clock::now();
 		bool ok = true;
-		std::vector<act> get_string_exceptions(pldata->get_data_size());	// Vettore con gli errori totali per tutti i casi
+		std::vector<act> get_string_exceptions(ldata.get_data_size());	// Vettore con gli errori totali per tutti i casi
 
-		if( (pldata->check_data_size(*this)) && (get_string_exceptions.size() > 0))
+		if( (ldata.check_data_size(*this)) && (get_string_exceptions.size() > 0))
 		{
 			for(uint ic=0; ic < cycles && ok; ic++)			// Ripete per il numero di cicli di apprendimento
 			{
 				uint idat = 0;
-				for (auto it = pldata->begin(); it != pldata->end(); it++)	// Percorre i dati di apprendimento
+				for (auto it = ldata.begin(); it != ldata.end(); it++)	// Percorre i dati di apprendimento
 				{
 					const std::vector<act> vi = it.get_input_v();			// Coppia di vettori con i dati di ingresso...		
 					const std::vector<act> vo = it.get_output_v();			// ...e di uscita desiderati

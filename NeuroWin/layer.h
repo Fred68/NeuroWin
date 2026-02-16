@@ -74,14 +74,6 @@ namespace neuro
 			~layer() noexcept;
 			#endif
 
-			//inline void clear_ptrs()
-			//{
-			//	for(uint i=0; i<_neurons.size(); i++)
-			//	{
-			//		_neurons[i].clear_ptrs();
-			//	}
-			//}
-
 			void reset();
 
 			inline neuron &operator[](uint i) { return _neurons[i]; }

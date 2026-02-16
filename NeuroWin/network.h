@@ -348,7 +348,8 @@ namespace neuro
 			/// <param name="error_med">errore quadratico medio</param>
 			/// <param name="msec_elap">millisecondi impiegati</param>
 			/// <returns></returns>
-			bool backward_propagate(std::shared_ptr<learn_data> pldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap);
+			bool backward_propagate(learn_data &ldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap);
+			//bool backward_propagate(std::shared_ptr<learn_data> pldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap);
 			
 			//inline void clear_ptrs()
 			//{

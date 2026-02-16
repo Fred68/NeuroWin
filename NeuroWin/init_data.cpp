@@ -10,7 +10,7 @@ namespace neuro
     /*                                         */
     /*******************************************/
 
-    init_data::init_data(std::vector<int> layers, std::vector<FACT> types, act learn_const_data) : _layers(layers), _types(types), _learn_const(learn_const_data)
+    init_data::init_data(std::vector<uint> layers, std::vector<FACT> types, act learn_const_data) : _layers(layers), _types(types), _learn_const(learn_const_data)
     {	
 		_ok = check();
     }		
@@ -68,4 +68,22 @@ namespace neuro
         
         return str;
     }
+	uint init_data::get_input_size()
+	{
+		uint n=0;
+		if(is_ok() && get_layers_num()>1)
+		{
+			n = _layers[0];
+		}
+		return n;
+	}
+	uint init_data::get_output_size()
+	{
+		uint n = 0;
+		if (is_ok() && get_layers_num() > 1)
+		{
+			n = _layers[get_layers_num()-1];
+		}
+		return n;
+	}
 }

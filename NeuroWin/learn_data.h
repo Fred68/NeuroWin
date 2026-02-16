@@ -58,13 +58,13 @@ namespace neuro
 
 		public:
 
-			inline learn_data(uint input_sz, uint output_sz) : _inp_sz(output_sz),_out_sz(output_sz) {};
+			inline learn_data(uint input_sz, uint output_sz) : _inp_sz(input_sz),_out_sz(output_sz) {};
 
-			std::string to_string();
+			std::string to_string(bool view_pairs = false);
 
 			uint add_input(std::vector<act> v);
 			uint add_output(std::vector<act> v);
-			void add_data(uint index_input, uint index_output, network &net);
+			void add_data(uint index_input, uint index_output, neuro_exceptions &nex);
 			inline void clear_data() {_ldata.clear();}
 			inline void clear_all() {clear_data(); _vinp.clear(); _vout.clear();}
 
@@ -72,6 +72,7 @@ namespace neuro
 			std::vector<act> &get_output(uint i);
 			std::tuple<std::vector<act>&, std::vector<act>&> get_data(uint i);
 			inline uint get_data_size() {return _ldata.size();}
+			/// TODO!!! Controllare...
 			bool check_data_size(network &net);
 	};
 
