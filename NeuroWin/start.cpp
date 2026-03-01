@@ -72,8 +72,8 @@ int main()
 	std::cout << "inita data" << std::endl;
 	std::cout << "-----------------------------------------------\n";
 	
-	//std::vector<uint> lays = { 3, 5, 2 };
-	std::vector<uint> lays = { 2, 2, 2 };
+	std::vector<uint> lays = { 3, 5, 2 };
+	//std::vector<uint> lays = { 2, 2, 2 };
 	std::vector<FACT> facts = { FACT::sigmoid, FACT::sigmoid, FACT::sigmoid };
 
 	init_data ini(lays, facts, 0.05);									// init_data
@@ -83,23 +83,23 @@ int main()
 	
 	learn_data ld(ini.get_input_size(), ini.get_output_size());			// learn_data
 	uint iInp, iOut;
-	//iOut = ld.add_output(vector<act>({ 1, 0 }));
-	//iInp = ld.add_input(vector<act>({ 0.1, 0.2, 0.9 }));
-	//ld.add_data(iInp, iOut, excs);
-	//iInp = ld.add_input(vector<act>({ 0.1, 0.1, 0.95 }));
-	//ld.add_data(iInp, iOut, excs);
-	//iInp = ld.add_input(vector<act>({ -0.1, 0.0, 0.8 }));
-	//ld.add_data(iInp, iOut, excs);
-
-	//iOut = ld.add_output(vector<act>({ 0, 1 }));
-	//iInp = ld.add_input(vector<act>({ 0.9, 0.2, 0.1 }));
-	//ld.add_data(iInp, iOut, excs);
-	//iInp = ld.add_input(vector<act>({ 0.85, 0.1, 0.0 }));
-	//ld.add_data(iInp, iOut, excs);
-	//iInp = ld.add_input(vector<act>({ 0.99, 0., 0.2 }));
-	//ld.add_data(iInp, iOut, excs);
-
 	iOut = ld.add_output(vector<act>({ 1, 0 }));
+	iInp = ld.add_input(vector<act>({ 0.1, 0.2, 0.9 }));
+	ld.add_data(iInp, iOut, excs);
+	iInp = ld.add_input(vector<act>({ 0.1, 0.1, 0.95 }));
+	ld.add_data(iInp, iOut, excs);
+	iInp = ld.add_input(vector<act>({ -0.1, 0.0, 0.8 }));
+	ld.add_data(iInp, iOut, excs);
+
+	iOut = ld.add_output(vector<act>({ 0, 1 }));
+	iInp = ld.add_input(vector<act>({ 0.9, 0.2, 0.1 }));
+	ld.add_data(iInp, iOut, excs);
+	iInp = ld.add_input(vector<act>({ 0.85, 0.1, 0.0 }));
+	ld.add_data(iInp, iOut, excs);
+	iInp = ld.add_input(vector<act>({ 0.99, 0., 0.2 }));
+	ld.add_data(iInp, iOut, excs);
+
+	/*iOut = ld.add_output(vector<act>({ 1, 0 }));
 	iInp = ld.add_input(vector<act>({ 0.1, 0.9 }));
 	ld.add_data(iInp, iOut, excs);
 	iInp = ld.add_input(vector<act>({ 0.15, 0.95 }));
@@ -113,7 +113,7 @@ int main()
 	iInp = ld.add_input(vector<act>({ 0.85, 0.0 }));
 	ld.add_data(iInp, iOut, excs);
 	iInp = ld.add_input(vector<act>({ 0.99, 0.2 }));
-	ld.add_data(iInp, iOut, excs);
+	ld.add_data(iInp, iOut, excs);*/
 
 
 	std::cout << "learn_data:\n" << ld.to_string(true) << std::endl;
@@ -143,7 +143,7 @@ int main()
 
 	char ch = '\0';
 	
-	vector<act> testInp = { 1.0, 1.0 };
+	vector<act> testInp = { 1.0, 1.0, 1.0 };
 
 	{
 		string chrs = "120X";
@@ -282,17 +282,17 @@ void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexc, vector<act> &
 		//	std::cout << "Net: " << net->to_string() << endl;
 	}
 
-	getchar();
-	std::cout << "\n\nNet prima del calcolo di indici e topologia\n" << net->to_string() << endl;
-	getchar();
+	//getchar();
+	//std::cout << "\n\nNet prima del calcolo di indici e topologia\n" << net->to_string() << endl;
+	//getchar();
 
-	net->calc_indexes();
-	net->get_topo();
-	std::cout << "\n\nNet dopo il calcolo di indici e topologia\n" << net->to_string() << endl;
-	getchar();
+	//net->calc_indexes();
+	//net->get_topo();
+	//std::cout << "\n\nNet dopo il calcolo di indici e topologia\n" << net->to_string() << endl;
+	//getchar();
 
 
-	std::cout << "\n\nSave neuron indexes:\n" << net->to_string() << endl;
+	//std::cout << "\n\nSave neuron indexes:\n" << net->to_string() << endl;
 	std::cout << "Salvataggio file..." << endl;
 	net->save("pippo.bin");
 
@@ -318,10 +318,10 @@ void load(learn_data &ld, neuro_exceptions &nexc, vector<act> &inp)
 	net.set_name("net");
 	#endif
 
-	cout << "\nnet2 prima del caricamento:\n" << net.to_string() << endl;
+	//cout << "\nnet2 prima del caricamento:\n" << net.to_string() << endl;
 	cout << "Caricamento file..." << endl;
 	net.load("pippo.bin");
-	cout << "\nnet2 dopo caricamento:\n" << net.to_string() << endl;
+	//cout << "\nnet2 dopo caricamento:\n" << net.to_string() << endl;
 
 	cout << "net is: " << ((net.isOk())?"ok":"err") << endl;
 	cout << "exc is: " << ((nexc.isOk()) ? "ok" : "err") << endl;
@@ -358,7 +358,7 @@ void load(learn_data &ld, neuro_exceptions &nexc, vector<act> &inp)
 		cout << "vinp (using): " << network::display_vector(vinp) << '\n';
 		cout << "vout (obj.) : " << network::display_vector(vout) << '\n';
 		cout << "vres (using): " << network::display_vector(vres) << endl;
-		cout << "Net2: " << net.to_string() << endl;
+		//cout << "Net2: " << net.to_string() << endl;
 
 		vector<act> out(2);
 		net.forward_propagate(inp, out);

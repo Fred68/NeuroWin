@@ -96,7 +96,7 @@ namespace neuro
 			
 			if (_nLays > 1)
 			{
-				for (uint i = 0; i < _nLays; i++)		// Crea i livelli, ognuno con un neurone in più (uscita 1, disattivo, per i bias)
+				for (uint i = 0; i < _nLays; i++)		// Crea i livelli, ognuno con un neurone in più (per il bias)
 				{
 					layer *ln;
 
@@ -113,9 +113,9 @@ namespace neuro
 					uint jmax = (uint)_layers.back().size();
 					for (uint j = 0; j < jmax; j++)
 					{
-						if (j == jmax - 1)
+						if (j == jmax - 1)					// Nodo bias
 						{
-							_layers.back()[j].set_fact(FACT::one);           // Nodo aggiunto: uscita sempre a 1
+							_layers.back()[j].set_fact(FACT::bias);           // Nodo aggiunto: uscita sempre a 1
 							_layers.back()[j].calc_y();                      // Calcola l'uscita e...
 							_layers.back()[j].set_active(false);             // ...disattiva
 						}

@@ -290,6 +290,7 @@ namespace neuro
 				f_act_der = &relu_der;
 				break;
 			case FACT::one:
+			case FACT::bias:
 				f_act = &one;
 				f_act_der = &zero;
 				break;
@@ -423,9 +424,9 @@ namespace neuro
     }
 
     void neuron::calc_y()
-    {   
-        //if(_active)
-		y = f_act(this);
+    {
+        if(_active)
+			y = f_act(this);
     }
 	void neuron::calc_ei()
 	{
@@ -590,11 +591,11 @@ namespace neuro
 			fs.read(reinterpret_cast<char*>(&input_tmp), sizeof(input_tmp));
 
 			set_fact(f_tmp);
+
 			_active = active_tmp;
 			_input = input_tmp;
 			set_beta();				// Azzera
 			
-
 			for (uint i = 0; i < _syns.size(); i++)
 			{
 				_syns[i].read(fs);
@@ -605,6 +606,15 @@ namespace neuro
 			name.resize(len);
 			fs.read(&name[0], sizeof(char)*len);
 			#endif
+
+			if (get_fact() == FACT::bias)		// Se nodo di bias:...
+			{
+				set_active(true);
+				calc_y();                      // Calcola l'uscita
+				set_active(false);
+			}
+
+			
 		}
 		catch (std::exception &ex)
 		{

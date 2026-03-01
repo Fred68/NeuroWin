@@ -152,7 +152,7 @@ namespace neuro
             act_func f_act_der;                     /// Derivata della funzione di attivazione (puntatore)
 			
 			FACT _fact;                             /// Tipo di funzione di attivazione
-            bool _active = true;                    /// Se false, non calcola né x dai pesi né y.
+            bool _active = true;                    /// Se false, non ricalcola né x dai pesi né y.
             bool _input = false;                    /// Se true: neurone di _input, non calcola la x, solo la y, e abilita set_input
 			stat _nstat = stat::_beta;				/// beta, EI o index (for I/O)
 

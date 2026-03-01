@@ -17,7 +17,7 @@
 #define ACT_DBL                     // Definizione del tipo di dato per l'attività: double 
 // #undef ACT_DBL					// Se non definito: float
 
-#define TXT_INFO		true		// Informazioni aggiuntive in nodi e sinapsi
+#define TXT_INFO		false		// Informazioni aggiuntive in nodi e sinapsi
 
 #define TXT_FLOAT_FRM	".4f"
 
@@ -25,7 +25,7 @@
 	#define _DEBUG_NEURO_DET false	// Debug con dettagli
 	#define _DEBUG_DTOR false		// Definisce dtor
 	#define _DEBUG_DTOR_LAY false	// Definisce dtor per class layer
-	#define _SEQ_CYCLE	true		// Calcolo con semplice ciclo for e non con for_each
+	#define _SEQ_CYCLE	false		// Calcolo con semplice ciclo for e non con for_each
 	#define EXEPOL std::execution::seq
 #else
 	#define EXEPOL std::execution::par
@@ -53,7 +53,7 @@ namespace neuro
 
 	typedef size_t uint;			// In alternativa: typedef unsigned int uint;
 
-    enum class FACT { sigmoid = 0, tanh, relu, one, id, test_error, Count };
+    enum class FACT { sigmoid = 0, tanh, relu, one, bias, id, test_error, Count };
 	
 	enum class EXE_POL { neuron = 0, layer, network };
 
@@ -66,6 +66,9 @@ namespace neuro
 		{
 		case FACT::one:
 			str = "one";
+			break;
+		case FACT::bias:
+			str = "bias";
 			break;
 		case FACT::sigmoid:
 			str = "sigmoid";
