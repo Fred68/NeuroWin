@@ -45,8 +45,7 @@ namespace neuro
 	
 	// TODO Creare: funzioni di reset (cancella tutti i dati), costruttori vari, funzioni set (per impostare i valori)
 	// TODO Aggiungere classe con la topologia della rete (per i/O e per init data)
-	// TODO Aggiungere salvataggio e caricamento di una rete (con i pesi), per eseguire l'addestramento in più fasi
-
+	
 	// I dati di sinapsi, neuroni e livelli sono legati a puntatori e reference a rete, neuroni e livelli.
 	// I costruttori e gli operatori di assegnazione (di copia e di spostamento) sono complessi, preché dovrebbero aggiornare...
 	// ... i riferimenti ai nuovi oggetti creati. Non sono stati ridefiniti, si usano quelli di default (copia bit epr bit).
@@ -85,7 +84,10 @@ namespace neuro
 			typedef void (*lay_func) (std::vector<neuron> &layer, uint i);					// Calcolo di un livello
 			typedef act (*weight_func) (uint iLay, uint iNeu, uint iSyn, bool is_bias);		// Inizializzazione di un peso
 			
-			
+			#if TXT_INFO
+            std::string _name = "";
+            #endif
+
 			std::vector<layer> _layers;
 
             uint _nLays = 0;
@@ -107,7 +109,17 @@ namespace neuro
 			// std::execution::par_unseq = vettorizzato su più thread. 
 			// Con unseq lo stesso thread potrebbe scrivere simultaneamente (con unica istruzione che agisce su più dati).
 			// In ogni caso un mutex introduce un overhead. Se l'operazione è semplice, meglio usare dati atomici
-			std::execution::parallel_policy exe_pol[3] = {std::execution::par, std::execution::par, std::execution::par};
+			
+			// TODO std::execution::par, std::execution::seq.... sono classi DIVERSE, necessaria funzione differente !
+			//std::execution::parallel_policy exe_pol[3] = {std::execution::par, std::execution::seq, std::execution::par};
+			
+			//union xxx
+			//{
+			//	std::execution::parallel_policy par;
+			//	std::execution::sequenced_policy seq;
+			//	std::execution::parallel_unsequenced_policy par_unseq;
+			//};
+			//xxx	exe_pol_new[3] = { std::execution::seq, std::execution::seq, std::execution::par_unseq};
 
 			void reset(bool clear_errors = true, bool clear_topo = true);
 			bool set(init_data &ini_data);
@@ -134,7 +146,7 @@ namespace neuro
 			/// <summary>
 			/// Imposta le modalitù di esecuzione dei cicli (parallelo, sequenziale)
 			/// </summary>
-			void set_exe_pol();
+			//void set_exe_pol();
 			/// <summary>
 			/// Imposta gli ingressi. Lunghezza del vettore non controllata.
 			/// </summary>
@@ -248,6 +260,11 @@ namespace neuro
 			~network() noexcept;
 			#endif
 
+			#if TXT_INFO
+			inline void set_name(std::string name) { _name = name; }
+			inline const std::string get_name() { return _name; }
+			#endif
+
             /// <summary>
             /// to_string
             /// </summary>
@@ -259,15 +276,6 @@ namespace neuro
 			/// </summary>
 			/// <returns></returns>
 			inline network &get_reference() {return *this;}
-
-			/// <summary>
-			/// Crea un'eccezione (e la aggiunge all'elenco), non esegue alcun throw
-			/// </summary>
-			/// <param name="type"></param>
-			/// <param name="is_error"></param>
-			/// <param name="desc"></param>
-			/// <returns></returns>
-			//constexpr neuro_exception &create_exception(const neuro_exception::type type = neuro_exception::type::none, bool is_error = true, std::string desc = "");
 
 			/// <summary>
 			/// Svuota l'elenco delle eccezioni
@@ -285,7 +293,6 @@ namespace neuro
 			/// </summary>
 			/// <param name="show_warnings">se true, include gli avvertimenti</param>
 			/// <returns></returns>
-			//std::string get_exceptions_string(bool show_warnings = false);
 			inline neuro_exceptions &get_exceptions() {return _exceptions_new;}
 			inline uint get_n_layers() const {return _nLays;}
 			inline uint get_input_layer_size() const { return _nInputs; }
@@ -300,8 +307,8 @@ namespace neuro
 
 			inline act get_learn_const() const {return _learn_const;}
 			inline void set_learn_const(act lrn_c) {_learn_const = lrn_c;}
-			inline std::execution::parallel_policy get_exe_pol(EXE_POL pol) const { return exe_pol[(int)pol]; }
-			
+			//inline std::execution::parallel_policy get_exe_pol(EXE_POL pol) const { return exe_pol[(int)pol]; }	
+
 			inline learn_const_func get_f_learn() const { return _learn_const_pf; };
 			inline void set_f_learn(learn_const_func lrn_f) { _learn_const_pf = lrn_f; };
 			
@@ -349,7 +356,6 @@ namespace neuro
 			/// <param name="msec_elap">millisecondi impiegati</param>
 			/// <returns></returns>
 			bool backward_propagate(learn_data &ldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap);
-			//bool backward_propagate(std::shared_ptr<learn_data> pldata, const uint cycles, const uint subcycles, act &error_med, std::chrono::milliseconds &msec_elap);
 			
 			//inline void clear_ptrs()
 			//{

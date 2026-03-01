@@ -21,8 +21,8 @@ using namespace std;
 using namespace neuro;
 
 // Prototyping
-void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexc);
-void load(learn_data &ld, neuro_exceptions &nexc);
+void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexc, vector<act> &inp);
+void load(learn_data &ld, neuro_exceptions &nexc, vector<act> &inp);
 
 int main()
 {
@@ -72,7 +72,8 @@ int main()
 	std::cout << "inita data" << std::endl;
 	std::cout << "-----------------------------------------------\n";
 	
-	std::vector<uint> lays = { 3, 5, 2 };
+	//std::vector<uint> lays = { 3, 5, 2 };
+	std::vector<uint> lays = { 2, 2, 2 };
 	std::vector<FACT> facts = { FACT::sigmoid, FACT::sigmoid, FACT::sigmoid };
 
 	init_data ini(lays, facts, 0.05);									// init_data
@@ -82,21 +83,38 @@ int main()
 	
 	learn_data ld(ini.get_input_size(), ini.get_output_size());			// learn_data
 	uint iInp, iOut;
+	//iOut = ld.add_output(vector<act>({ 1, 0 }));
+	//iInp = ld.add_input(vector<act>({ 0.1, 0.2, 0.9 }));
+	//ld.add_data(iInp, iOut, excs);
+	//iInp = ld.add_input(vector<act>({ 0.1, 0.1, 0.95 }));
+	//ld.add_data(iInp, iOut, excs);
+	//iInp = ld.add_input(vector<act>({ -0.1, 0.0, 0.8 }));
+	//ld.add_data(iInp, iOut, excs);
+
+	//iOut = ld.add_output(vector<act>({ 0, 1 }));
+	//iInp = ld.add_input(vector<act>({ 0.9, 0.2, 0.1 }));
+	//ld.add_data(iInp, iOut, excs);
+	//iInp = ld.add_input(vector<act>({ 0.85, 0.1, 0.0 }));
+	//ld.add_data(iInp, iOut, excs);
+	//iInp = ld.add_input(vector<act>({ 0.99, 0., 0.2 }));
+	//ld.add_data(iInp, iOut, excs);
+
 	iOut = ld.add_output(vector<act>({ 1, 0 }));
-	iInp = ld.add_input(vector<act>({ 0.1, 0.2, 0.9 }));
+	iInp = ld.add_input(vector<act>({ 0.1, 0.9 }));
 	ld.add_data(iInp, iOut, excs);
-	iInp = ld.add_input(vector<act>({ 0.1, 0.1, 0.95 }));
+	iInp = ld.add_input(vector<act>({ 0.15, 0.95 }));
 	ld.add_data(iInp, iOut, excs);
-	iInp = ld.add_input(vector<act>({ -0.1, 0.0, 0.8 }));
+	iInp = ld.add_input(vector<act>({ -0.1, 0.8 }));
 	ld.add_data(iInp, iOut, excs);
 
 	iOut = ld.add_output(vector<act>({ 0, 1 }));
-	iInp = ld.add_input(vector<act>({ 0.9, 0.2, 0.1 }));
+	iInp = ld.add_input(vector<act>({ 0.9, 0.1 }));
 	ld.add_data(iInp, iOut, excs);
-	iInp = ld.add_input(vector<act>({ 0.85, 0.1, 0.0 }));
+	iInp = ld.add_input(vector<act>({ 0.85, 0.0 }));
 	ld.add_data(iInp, iOut, excs);
-	iInp = ld.add_input(vector<act>({ 0.99, 0., 0.2 }));
+	iInp = ld.add_input(vector<act>({ 0.99, 0.2 }));
 	ld.add_data(iInp, iOut, excs);
+
 
 	std::cout << "learn_data:\n" << ld.to_string(true) << std::endl;
 	//for (auto it = ld.begin(); it != ld.end(); it++){}		// for(auto it : ld){} non è implementato
@@ -125,6 +143,8 @@ int main()
 
 	char ch = '\0';
 	
+	vector<act> testInp = { 1.0, 1.0 };
+
 	{
 		string chrs = "120X";
 		while(chrs.find(ch)==std::string::npos)
@@ -137,18 +157,19 @@ int main()
 	{
 		case '1':
 		{
-			learn(ini,ld,excs);
+			learn(ini,ld,excs,testInp);
 		}
 		break;
 		case '2':
 		{
-			load(ld,excs);
+			load(ld,excs, testInp);
 		}
 		break;
 		default:
 		break;
 	}
 
+	
 
 	//net2.~network();		// Prova dtor
 	//net->~network();
@@ -167,11 +188,16 @@ int main()
     
 }
 
-void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexc)
+void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexc, vector<act> &inp)
 {
+	//cout << "inputs=" << network::display_vector(inp) << std::endl;
+
 	#if SAVE_TEST
 
 	std::shared_ptr<network> net = make_shared<network>(ini, nexc);		// Crea la rete, chiamando il ctor;
+	#if TXT_INFO
+	net->set_name("net");
+	#endif
 	try
 	{
 		neuro_exceptions::neuro_exception tmp = net->get_exceptions().create_exception(neuro_exceptions::pippo, false, "warning...");
@@ -270,41 +296,75 @@ void learn(init_data &ini, learn_data &ld, neuro_exceptions &nexc)
 	std::cout << "Salvataggio file..." << endl;
 	net->save("pippo.bin");
 
+	vector<act> out(2);
+	net->forward_propagate(inp,out);
+	cout << "inputs= \t" << network::display_vector(inp) << std::endl;
+	cout << "outputs=\t" << network::display_vector(out) << std::endl;
+
 	#endif
 }
 
-void load(learn_data &ld, neuro_exceptions &nexc)
+void load(learn_data &ld, neuro_exceptions &nexc, vector<act> &inp)
 {
 	
-	// TODO!!! Identificare errore dopo load(). fw_prop non fa nulla. Reimpostare puntatori a funzioni di attivazione ?
+	//cout << "inputs=" << network::display_vector(inp) << std::endl;
 
 	#if LOAD_TEST
 
+	nexc.clear();
+
 	network net(nexc);
+	#if TXT_INFO
+	net.set_name("net");
+	#endif
+
 	cout << "\nnet2 prima del caricamento:\n" << net.to_string() << endl;
 	cout << "Caricamento file..." << endl;
 	net.load("pippo.bin");
 	cout << "\nnet2 dopo caricamento:\n" << net.to_string() << endl;
 
-	//std::shared_ptr<learn_data> ld = make_shared<learn_data>(net);
+	cout << "net is: " << ((net.isOk())?"ok":"err") << endl;
+	cout << "exc is: " << ((nexc.isOk()) ? "ok" : "err") << endl;
 
 	cout << endl;
 	cout << "--------------------------------------------------\n";
 	cout << "Output della rete 'net2' con forward-propagation\n";
 	cout << "--------------------------------------------------\n";
 
-	
-
 	for (auto it = ld.begin(); it != ld.end(); it++)
 	{
 		auto vinp = it.get_input_v();
-		auto vout = it.get_output_v();
-		vector<act> vres;
-		cout << "fw prop: " << ((net.forward_propagate(vinp, vres)) ? "ok" : "err") << endl;
+		auto vout = it.get_output_v();	
+		vector<act> vres(net.get_output_layer_size());
+		bool ok = net.forward_propagate(vinp, vres);
+		if(ok)
+		{	
+			cout << "forward-propagation: ok" << endl;
+			cout << "net is: " << ((net.isOk()) ? "ok" : "err") << endl;
+			cout << "exc is: " << ((nexc.isOk()) ? "ok" : "err") << endl;
+			cout << "vinp (using): " << network::display_vector(vinp) << '\n';
+			cout << "vout (obj.) : " << network::display_vector(vout) << '\n';
+			cout << "vres (using): " << network::display_vector(vres) << endl;
+
+		}
+		else
+		{
+			cout << "error in forward-propagation" << endl;
+			cout << "net is: " << ((net.isOk()) ? "ok" : "err") << endl;
+			cout << "exc is: " << ((nexc.isOk()) ? "ok" : "err") << endl;
+
+		}
+		//cout << "fw prop: " << ((net.forward_propagate(vinp, vres)) ? "ok" : "err") << endl;
 		cout << "vinp (using): " << network::display_vector(vinp) << '\n';
 		cout << "vout (obj.) : " << network::display_vector(vout) << '\n';
 		cout << "vres (using): " << network::display_vector(vres) << endl;
 		cout << "Net2: " << net.to_string() << endl;
+
+		vector<act> out(2);
+		net.forward_propagate(inp, out);
+		cout << "inputs= \t" << network::display_vector(inp) << std::endl;
+		cout << "outputs=\t" << network::display_vector(out) << std::endl;
+
 	}
 
 	#endif

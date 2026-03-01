@@ -29,7 +29,8 @@ namespace neuro
 	class network;
 	class synapse;	
 
-	typedef std::shared_ptr<neuron> ptN;
+	// typedef std::shared_ptr<neuron> ptN;
+	typedef neuron* ptN;
 
 	class neuron
     {
@@ -146,13 +147,13 @@ namespace neuro
 				act beta;							/// beta (primo calcolo), poi...
 				act ei;								/// ...EI = beta * F' (secondo calcolo)
 			};
-            std::vector<synapse> _syns;              /// Sinapsi
+            std::vector<synapse> _syns;             /// Sinapsi
             act_func f_act;                         /// Funzione di attivazione (puntatore)
             act_func f_act_der;                     /// Derivata della funzione di attivazione (puntatore)
 			
-			FACT _fact;                              /// Tipo di funzione di attivazione
-            bool _active = true;                     /// Se false, non calcola né x dai pesi né y.
-            bool _input = false;                     /// Se true: neurone di _input, non calcola la x, solo la y, e abilita set_input
+			FACT _fact;                             /// Tipo di funzione di attivazione
+            bool _active = true;                    /// Se false, non calcola né x dai pesi né y.
+            bool _input = false;                    /// Se true: neurone di _input, non calcola la x, solo la y, e abilita set_input
 			stat _nstat = stat::_beta;				/// beta, EI o index (for I/O)
 
 			#if TXT_INFO
@@ -261,7 +262,10 @@ namespace neuro
 			/// Valore dell'uscita y
 			/// </summary>
 			/// <returns></returns>
-			inline act get_y() { return y; }		// Uscita
+			inline act get_y()
+			{
+				return y;
+			}		// Uscita
 
 			/// <summary>
 			/// Calcola l'uscita y, solo se è attivo
@@ -291,7 +295,7 @@ namespace neuro
 			/// Imposta la derivata dell'errore (beta, in unione con ei)
 			/// </summary>
 			/// <param name="beta_in"></param>
-			void set_beta(act beta_in);
+			void set_beta(act beta_in = (act)0.0);
 
 			/// <summary>
 			/// Valore della derivata dell'errore (ei, in unione con beta)
@@ -303,7 +307,7 @@ namespace neuro
 			/// Imposta la derivata dell'errore (ei, in unione con beta)
 			/// </summary>
 			/// <param name="ei_in"></param>
-			void set_ei(act ei_in);
+			void set_ei(act ei_in = (act)0.0);
 			
 			/// <summary>
 			/// Calcola la derivata EI dell'errore con la formula [7].
@@ -348,7 +352,7 @@ namespace neuro
 			/// Aggiorna, nelle sinapsi, i puntatori ai neuroni, in base agli indici
 			/// </summary>
 			/// <param name="ilay"></param>
-			void update_syn_pointers(uint ilay);	// Aggiorna, nelle sinapsi, i puntatori ai neuroni
+			void update_syn_pointers(uint ilay/*, network &net_ref*/);	// Aggiorna, nelle sinapsi, i puntatori ai neuroni
 
 			void write(std::ofstream &fs);
 			void read(std::ifstream &fs);

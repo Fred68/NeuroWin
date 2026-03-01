@@ -22,7 +22,8 @@ namespace neuro
     }
 	neuron::synapse::synapse(neuron &p_n, act ws)
     {
-		_pn = std::shared_ptr<neuron>(&p_n);     // Non usa _pn=std::make_shared<neuron>(p_n) perché creerebbe una copia
+		//_pn = std::shared_ptr<neuron>(&p_n);     // Non usa _pn=std::make_shared<neuron>(p_n) perché creerebbe una copia
+		_pn = &p_n;
 		_in = UINT_ERROR;
         w = ws;
         #if _DEBUG_NEURO_DET
@@ -43,7 +44,8 @@ namespace neuro
 	void neuron::synapse::reset()
 	{
 		// Errato usare _pn = std::shared_ptr<neuron>(nullptr) oppure std::make_shared<neuron>()
-		_pn.reset();
+		//_pn.reset();
+		_pn = nullptr;
 		_in = UINT_ERROR;
 		w = (act)1;
 	}
@@ -74,7 +76,8 @@ namespace neuro
 	bool neuron::synapse::update_node_index()
 	{
 		bool ok = false;
-		if(_pn.get() != nullptr)
+		//if(_pn.get() != nullptr)
+		if (_pn != nullptr)
 		{
 			_in = _pn->get_index();
 			ok = true;
@@ -89,7 +92,8 @@ namespace neuro
 	void neuron::synapse::set_node_index(uint i)
 	{
 		_in = i;
-		_pn.reset();	// Non usare _pn = nullptr;
+		//_pn.reset();	// Non usare _pn = nullptr;
+		_pn = nullptr;
 	}
 
 	void neuron::synapse::write(std::ofstream &fs)

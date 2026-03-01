@@ -10,7 +10,7 @@
 
 namespace neuro
 {
-	// TODO ATTENZIONE: vector<obj>::push_back(obj&) fa UNA COPIA dell'oggetto passato per reference !!!! Vd. std::move()
+	// ATTENZIONE: vector<T>::push_back(T&) fa UNA COPIA dell'oggetto passato per reference ! Vd. std::move()
 
     /*******************************************/
     /*                                         */
@@ -134,7 +134,7 @@ namespace neuro
 			}
 
 			calc_io_lay_numbers();		// Calcola i numeri di nodi dei livelli di input e output
-			set_exe_pol();				// Imposta l'esecuzione dei cicli (parallelo, sequenziale)
+			//set_exe_pol();				// Imposta l'esecuzione dei cicli (parallelo, sequenziale)
 			calc_indexes();				// Calcola gli indici di nodi e sinapsi
 		}
 		else
@@ -175,7 +175,7 @@ namespace neuro
 		}
 
 		calc_io_lay_numbers();		// Calcola i numeri di nodi dei livelli di input e output
-		set_exe_pol();				// Imposta l'esecuzione dei cicli (parallelo, sequenziale)
+		//set_exe_pol();				// Imposta l'esecuzione dei cicli (parallelo, sequenziale)
 
 		//if(!calc_pointers())		// Calcola i puntatori ai nodi, in base agli indici.
 		//{
@@ -197,14 +197,14 @@ namespace neuro
 		}
 	}
 
-	void network::set_exe_pol()
-	{
-		// TODO: Impostare exe_pol in base al numero totale di nodi e al numero di nodi per livello
-		// TODO: Fare delle prove di velocità
-		exe_pol[(int)EXE_POL::neuron] = std::execution::par;
-		exe_pol[(int)EXE_POL::layer] = std::execution::par;
-		exe_pol[(int)EXE_POL::network] = std::execution::par;
-	}
+	//void network::set_exe_pol()
+	//{
+	//	// Impostare exe_pol in base al numero totale di nodi e al numero di nodi per livello
+	//	// Fare delle prove di velocità
+	//	exe_pol[(int)EXE_POL::neuron] = std::execution::par;
+	//	exe_pol[(int)EXE_POL::layer] = std::execution::par;
+	//	exe_pol[(int)EXE_POL::network] = std::execution::par;
+	//}
 
     std::string network::to_string()
     {
@@ -213,6 +213,9 @@ namespace neuro
 		getchar();
 		#endif
         std::string txt;
+		#if TXT_INFO
+		txt += std::format("{0}\n",_name);
+		#endif
         txt += std::format("Layers: {0}\n", _nLays);
 		txt += std::format("Learn const: {0}\n", get_learn_const());
 		//txt += std::format("E: {0}\n", _err_tot);
@@ -292,7 +295,7 @@ namespace neuro
 			auto v = std::ranges::iota_view((uint)0, (uint)inp_lay.size());
 			std::atomic<bool> ok = true;
 			auto func_set = [&](uint i) {ok = ok && get_at(0, i).set_x(inp_lay[i]); };
-			std::for_each(get_exe_pol(EXE_POL::layer),v.begin(),v.end(),func_set);
+			std::for_each(EXEPOL, v.begin(), v.end(), func_set);
 			ret = ok;
 		}
 		else
@@ -318,8 +321,8 @@ namespace neuro
 					auto betatmp = get_at(_nLays - 1, i).get_y() - out_lay[i];
 					get_at(_nLays - 1, i).set_beta(betatmp);
 					errtot.fetch_add(betatmp*betatmp);
-				}; 
-			std::for_each(get_exe_pol(EXE_POL::layer),v.begin(),v.end(),func_set);			// Formula [6]		
+				};
+			std::for_each(EXEPOL,v.begin(),v.end(),func_set);			// Formula [6]		
 			error_tot = errtot;
 			ret = ok;
 		}
@@ -366,22 +369,30 @@ namespace neuro
 	bool network::calc_y_lay(uint nlay)
 	{
 		bool ret = true;
-		//std::vector<neuron> &lay = _layers[nlay];
 		layer &lay = _layers[nlay];
+		#if _SEQ_CYCLE && false
+		for(uint i=0; i<lay.size(); i++)
+		{
+			lay[i].calc_x();
+			lay[i].calc_y();
+			lay[i].set_beta((act)0.0);
+		}
+		#else
 		auto v = std::ranges::iota_view((uint)0, (uint)lay.size());
 		auto func_calc_y = [&](uint i) {lay[i].calc_x(); lay[i].calc_y(); lay[i].set_beta((act)0.0);};
-		std::for_each(get_exe_pol(EXE_POL::layer), v.begin(), v.end(), func_calc_y);	// Formula [2]		
+		std::for_each(EXEPOL, v.begin(), v.end(), func_calc_y);	// Formula [2]		
+		#endif
+		
 		return ret;
 	}
 
 	bool network::calc_ei_eaprec_lay(uint nlay)
 	{
 		bool ret = false;
-		//std::vector<neuron> &lay = _layers[nlay];
 		layer &lay = _layers[nlay];
 		auto v = std::ranges::iota_view((uint)0, (uint)lay.size());
 		auto func_calc_ei = [&](uint j) {lay[j].calc_ei(); lay[j].calc_parz_eai(); };
-		std::for_each(get_exe_pol(EXE_POL::layer), v.begin(), v.end(), func_calc_ei);
+		std::for_each(EXEPOL, v.begin(), v.end(), func_calc_ei);
 		return ret;
 	}
 
@@ -394,7 +405,7 @@ namespace neuro
 			auto func_calc_w = [&](uint i) {lay[i].calc_w(get_f_learn()(*this,nlay,i));};
 			// Nota: calc_w(...) usa std::execution::par sui pesi, possibile 'race condition' ?
 			// No, le sinapsi di un neurone (verso i precedenti) sono indipendenti da quelle di un altro neurone
-			std::for_each(get_exe_pol(EXE_POL::layer), v.begin(), v.end(), func_calc_w);
+			std::for_each(EXEPOL, v.begin(), v.end(), func_calc_w);
 		}
 	}
 
@@ -416,6 +427,7 @@ namespace neuro
 				calc_y_lay(i);	
 			}
 		}
+		this;
 		return ok;
 	}
 
@@ -444,7 +456,7 @@ namespace neuro
 	{
 		auto v = std::ranges::iota_view((uint)1, _nLays);	// Dal secondo livello (lay=1) all'ultimo (nLay-1).
 		auto func_calc_lay = [&](uint i) {calc_w_lay(i);};
-		std::for_each(get_exe_pol(EXE_POL::network),v.begin(),v.end(),func_calc_lay);
+		std::for_each(EXEPOL,v.begin(),v.end(),func_calc_lay);
 	}
 
 	bool network::forward_propagate(const std::vector<act> &inp_lay, std::vector<act> &out_lay)
@@ -462,6 +474,7 @@ namespace neuro
 		}
 		else
 		{
+			// TODO!!! Aggiungere eccezione
 			ok = false;
 		}
 		return ok;
@@ -557,7 +570,7 @@ namespace neuro
 					try
 					{
 						neuron &n = get_neuron(iL,iN);
-						n.update_syn_pointers(iL);
+						n.update_syn_pointers(iL/*,*this*/);
 					}
 					catch(neuro_exceptions::neuro_exception &nex)
 					{
@@ -666,6 +679,8 @@ namespace neuro
 
 
 	}
+	
+	// TODO!!! Dopo il caricamento, esegue il calcolo delle x, ma il valore è sbagliato !!!
 
 	void network::load(const std::string &fname)
 	{
@@ -697,6 +712,7 @@ namespace neuro
 		}
 		if (fs.is_open())
 			fs.close();
+		
 		/*if(calc_pointers())
 		{
 			calc_io_lay_numbers();

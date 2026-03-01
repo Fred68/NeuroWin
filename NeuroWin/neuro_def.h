@@ -17,7 +17,7 @@
 #define ACT_DBL                     // Definizione del tipo di dato per l'attività: double 
 // #undef ACT_DBL					// Se non definito: float
 
-#define TXT_INFO		false		// Informazioni aggiuntive in nodi e sinapsi
+#define TXT_INFO		true		// Informazioni aggiuntive in nodi e sinapsi
 
 #define TXT_FLOAT_FRM	".4f"
 
@@ -25,6 +25,10 @@
 	#define _DEBUG_NEURO_DET false	// Debug con dettagli
 	#define _DEBUG_DTOR false		// Definisce dtor
 	#define _DEBUG_DTOR_LAY false	// Definisce dtor per class layer
+	#define _SEQ_CYCLE	true		// Calcolo con semplice ciclo for e non con for_each
+	#define EXEPOL std::execution::seq
+#else
+	#define EXEPOL std::execution::par
 #endif
 
 #define _COPY_CTORS_ false

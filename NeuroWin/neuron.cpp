@@ -251,7 +251,8 @@ namespace neuro
         {
             for(synapse &s : _syns)				// Ciclo su reference, se no chiama il copy ctor.
             {
-                if(s._pn.get() != nullptr)			// if (std::get<ptN>(s._pn) != nullptr)
+                //if(s._pn.get() != nullptr)			// if (std::get<ptN>(s._pn) != nullptr)
+				if (s._pn != nullptr)			// if (std::get<ptN>(s._pn) != nullptr)
                 {
                     std::string nn = "";
                     #if TXT_INFO
@@ -393,18 +394,38 @@ namespace neuro
 				std::atomic<act> sum = 0.0f;
             #endif
         
+			//this;
+			#if _SEQ_CYCLE
+			for(uint i=0; i<_syns.size(); i++)
+			{
+				act yy = _syns[i]._pn->get_y();
+				act ww = _syns[i].w;
+				sum += yy * ww;
+			}
+			#else
             // Calcola, su tutte le sinapsi del neurone, la somma delle uscite y dei nodi collegati, moltiplicate...
             // ...per il peso w della sinapsi. Il risultato è il segnale di ingresso x del neurone.        
-            auto func_add = [&](const synapse &s) {sum.fetch_add(s._pn->y * s.w);};
+            // auto func_add = [&](const synapse &s) {sum.fetch_add(s._pn->y * s.w);};
+			auto func_add = [&](const synapse &s) {sum.fetch_add(s._pn->get_y() * s.w); };
 			//auto func_add = [&](const synapse &s) {sum.fetch_add(std::get<ptN>(s._pn)->y * s.w); };
-            std::for_each(_net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_add);
-			x = sum;
+            //std::for_each(_net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_add);
+			std::for_each(EXEPOL, _syns.begin(), _syns.end(), func_add);
+			#endif
+
+			this->x = sum;
+
+			// TODO!!! Togliere... solo per debug
+			//std::string sss = this->_net.to_string();
+			//std::cout << sss;
+
+			//std::cout << "x= " << sum << std::endl;
         }
     }
+
     void neuron::calc_y()
     {   
-        if(_active)
-            y = f_act(this);
+        //if(_active)
+		y = f_act(this);
     }
 	void neuron::calc_ei()
 	{
@@ -423,9 +444,9 @@ namespace neuro
 	{
 		if (_active && !_input)
 		{
-			auto func_ea = [&](const synapse &s) {s._pn->set_beta(s.w * get_ei());};
+			auto func_ea =   [&](const synapse &s) {s._pn->set_beta(s.w * get_ei());};
 			//auto func_ea = [&](const synapse &s) {std::get<ptN>(s._pn)->set_beta(s.w * get_ei()); };
-			std::for_each(_net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_ea);
+			std::for_each(EXEPOL, _syns.begin(), _syns.end(), func_ea);
 		}
 	}
 	void neuron::calc_w(act learn_const)
@@ -439,7 +460,7 @@ namespace neuro
 				//s.w -=  learn_const * ei * std::get<ptN>(s._pn)->y;
 				s.w -= learn_const * ei * s._pn->y;
 			};
-			std::for_each(_net.get_exe_pol(EXE_POL::neuron), _syns.begin(), _syns.end(), func_updw);
+			std::for_each(EXEPOL, _syns.begin(), _syns.end(), func_updw);
 		}
 	}
 
@@ -533,6 +554,12 @@ namespace neuro
 				{
 					_syns[i].write(fs);
 				}
+				#if TXT_INFO
+				size_t len = name.length();
+				fs.write(reinterpret_cast<char*>(&len), sizeof(size_t));
+				fs.write(name.c_str(), sizeof(char) * len);
+				//fs.write(reinterpret_cast<char*>(&name), sizeof(name));
+				#endif
 			}
 			else
 			{
@@ -562,15 +589,22 @@ namespace neuro
 			fs.read(reinterpret_cast<char*>(&active_tmp), sizeof(active_tmp));
 			fs.read(reinterpret_cast<char*>(&input_tmp), sizeof(input_tmp));
 
-			_fact = f_tmp;
+			set_fact(f_tmp);
 			_active = active_tmp;
 			_input = input_tmp;
+			set_beta();				// Azzera
+			
 
 			for (uint i = 0; i < _syns.size(); i++)
 			{
 				_syns[i].read(fs);
 			}
-
+			#if TXT_INFO
+			size_t len;
+			fs.read(reinterpret_cast<char*>(&len), sizeof(size_t));
+			name.resize(len);
+			fs.read(&name[0], sizeof(char)*len);
+			#endif
 		}
 		catch (std::exception &ex)
 		{
@@ -582,8 +616,7 @@ namespace neuro
 			// TODO poi aggiungere (con o senza throw) _net.create_exception...
 		}
 	}
-
-	void neuron::update_syn_pointers(uint ilay)
+	void neuron::update_syn_pointers(uint ilay/*, network &net_ref*/)
 	{
 		// Dopo set() i neuroni del livello 0 hanno _input a true
 		if(!_input)		// Se è un neurone di _input, non ha sinapsi in ingresso
@@ -591,9 +624,7 @@ namespace neuro
 			for(uint iS = 0; iS<get_n_syn(); iS++)
 			{
 				synapse &s = _syns[iS];
-				
-				s.set_node_ptr(std::make_shared<neuron>(_net.get_neuron(ilay - 1, s._in)));
-				int x=1;
+				s.set_node_ptr(&_net.get_neuron(ilay - 1, s._in));
 			}
 		}
 	}
